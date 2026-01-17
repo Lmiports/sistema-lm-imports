@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VÉRTICE - GESTÃO DE CLIENTES</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+
+    <style>
+        :root { --bg: #020617; --card: #0f172a; --accent: #3b82f6; --border: #1e293b; --text: #f8fafc; --success: #10b981; --danger: #ef4444; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* SIDEBAR */
+        .sidebar { width: 250px; background: #000; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; transition: 0.3s; }
+        .logo { color: var(--accent); text-align: center; font-weight: bold; font-size: 20px; margin-bottom: 40px; letter-spacing: 2px; }
+        .nav-item { padding: 15px; color: #94a3b8; text-decoration: none; border-radius: 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
+        .nav-item:hover, .nav-item.active { background: var(--accent); color: #fff; }
+
+        /* CONTENT */
+        .content { flex: 1; padding: 20px; display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; overflow-y: auto; }
+        
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
+        .card-header { padding: 15px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: center; }
+        .card-title { font-size: 14px; font-weight: bold; color: var(--accent); text-transform: uppercase; margin: 0; }
+        
+        /* LISTA (ESQUERDA) */
+        .search-box { padding: 15px; border-bottom: 1px solid var(--border); }
+        input, textarea, select { width: 100%; padding: 12px; background: #020617; border: 1px solid var(--border); border-radius: 8px; color: #fff; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+        
+        .client-list { overflow-y: auto; flex: 1; }
+        .client-item { padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
+        .client-item:hover { background: rgba(59, 130, 246, 0.1); }
+        .client-item.active { background: var(--accent); color: #fff; }
+        .client-meta { font-size: 11px; color: #94a3b8; }
+        .client-item.active .client-meta { color: #e2e8f0; }
+
+        /* FORMULÁRIO (DIREITA) */
+        .form-body { padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 15px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .label { font-size: 11px; color: #64748b; margin-bottom: 5px; display: block; text-transform: uppercase; }
+        
+        .cep-wrapper { display: flex; gap: 10px; align-items: flex-end; }
+        .btn-cep { background: var(--accent); color: #fff; border: none; padding: 12px 15px; border-radius: 8px; cursor: pointer; height: 42px; width: 50px; display: flex; align-items: center; justify-content: center; }
+        .btn-cep:hover { background: #2563eb; }
+
+        .historico-box { 
+            background: #000; border: 1px solid var(--border); border-radius: 8px; 
+            padding: 15px; color: #cbd5e1; font-family: 'Courier New', monospace; 
+            font-size: 12px; line-height: 1.5; height: 150px; overflow-y: auto; white-space: pre-wrap;
+        }
+
+        /* BOTÕES */
+        .btn-group { padding: 15px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; background: var(--card); }
+        .btn { padding: 10px 20px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
+        .btn-save { background: var(--success); color: #000; }
+        .btn-save:hover { background: #34d399; }
+        .btn-new { background: var(--accent); color: #fff; }
+        .btn-del { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
+        .btn-del:hover { background: var(--danger); color: #fff; }
+
+        /* MENU MOBILE ICON */
+        .menu-toggle { display: none; position: fixed; top: 15px; left: 15px; z-index: 1001; background: var(--accent); color: white; border: none; padding: 8px; border-radius: 5px; }
+
+        /* --- RESPONSIVIDADE MOBILE --- */
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow: auto; height: auto; padding-top: 50px; }
+            
+            .menu-toggle { display: block; }
+            .sidebar { 
+                position: fixed; top: 0; left: -250px; height: 100vh; z-index: 1000; 
+                background: rgba(0,0,0,0.95); width: 250px; 
+            }
+            .sidebar.active { left: 0; }
+
+            .content { 
+                display: flex; 
+                flex-direction: column; 
+                height: auto; 
+                overflow: visible;
+                padding: 10px;
+            }
+
+            /* Lista de Clientes menor no topo */
+            .card:first-child {
+                max-height: 300px; /* Limita altura da lista */
+                flex: none;
+            }
+            .client-list { max-height: 200px; }
+
+            /* Formulário vira coluna única */
+            .form-grid { grid-template-columns: 1fr !important; }
+            
+            /* Ajuste específico para CEP e Bairro */
+            .form-grid[style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            .form-body { overflow: visible; height: auto; }
+            
+            .btn { width: 100%; justify-content: center; }
+            .btn-group { flex-direction: column-reverse; }
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('active')">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <aside class="sidebar">
+        <div class="logo">VÉRTICE</div>
+        <nav>
+            <a href="index.html" class="nav-item"><i class="fas fa-home"></i> Início</a>
+            <a href="clientes.html" class="nav-item active"><i class="fas fa-users"></i> Clientes</a>
+            <a href="estoque.html" class="nav-item"><i class="fas fa-box"></i> Estoque</a>
+            <a href="vendas.html" class="nav-item"><i class="fas fa-cash-register"></i> PDV Vendas</a>
+        </nav>
+    </aside>
+
+    <main class="content">
+        
+        <section class="card">
+            <div class="card-header">
+                <h3 class="card-title">Base de Clientes</h3>
+                <span style="font-size:10px; color:#64748b" id="total-clientes">0 cadastros</span>
+            </div>
+            <div class="search-box">
+                <input type="text" id="busca" placeholder="🔍 Buscar por nome ou CPF..." onkeyup="filtrarLista()">
+            </div>
+            <div class="client-list" id="lista-clientes">
+                <div style="padding:20px; text-align:center; color:#64748b;">Carregando...</div>
+            </div>
+            <div style="padding:15px; border-top:1px solid var(--border);">
+                <button class="btn btn-new" style="width:100%; justify-content:center;" onclick="novoCliente()">
+                    <i class="fas fa-plus"></i> NOVO CLIENTE
+                </button>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-id-card"></i> Ficha Cadastral</h3>
+                <input type="hidden" id="clienteId">
+            </div>
+            
+            <div class="form-body">
+                <div class="form-grid">
+                    <div>
+                        <label class="label">Nome Completo</label>
+                        <input type="text" id="nome" placeholder="Ex: Rodrigo Carvalho">
+                    </div>
+                    <div>
+                        <label class="label">CPF</label>
+                        <input type="text" id="cpf" placeholder="000.000.000-00">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div>
+                        <label class="label">WhatsApp</label>
+                        <input type="text" id="whats" placeholder="(11) 99999-9999">
+                    </div>
+                    <div>
+                        <label class="label">E-mail</label>
+                        <input type="email" id="email" placeholder="cliente@email.com">
+                    </div>
+                </div>
+
+                <hr style="border:0; border-top:1px solid var(--border); width:100%; margin:10px 0;">
+
+                <div class="form-grid" style="grid-template-columns: 1fr 3fr;">
+                    <div>
+                        <label class="label">CEP</label>
+                        <div class="cep-wrapper">
+                            <input type="text" id="cep" placeholder="00000-000" maxlength="9" onblur="buscarCep()">
+                            <button class="btn-cep" onclick="buscarCep()"><i class="fas fa-search"></i></button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="label">Rua / Logradouro</label>
+                        <input type="text" id="logradouro" placeholder="Ex: Av. Paulista">
+                    </div>
+                </div>
+
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr 2fr;">
+                    <div>
+                        <label class="label">Número</label>
+                        <input type="text" id="numero" placeholder="Nº">
+                    </div>
+                    <div>
+                        <label class="label">Comp.</label>
+                        <input type="text" id="complemento" placeholder="Ap 22">
+                    </div>
+                    <div>
+                        <label class="label">Bairro</label>
+                        <input type="text" id="bairro" placeholder="Bairro">
+                    </div>
+                </div>
+
+                <div class="form-grid" style="grid-template-columns: 3fr 1fr;">
+                    <div>
+                        <label class="label">Cidade</label>
+                        <input type="text" id="cidade" placeholder="Cidade">
+                    </div>
+                    <div>
+                        <label class="label">UF</label>
+                        <input type="text" id="uf" placeholder="UF" maxlength="2">
+                    </div>
+                </div>
+
+                <div style="margin-top:10px;">
+                    <label class="label" style="color:var(--accent);">
+                        <i class="fas fa-history"></i> Histórico de Compras (Automático)
+                    </label>
+                    <textarea id="historico" class="historico-box" placeholder="Histórico vazio..."></textarea>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-del" onclick="deletarCliente()">
+                    <i class="fas fa-trash"></i> Excluir
+                </button>
+                <button class="btn btn-save" onclick="salvarCliente()">
+                    <i class="fas fa-save"></i> SALVAR DADOS
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        let dbClientes = [];
+        let clienteSelecionadoId = null;
+
+        // INICIALIZAÇÃO
+        window.onload = () => {
+            db.collection("clientes").orderBy("nome").onSnapshot(snap => {
+                dbClientes = [];
+                snap.forEach(doc => dbClientes.push({ id: doc.id, ...doc.data() }));
+                document.getElementById('total-clientes').innerText = `${dbClientes.length} cadastros`;
+                renderizarLista(dbClientes);
+            });
+        };
+
+        // RENDERIZAR LISTA
+        function renderizarLista(lista) {
+            const div = document.getElementById('lista-clientes');
+            div.innerHTML = "";
+            lista.forEach(c => {
+                const el = document.createElement('div');
+                el.className = `client-item ${clienteSelecionadoId === c.id ? 'active' : ''}`;
+                el.onclick = () => carregarFicha(c);
+                el.innerHTML = `
+                    <div>
+                        <div style="font-weight:600;">${c.nome}</div>
+                        <div class="client-meta">${c.whats || 'Sem contato'}</div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="font-size:10px; opacity:0.5;"></i>
+                `;
+                div.appendChild(el);
+            });
+        }
+
+        function filtrarLista() {
+            const termo = document.getElementById('busca').value.toLowerCase();
+            const filtrados = dbClientes.filter(c => 
+                c.nome.toLowerCase().includes(termo) || 
+                (c.cpf && c.cpf.includes(termo))
+            );
+            renderizarLista(filtrados);
+        }
+
+        // FORMULÁRIO
+        function carregarFicha(c) {
+            clienteSelecionadoId = c.id;
+            document.getElementById('clienteId').value = c.id;
+            document.getElementById('nome').value = c.nome;
+            document.getElementById('cpf').value = c.cpf || '';
+            document.getElementById('whats').value = c.whats || '';
+            document.getElementById('email').value = c.email || '';
+            document.getElementById('historico').value = c.historico || '';
+            
+            // Dados de Endereço (Compatibilidade)
+            document.getElementById('cep').value = c.cep || '';
+            document.getElementById('logradouro').value = c.logradouro || c.endereco || '';
+            document.getElementById('numero').value = c.numero || '';
+            document.getElementById('complemento').value = c.complemento || '';
+            document.getElementById('bairro').value = c.bairro || '';
+            document.getElementById('cidade').value = c.cidade || '';
+            document.getElementById('uf').value = c.uf || '';
+
+            renderizarLista(dbClientes); 
+            
+            // No mobile, rola até o formulário quando clica num cliente
+            if(window.innerWidth <= 768) {
+                document.querySelector('.form-body').scrollIntoView({behavior: "smooth"});
+            }
+        }
+
+        function novoCliente() {
+            clienteSelecionadoId = null;
+            document.getElementById('clienteId').value = "";
+            document.getElementById('nome').value = "";
+            document.getElementById('cpf').value = "";
+            document.getElementById('whats').value = "";
+            document.getElementById('email').value = "";
+            document.getElementById('historico').value = "";
+            
+            document.getElementById('cep').value = "";
+            document.getElementById('logradouro').value = "";
+            document.getElementById('numero').value = "";
+            document.getElementById('complemento').value = "";
+            document.getElementById('bairro').value = "";
+            document.getElementById('cidade').value = "";
+            document.getElementById('uf').value = "";
+
+            document.getElementById('nome').focus();
+            renderizarLista(dbClientes);
+            
+            if(window.innerWidth <= 768) {
+                document.querySelector('.form-body').scrollIntoView({behavior: "smooth"});
+            }
+        }
+
+        // BUSCA DE CEP AUTOMÁTICA
+        function buscarCep() {
+            let cep = document.getElementById('cep').value.replace(/\D/g, '');
+            if (cep.length !== 8) return;
+
+            document.getElementById('logradouro').placeholder = "Buscando...";
+            
+            fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.erro) {
+                        document.getElementById('logradouro').value = data.logradouro;
+                        document.getElementById('bairro').value = data.bairro;
+                        document.getElementById('cidade').value = data.localidade;
+                        document.getElementById('uf').value = data.uf;
+                        document.getElementById('numero').focus();
+                    } else {
+                        alert("CEP não encontrado!");
+                        document.getElementById('logradouro').placeholder = "Rua / Logradouro";
+                    }
+                })
+                .catch(() => alert("Sem conexão com ViaCEP."));
+        }
+
+        async function salvarCliente() {
+            const id = document.getElementById('clienteId').value;
+            
+            const logradouro = document.getElementById('logradouro').value;
+            const numero = document.getElementById('numero').value;
+            const complemento = document.getElementById('complemento').value;
+            const bairro = document.getElementById('bairro').value;
+            const cidade = document.getElementById('cidade').value;
+            const uf = document.getElementById('uf').value;
+
+            // Compatibilidade com PDV antigo
+            const enderecoCompleto = `${logradouro}, Nº ${numero} ${complemento ? '- ' + complemento : ''}, ${bairro}, ${cidade}-${uf}`;
+
+            const dados = {
+                nome: document.getElementById('nome').value,
+                cpf: document.getElementById('cpf').value,
+                whats: document.getElementById('whats').value,
+                email: document.getElementById('email').value,
+                historico: document.getElementById('historico').value,
+                cep: document.getElementById('cep').value,
+                logradouro: logradouro,
+                numero: numero,
+                complemento: complemento,
+                bairro: bairro,
+                cidade: cidade,
+                uf: uf,
+                endereco: enderecoCompleto 
+            };
+
+            if (!dados.nome) return alert("O Nome é obrigatório.");
+
+            try {
+                if (id) {
+                    await db.collection("clientes").doc(id).update(dados);
+                    alert("Dados atualizados!");
+                } else {
+                    await db.collection("clientes").add(dados);
+                    novoCliente();
+                    alert("Cliente cadastrado com sucesso!");
+                }
+            } catch (e) { alert("Erro ao salvar: " + e.message); }
+        }
+
+        async function deletarCliente() {
+            const id = document.getElementById('clienteId').value;
+            if(!id) return;
+            if(confirm("Deseja realmente excluir este cliente?")) {
+                try {
+                    await db.collection("clientes").doc(id).delete();
+                    novoCliente();
+                    alert("Cliente excluído.");
+                } catch(e) { alert("Erro: " + e.message); }
+            }
+        }
+    </script>
+</body>
+</html>
