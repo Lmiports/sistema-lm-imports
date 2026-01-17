@@ -1,256 +1,193 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VÉRTICE - Sistema de Gestão LM IMPORTS</title>
-    
-    <link rel="icon" href="https://i.imgur.com/your-v-logo-image.png" type="image/png"> 
-    <link rel="apple-touch-icon" href="https://i.imgur.com/your-v-logo-image.png">
-    
+    <title>VÉRTICE - CENTRAL DE COMANDO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
-        :root {
-            --bg: #020617;
-            --card: #0f172a;
-            --accent: #00e0ff; /* Ciano Neon */
-            --border: rgba(255, 255, 255, 0.1);
-            --text: #f8fafc;
-        }
-
-        body {
-            /* Fundo estelar */
-            background: url('fundo.png') no-repeat center center fixed;
-            background-size: cover;
-            color: var(--text);
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0;
-            display: flex;
-            height: 100vh;
-            overflow: hidden; 
-        }
-
-        /* FILTRO ESCURO PARA O FUNDO */
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(2, 6, 23, 0.6);
-            z-index: -1;
-        }
-
-        /* SPLASH SCREEN */
-        #splash-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #020617;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 9999; opacity: 1; transition: opacity 1s ease-out; text-align: center;
-        }
-        #splash-screen.fade-out { opacity: 0; pointer-events: none; }
-        .splash-logo { font-size: 80px; font-weight: 900; color: #fff; letter-spacing: 5px; margin-bottom: 10px; }
-        .splash-subtitle { font-size: 20px; color: var(--accent); letter-spacing: 3px; }
-
-        /* SIDEBAR (MENU LATERAL) */
-        .sidebar {
-            width: 250px;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            border-right: 1px solid var(--border);
-            padding: 20px; display: flex; flex-direction: column;
-            transition: transform 0.3s ease-in-out; z-index: 1000;
-        }
-        .sidebar.hidden-mobile { transform: translateX(-100%); position: fixed; height: 100vh; }
-        .logo { color: var(--accent); text-align: center; font-weight: 900; font-size: 22px; margin-bottom: 40px; letter-spacing: 3px; }
+        :root { --bg: #020617; --card: #0f172a; --accent: #3b82f6; --text: #f8fafc; --hover: #1e293b; }
         
-        .nav-item {
-            padding: 15px; color: #94a3b8; text-decoration: none; border-radius: 8px;
-            margin-bottom: 5px; display: flex; align-items: center; gap: 10px; transition: 0.3s; font-weight: 600;
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', sans-serif; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; /* Garante altura mínima */
+            align-items: center; 
+            justify-content: center; 
+            position: relative; 
+            padding: 20px; /* Espaço nas bordas */
+            box-sizing: border-box;
         }
-        .nav-item:hover, .nav-item.active { background: var(--accent); color: #000; font-weight: bold; }
+        
+        /* CABEÇALHO */
+        .header { text-align: center; margin-bottom: 40px; animation: fadeIn 1s ease-in; width: 100%; }
+        .brand { font-size: 60px; font-weight: 900; letter-spacing: 5px; color: var(--accent); text-shadow: 0 0 20px rgba(59, 130, 246, 0.3); margin: 0; }
+        .subtitle { font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px; }
 
-        /* AREA PRINCIPAL */
-        .content {
-            flex: 1; padding: 20px; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; overflow-y: auto;
-            position: relative;
+        /* MENU FLEXÍVEL */
+        .menu-container { 
+            display: flex; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            gap: 30px; 
+            max-width: 1200px; 
+            width: 100%; 
+            z-index: 10;
         }
-
-        .main-title {
-            font-size: 60px; font-weight: 900; color: #fff;
-            letter-spacing: 5px; text-transform: uppercase; margin-bottom: 10px;
-            text-align: center; text-shadow: 0 0 20px rgba(0, 224, 255, 0.5);
+        
+        .card { 
+            background: var(--card); border: 1px solid #1e293b; border-radius: 20px; 
+            padding: 40px 20px; text-align: center; cursor: pointer; transition: 0.3s; 
+            text-decoration: none; color: var(--text); position: relative; overflow: hidden;
+            width: 200px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-        .main-subtitle { font-size: 18px; color: #cbd5e1; letter-spacing: 2px; text-align: center; margin-bottom: 40px; }
+        
+        .card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2); }
+        .icon-box { font-size: 40px; margin-bottom: 20px; color: var(--accent); transition: 0.3s; }
+        .card:hover .icon-box { transform: scale(1.1); color: #fff; }
+        .card-title { font-size: 18px; font-weight: bold; margin: 0; }
+        .card-desc { font-size: 11px; color: #64748b; margin-top: 10px; }
 
-        /* CARTÃO DE INFO */
-        .info-card {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(5px);
-            border: 1px solid var(--border);
-            border-left: 4px solid var(--accent);
-            padding: 20px 30px; border-radius: 12px;
-            text-align: center; max-width: 700px; margin-bottom: 40px;
-        }
-        .info-card h3 { color: var(--accent); margin: 0 0 10px 0; }
-        .info-card p { font-size: 14px; color: #e2e8f0; line-height: 1.6; margin: 0; }
-
-        /* GRID DE BOTÕES */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            width: 100%; max-width: 900px;
-        }
-
-        .menu-card {
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px; padding: 25px 15px;
-            text-align: center; text-decoration: none; color: #fff;
-            transition: 0.3s; display: flex; flex-direction: column;
-            align-items: center; gap: 10px;
-        }
-
-        .menu-card:hover {
-            transform: translateY(-5px);
-            background: rgba(0, 224, 255, 0.1);
-            border-color: var(--accent);
-            box-shadow: 0 0 15px rgba(0, 224, 255, 0.3);
+        /* RELÓGIO E FOOTER (Desktop) */
+        .clock-container { position: absolute; bottom: 40px; right: 40px; text-align: right; }
+        .time { font-size: 28px; font-weight: bold; color: #fff; opacity: 0.8; }
+        .date { font-size: 12px; color: #64748b; }
+        
+        .dev-footer {
+            position: absolute; bottom: 10px; width: 100%; text-align: center;
+            font-size: 10px; color: #334155; letter-spacing: 1px; opacity: 0.7;
         }
 
-        .menu-card i { font-size: 30px; color: var(--accent); margin-bottom: 5px; }
-        .menu-card span { font-size: 14px; font-weight: bold; text-transform: uppercase; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* RODAPÉ COM ASSINATURA */
-        .footer-credits {
-            margin-top: 50px;
-            font-size: 12px;
-            color: #94a3b8;
-            opacity: 0.8;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-align: center;
-        }
+        /* --- RESPONSIVIDADE MOBILE --- */
+        @media (max-width: 768px) {
+            body {
+                justify-content: flex-start; /* Começa do topo */
+                padding-top: 40px;
+                height: auto;
+                overflow-y: auto; /* Permite rolar */
+            }
 
-        /* BOTÃO MOBILE */
-        .menu-toggle {
-            display: none; position: fixed; top: 15px; left: 15px; z-index: 1001;
-            background: var(--accent); color: #000; border: none; padding: 10px;
-            border-radius: 5px; cursor: pointer;
-        }
-
-        /* RESPONSIVIDADE */
-        @media (max-width: 850px) {
-            body { flex-direction: column; overflow-y: auto; }
-            .sidebar { width: 220px; }
-            .content { padding-top: 60px; justify-content: flex-start; }
-            .menu-toggle { display: block; }
+            .brand { font-size: 40px; letter-spacing: 2px; } /* Título menor */
             
-            .main-title { font-size: 35px; letter-spacing: 2px; }
-            .main-subtitle { font-size: 14px; }
+            .menu-container {
+                flex-direction: column; /* Um item abaixo do outro */
+                gap: 15px;
+            }
+
+            .card {
+                width: 100%; /* Largura total */
+                flex-direction: row; /* Ícone na esquerda, Texto na direita */
+                padding: 20px;
+                box-sizing: border-box; /* Garante que padding não estoure a tela */
+                justify-content: flex-start; /* Alinha a esquerda */
+                gap: 20px;
+                text-align: left;
+                min-height: 80px;
+            }
+
+            .icon-box { margin-bottom: 0; font-size: 28px; width: 40px; text-align: center; }
             
-            .menu-grid { grid-template-columns: 1fr 1fr; }
+            .card div { display: flex; flex-direction: column; } /* Agrupa Título e Desc */
+            .card-title { font-size: 16px; }
+            .card-desc { margin-top: 2px; }
+
+            /* Relógio e Footer deixam de ser absolutos e vão para o final da página */
+            .clock-container {
+                position: relative;
+                bottom: auto;
+                right: auto;
+                margin-top: 40px;
+                text-align: center;
+                width: 100%;
+            }
             
-            #splash-screen .splash-logo { font-size: 50px; }
-            #splash-screen .splash-subtitle { font-size: 14px; }
+            .dev-footer {
+                position: relative;
+                bottom: auto;
+                margin-top: 20px;
+                padding-bottom: 20px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="overlay"></div>
-
-    <div id="splash-screen">
-        <div class="splash-logo">VÉRTICE</div>
-        <div class="splash-subtitle">SISTEMA DE GESTÃO | LM IMPORTS</div>
+    <div class="header">
+        <h1 class="brand">VÉRTICE</h1>
+        <div class="subtitle">Sistema de Gestão LM Imports</div>
     </div>
 
-    <button class="menu-toggle" onclick="toggleSidebar()">
-        <i class="fas fa-bars"></i>
-    </button>
+    <div class="menu-container">
+        <a href="vendas.html" class="card">
+            <i class="fas fa-cash-register icon-box"></i>
+            <div>
+                <h2 class="card-title">PDV Vendas</h2>
+                <p class="card-desc">Frente de Caixa</p>
+            </div>
+        </a>
 
-    <aside class="sidebar hidden-mobile" id="sidebar">
-        <div class="logo">VÉRTICE</div>
-        <nav>
-            <a href="index.html" class="nav-item active"><i class="fas fa-home"></i> Início</a>
-            <a href="vendas.html" class="nav-item"><i class="fas fa-cash-register"></i> PDV Vendas</a>
-            <a href="clientes.html" class="nav-item"><i class="fas fa-users"></i> Clientes</a>
-            <a href="estoque.html" class="nav-item"><i class="fas fa-box"></i> Estoque</a>
-            <a href="fornecedores.html" class="nav-item"><i class="fas fa-truck"></i> Fornecedores</a>
-            <a href="admin.html" class="nav-item"><i class="fas fa-chart-pie"></i> Financeiro</a>
-        </nav>
-    </aside>
+        <a href="clientes.html" class="card">
+            <i class="fas fa-users icon-box"></i>
+            <div>
+                <h2 class="card-title">Clientes</h2>
+                <p class="card-desc">CRM e Histórico</p>
+            </div>
+        </a>
 
-    <main class="content" id="main-content">
-        <h1 class="main-title">BEM-VINDO AO VÉRTICE</h1>
-        <p class="main-subtitle">Sua Central de Comando para a LM IMPORTS</p>
+        <a href="estoque.html" class="card">
+            <i class="fas fa-boxes icon-box"></i>
+            <div>
+                <h2 class="card-title">Estoque</h2>
+                <p class="card-desc">Produtos e Preços</p>
+            </div>
+        </a>
 
-        <div class="info-card">
-            <h3><i class="fas fa-chart-line"></i> Visão Completa e Eficiência</h3>
-            <p>Gerencie clientes, estoque, fornecedores e vendas em um só lugar. Tenha o controle total do seu negócio com dashboards intuitivos.</p>
-        </div>
+        <a href="fornecedores.html" class="card">
+            <i class="fas fa-truck icon-box"></i>
+            <div>
+                <h2 class="card-title">Fornecedores</h2>
+                <p class="card-desc">Parceiros e Compras</p>
+            </div>
+        </a>
 
-        <div class="menu-grid">
-            <a href="vendas.html" class="menu-card">
-                <i class="fas fa-cash-register"></i>
-                <span>PDV Vendas</span>
-            </a>
-            
-            <a href="estoque.html" class="menu-card">
-                <i class="fas fa-boxes"></i>
-                <span>Estoque</span>
-            </a>
+        <a href="admin.html" class="card" style="border-color: rgba(239, 68, 68, 0.3);">
+            <i class="fas fa-chart-pie icon-box" style="color: #ef4444;"></i>
+            <div>
+                <h2 class="card-title">Financeiro</h2>
+                <p class="card-desc">Relatórios e Lucro</p>
+            </div>
+        </a>
+    </div>
 
-            <a href="clientes.html" class="menu-card">
-                <i class="fas fa-users"></i>
-                <span>Clientes</span>
-            </a>
+    <div class="clock-container">
+        <div class="time" id="clock">00:00</div>
+        <div class="date" id="date">Carregando data...</div>
+    </div>
 
-            <a href="admin.html" class="menu-card" style="border-color: rgba(239, 68, 68, 0.5);">
-                <i class="fas fa-chart-pie" style="color: #ef4444;"></i>
-                <span>Financeiro</span>
-            </a>
-        </div>
-        
-        <footer class="footer-credits">
-            Desenvolvido por Rodrigo N de Carvalho LTDA © 2026
-        </footer>
-    </main>
+    <div class="dev-footer">
+        Desenvolvido por Rodrigo N Carvalho Ltda © 2026
+    </div>
 
     <script>
-        window.addEventListener('load', () => {
-            const splashScreen = document.getElementById('splash-screen');
-            setTimeout(() => {
-                splashScreen.classList.add('fade-out');
-                splashScreen.addEventListener('transitionend', () => splashScreen.remove());
-            }, 2000);
-        });
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('hidden-mobile');
-            document.body.style.overflow = sidebar.classList.contains('hidden-mobile') ? 'auto' : 'hidden';
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const dateString = now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+            
+            document.getElementById('clock').innerText = timeString;
+            document.getElementById('date').innerText = dateString.charAt(0).toUpperCase() + dateString.slice(1);
         }
-
-        document.addEventListener('click', (event) => {
-            const sidebar = document.getElementById('sidebar');
-            const menuToggle = document.querySelector('.menu-toggle');
-            if (window.innerWidth <= 850 && !sidebar.contains(event.target) && !menuToggle.contains(event.target) && !sidebar.classList.contains('hidden-mobile')) {
-                sidebar.classList.add('hidden-mobile');
-                document.body.style.overflow = 'auto';
-            }
-        });
-
-        window.addEventListener('resize', () => {
-            const sidebar = document.getElementById('sidebar');
-            if (window.innerWidth > 850) {
-                sidebar.classList.remove('hidden-mobile');
-                document.body.style.overflow = 'hidden';
-            } else {
-                sidebar.classList.add('hidden-mobile');
-                document.body.style.overflow = 'auto';
-            }
-        });
+        setInterval(updateClock, 1000);
+        updateClock();
     </script>
+
 </body>
 </html>
