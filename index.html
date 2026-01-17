@@ -14,241 +14,155 @@
         :root {
             --bg: #020617;
             --card: #0f172a;
-            --accent: #3b82f6;
-            --border: #1e293b;
+            --accent: #00e0ff; /* Ciano Neon */
+            --border: rgba(255, 255, 255, 0.1);
             --text: #f8fafc;
         }
 
         body {
-            background: var(--bg);
+            /* Fundo estelar */
+            background: url('fundo.png') no-repeat center center fixed;
+            background-size: cover;
             color: var(--text);
             font-family: 'Segoe UI', sans-serif;
             margin: 0;
             display: flex;
             height: 100vh;
-            overflow: hidden; /* Esconde o overflow da página principal enquanto a splash está ativa */
+            overflow: hidden; 
         }
 
-        /* SPLASH SCREEN (TELA DE ABERTURA) */
+        /* FILTRO ESCURO PARA O FUNDO */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(2, 6, 23, 0.6);
+            z-index: -1;
+        }
+
+        /* SPLASH SCREEN */
         #splash-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg); /* Fundo preto/azul profundo */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999; /* Garante que fique por cima de tudo */
-            opacity: 1;
-            transition: opacity 1s ease-out; /* Transição suave para o fade out */
-            text-align: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #020617;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 9999; opacity: 1; transition: opacity 1s ease-out; text-align: center;
         }
-
-        #splash-screen.fade-out {
-            opacity: 0;
-            pointer-events: none; /* Impede cliques na tela invisível */
-        }
-
-        .splash-logo {
-            font-size: 80px; /* Tamanho maior para o logo principal */
-            font-weight: 900;
-            color: var(--text); /* Branco */
-            letter-spacing: 5px;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-
-        .splash-subtitle {
-            font-size: 20px;
-            color: var(--accent); /* Azul vibrante */
-            letter-spacing: 3px;
-            text-transform: uppercase;
-        }
-
-        .splash-credit {
-            position: absolute;
-            bottom: 20px;
-            font-size: 12px;
-            color: #64748b;
-            opacity: 0.7;
-        }
+        #splash-screen.fade-out { opacity: 0; pointer-events: none; }
+        .splash-logo { font-size: 80px; font-weight: 900; color: #fff; letter-spacing: 5px; margin-bottom: 10px; }
+        .splash-subtitle { font-size: 20px; color: var(--accent); letter-spacing: 3px; }
 
         /* SIDEBAR (MENU LATERAL) */
         .sidebar {
             width: 250px;
-            background: #000;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
             border-right: 1px solid var(--border);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s ease-in-out; /* Transição para esconder/mostrar no mobile */
-            z-index: 1000; /* Garante que o menu fique sobre o conteúdo no mobile */
+            padding: 20px; display: flex; flex-direction: column;
+            transition: transform 0.3s ease-in-out; z-index: 1000;
         }
-
-        .sidebar.hidden-mobile {
-            transform: translateX(-100%); /* Esconde o menu para a esquerda */
-            position: fixed; /* Fixa o menu quando escondido */
-            height: 100vh;
-        }
-
-        .logo {
-            color: var(--accent);
-            text-align: center;
-            font-weight: 900;
-            font-size: 22px;
-            margin-bottom: 40px;
-            letter-spacing: 3px;
-        }
-
+        .sidebar.hidden-mobile { transform: translateX(-100%); position: fixed; height: 100vh; }
+        .logo { color: var(--accent); text-align: center; font-weight: 900; font-size: 22px; margin-bottom: 40px; letter-spacing: 3px; }
+        
         .nav-item {
-            padding: 15px;
-            color: #94a3b8;
-            text-decoration: none;
-            border-radius: 8px;
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: 0.3s;
-            font-weight: 600;
+            padding: 15px; color: #94a3b8; text-decoration: none; border-radius: 8px;
+            margin-bottom: 5px; display: flex; align-items: center; gap: 10px; transition: 0.3s; font-weight: 600;
         }
+        .nav-item:hover, .nav-item.active { background: var(--accent); color: #000; font-weight: bold; }
 
-        .nav-item:hover, .nav-item.active {
-            background: var(--accent);
-            color: #fff;
-        }
-
-        /* CONTENT (ÁREA PRINCIPAL) */
+        /* AREA PRINCIPAL */
         .content {
-            flex: 1;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow-y: auto; /* Permite scroll se o conteúdo for maior que a tela */
-            transition: margin-left 0.3s ease-in-out;
+            flex: 1; padding: 20px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; overflow-y: auto;
+            position: relative;
         }
 
         .main-title {
-            font-size: 70px;
-            font-weight: 900;
-            color: var(--accent);
-            letter-spacing: 5px;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-            opacity: 0.8;
-            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            font-size: 60px; font-weight: 900; color: #fff;
+            letter-spacing: 5px; text-transform: uppercase; margin-bottom: 10px;
+            text-align: center; text-shadow: 0 0 20px rgba(0, 224, 255, 0.5);
         }
+        .main-subtitle { font-size: 18px; color: #cbd5e1; letter-spacing: 2px; text-align: center; margin-bottom: 40px; }
 
-        .main-subtitle {
-            font-size: 24px;
-            color: var(--text);
-            letter-spacing: 2px;
-            opacity: 0.7;
-            text-align: center;
-        }
-
+        /* CARTÃO DE INFO */
         .info-card {
-            background: var(--card);
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(5px);
             border: 1px solid var(--border);
             border-left: 4px solid var(--accent);
-            padding: 25px 30px;
-            border-radius: 12px;
+            padding: 20px 30px; border-radius: 12px;
+            text-align: center; max-width: 700px; margin-bottom: 40px;
+        }
+        .info-card h3 { color: var(--accent); margin: 0 0 10px 0; }
+        .info-card p { font-size: 14px; color: #e2e8f0; line-height: 1.6; margin: 0; }
+
+        /* GRID DE BOTÕES */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            width: 100%; max-width: 900px;
+        }
+
+        .menu-card {
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px; padding: 25px 15px;
+            text-align: center; text-decoration: none; color: #fff;
+            transition: 0.3s; display: flex; flex-direction: column;
+            align-items: center; gap: 10px;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-5px);
+            background: rgba(0, 224, 255, 0.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(0, 224, 255, 0.3);
+        }
+
+        .menu-card i { font-size: 30px; color: var(--accent); margin-bottom: 5px; }
+        .menu-card span { font-size: 14px; font-weight: bold; text-transform: uppercase; }
+
+        /* RODAPÉ COM ASSINATURA */
+        .footer-credits {
             margin-top: 50px;
-            text-align: center;
-            max-width: 600px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        }
-
-        .info-card h3 {
-            color: var(--accent);
-            font-size: 18px;
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-
-        .info-card p {
-            font-size: 14px;
-            color: #cbd5e1;
-            line-height: 1.6;
-        }
-
-        .credit-footer {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
             font-size: 12px;
-            color: #64748b;
-            opacity: 0.7;
+            color: #94a3b8;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
         }
 
-        /* MOBILE MENU ICON */
+        /* BOTÃO MOBILE */
         .menu-toggle {
-            display: none; /* Escondido por padrão, só aparece no mobile */
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 1001;
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            display: none; position: fixed; top: 15px; left: 15px; z-index: 1001;
+            background: var(--accent); color: #000; border: none; padding: 10px;
+            border-radius: 5px; cursor: pointer;
         }
 
         /* RESPONSIVIDADE */
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-                overflow-y: auto; /* Permite scroll no corpo da página no mobile */
-            }
-
-            .sidebar {
-                width: 200px; /* Reduz a largura no mobile */
-            }
-
-            .content {
-                padding: 10px;
-                padding-top: 60px; /* Espaço para o botão de menu */
-            }
-
-            .menu-toggle {
-                display: block; /* Mostra o botão de menu no mobile */
-            }
-
-            .main-title {
-                font-size: 45px; /* Tamanho menor no mobile */
-                letter-spacing: 3px;
-            }
-
-            .main-subtitle {
-                font-size: 18px;
-            }
-
-            #splash-screen .splash-logo {
-                font-size: 60px;
-            }
-            #splash-screen .splash-subtitle {
-                font-size: 16px;
-            }
+        @media (max-width: 850px) {
+            body { flex-direction: column; overflow-y: auto; }
+            .sidebar { width: 220px; }
+            .content { padding-top: 60px; justify-content: flex-start; }
+            .menu-toggle { display: block; }
+            
+            .main-title { font-size: 35px; letter-spacing: 2px; }
+            .main-subtitle { font-size: 14px; }
+            
+            .menu-grid { grid-template-columns: 1fr 1fr; }
+            
+            #splash-screen .splash-logo { font-size: 50px; }
+            #splash-screen .splash-subtitle { font-size: 14px; }
         }
     </style>
 </head>
 <body>
 
+    <div class="overlay"></div>
+
     <div id="splash-screen">
         <div class="splash-logo">VÉRTICE</div>
         <div class="splash-subtitle">SISTEMA DE GESTÃO | LM IMPORTS</div>
-        <div class="splash-credit">Desenvolvido por Rodrigo N de Carvalho LTDA © 2026</div>
     </div>
 
     <button class="menu-toggle" onclick="toggleSidebar()">
@@ -259,11 +173,11 @@
         <div class="logo">VÉRTICE</div>
         <nav>
             <a href="index.html" class="nav-item active"><i class="fas fa-home"></i> Início</a>
+            <a href="vendas.html" class="nav-item"><i class="fas fa-cash-register"></i> PDV Vendas</a>
             <a href="clientes.html" class="nav-item"><i class="fas fa-users"></i> Clientes</a>
             <a href="estoque.html" class="nav-item"><i class="fas fa-box"></i> Estoque</a>
             <a href="fornecedores.html" class="nav-item"><i class="fas fa-truck"></i> Fornecedores</a>
-            <a href="vendas.html" class="nav-item"><i class="fas fa-cash-register"></i> PDV Vendas</a>
-            <a href="admin.html" class="nav-item"><i class="fas fa-chart-pie"></i> Painel Financeiro</a>
+            <a href="admin.html" class="nav-item"><i class="fas fa-chart-pie"></i> Financeiro</a>
         </nav>
     </aside>
 
@@ -273,49 +187,68 @@
 
         <div class="info-card">
             <h3><i class="fas fa-chart-line"></i> Visão Completa e Eficiência</h3>
-            <p>Gerencie clientes, estoque, fornecedores e vendas em um só lugar. Tenha o controle total do seu negócio com dashboards intuitivos e acesso rápido às informações cruciais.</p>
+            <p>Gerencie clientes, estoque, fornecedores e vendas em um só lugar. Tenha o controle total do seu negócio com dashboards intuitivos.</p>
         </div>
+
+        <div class="menu-grid">
+            <a href="vendas.html" class="menu-card">
+                <i class="fas fa-cash-register"></i>
+                <span>PDV Vendas</span>
+            </a>
+            
+            <a href="estoque.html" class="menu-card">
+                <i class="fas fa-boxes"></i>
+                <span>Estoque</span>
+            </a>
+
+            <a href="clientes.html" class="menu-card">
+                <i class="fas fa-users"></i>
+                <span>Clientes</span>
+            </a>
+
+            <a href="admin.html" class="menu-card" style="border-color: rgba(239, 68, 68, 0.5);">
+                <i class="fas fa-chart-pie" style="color: #ef4444;"></i>
+                <span>Financeiro</span>
+            </a>
+        </div>
+        
+        <footer class="footer-credits">
+            Desenvolvido por Rodrigo N de Carvalho LTDA © 2026
+        </footer>
     </main>
 
     <script>
-        // Simula um tempo de carregamento para a splash screen
         window.addEventListener('load', () => {
             const splashScreen = document.getElementById('splash-screen');
-            // Remove a splash screen após 2 segundos
             setTimeout(() => {
                 splashScreen.classList.add('fade-out');
-                // Opcional: remover completamente do DOM após a transição
                 splashScreen.addEventListener('transitionend', () => splashScreen.remove());
-            }, 2000); // 2000 milissegundos = 2 segundos
+            }, 2000);
         });
 
-        // Função para esconder/mostrar a sidebar no mobile
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('hidden-mobile');
-            // Se o menu estiver visível no mobile, impede o scroll do body
             document.body.style.overflow = sidebar.classList.contains('hidden-mobile') ? 'auto' : 'hidden';
         }
 
-        // Fecha a sidebar ao clicar fora dela no mobile (opcional)
         document.addEventListener('click', (event) => {
             const sidebar = document.getElementById('sidebar');
             const menuToggle = document.querySelector('.menu-toggle');
-            if (window.innerWidth <= 768 && !sidebar.contains(event.target) && !menuToggle.contains(event.target) && !sidebar.classList.contains('hidden-mobile')) {
+            if (window.innerWidth <= 850 && !sidebar.contains(event.target) && !menuToggle.contains(event.target) && !sidebar.classList.contains('hidden-mobile')) {
                 sidebar.classList.add('hidden-mobile');
-                document.body.style.overflow = 'auto'; // Restaura o scroll
+                document.body.style.overflow = 'auto';
             }
         });
 
-        // Adapta o estado da sidebar quando redimensiona a tela
         window.addEventListener('resize', () => {
             const sidebar = document.getElementById('sidebar');
-            if (window.innerWidth > 768) {
+            if (window.innerWidth > 850) {
                 sidebar.classList.remove('hidden-mobile');
-                document.body.style.overflow = 'hidden'; // Esconde scroll no desktop
+                document.body.style.overflow = 'hidden';
             } else {
-                sidebar.classList.add('hidden-mobile'); // Esconde no mobile
-                document.body.style.overflow = 'auto'; // Permite scroll no mobile
+                sidebar.classList.add('hidden-mobile');
+                document.body.style.overflow = 'auto';
             }
         });
     </script>
