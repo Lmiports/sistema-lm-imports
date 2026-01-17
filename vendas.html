@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LM IMPORTS - PDV</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        :root { --bg: #020617; --card: #0f172a; --accent: #3b82f6; --border: #1e293b; --text: #f8fafc; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* SIDEBAR */
+        .sidebar { width: 250px; background: #000; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; transition: 0.3s; }
+        .logo { color: var(--accent); text-align: center; font-weight: bold; font-size: 20px; margin-bottom: 40px; letter-spacing: 2px; }
+        .nav-item { padding: 15px; color: #94a3b8; text-decoration: none; border-radius: 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
+        .nav-item:hover, .nav-item.active { background: var(--accent); color: #fff; }
+
+        /* CONTENT */
+        .content { flex: 1; padding: 20px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; overflow-y: auto; position: relative; }
+        .card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 12px; display: flex; flex-direction: column; gap: 15px; position: relative; }
+        h2 { font-size: 14px; color: var(--accent); margin: 0; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+        
+        /* UI FIX */
+        input, select { width: 100%; padding: 12px; background: #020617; border: 1px solid var(--border); border-radius: 8px; color: #fff; box-sizing: border-box; outline: none; transition: 0.3s; font-size: 14px; }
+        input:focus, select:focus { border-color: var(--accent); }
+        .search-box { position: relative; z-index: 50; }
+        
+        /* BUSCA FLUTUANTE (Z-INDEX ALTO) */
+        .search-results { 
+            background: #1e293b; border: 1px solid var(--accent); position: absolute; width: 100%; max-height: 300px; overflow-y: auto; 
+            z-index: 9999; top: 100%; left: 0; border-radius: 0 0 8px 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.9); 
+        }
+        .result-item { padding: 12px; border-bottom: 1px solid #334155; cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+        .result-item:hover { background: var(--accent); color: #fff; }
+        
+        .filter-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; }
+        .f-tab { padding: 8px 16px; background: #1e293b; border: 1px solid transparent; border-radius: 20px; font-size: 12px; cursor: pointer; white-space: nowrap; transition: 0.2s; color: #94a3b8; }
+        .f-tab.active { background: var(--accent); color: #fff; }
+
+        /* CARD CLIENTE PRO (ESTILO AMARELO) */
+        .client-card { background: rgba(15, 23, 42, 0.9); border: 1px solid var(--accent); padding: 20px; border-radius: 12px; margin-top: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .client-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; border-bottom: 1px solid #1e293b; padding-bottom: 10px; }
+        .client-header strong { font-size: 18px; color: #fff; font-weight: bold; }
+        .btn-trocar { background: none; border: 1px solid var(--danger); color: var(--danger); font-size: 10px; cursor: pointer; font-weight: bold; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; }
+        .client-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .info-group { display: flex; flex-direction: column; gap: 2px; }
+        .info-label { font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: bold; }
+        .info-value { font-size: 13px; color: #e2e8f0; font-weight: 500; word-break: break-word; }
+
+        .item-list { max-height: 250px; overflow-y: auto; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(255,255,255,0.03); margin-bottom: 5px; border-radius: 6px; font-size: 13px; border-left: 3px solid transparent; }
+        .item-row.indisponivel { background: rgba(239, 68, 68, 0.2); border-left-color: var(--danger); }
+        .btn-remove { color: var(--danger); cursor: pointer; padding: 5px; }
+        
+        .total-display { font-size: 32px; font-weight: bold; text-align: right; margin: 10px 0; color: var(--success); }
+        .btn-action { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 5px; transition: 0.2s; }
+        .btn-success { background: var(--success); color: #000; }
+        .btn-print { background: var(--accent); color: #fff; margin-top: 10px; font-size: 12px; }
+        .btn-disabled { background: #334155; color: #94a3b8; cursor: not-allowed; }
+        .troca-badge { background: #f59e0b20; color: var(--warning); border: 1px solid var(--warning); padding: 8px; border-radius: 6px; margin-top: 5px; font-size: 12px; display: flex; justify-content: space-between; }
+        .hidden { display: none !important; }
+
+        /* MOBILE MENU ICON */
+        .menu-toggle { display: none; position: fixed; top: 15px; left: 15px; z-index: 1001; background: var(--accent); color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; }
+
+        /* RESPONSIVIDADE */
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow: auto; height: auto; padding-top: 50px; }
+            .sidebar { position: fixed; top: 0; left: -250px; height: 100vh; z-index: 1000; background: rgba(0,0,0,0.95); width: 250px; }
+            .sidebar.active { left: 0; }
+            .menu-toggle { display: block; }
+            .content { grid-template-columns: 1fr; padding: 10px; height: auto; overflow: visible; }
+            .client-grid { grid-template-columns: 1fr; }
+            .total-display { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('active')"><i class="fas fa-bars"></i></button>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="logo">VÉRTICE</div>
+        <nav>
+            <a href="index.html" class="nav-item"><i class="fas fa-home"></i> Início</a>
+            <a href="clientes.html" class="nav-item"><i class="fas fa-users"></i> Clientes</a>
+            <a href="estoque.html" class="nav-item"><i class="fas fa-box"></i> Estoque</a>
+            <a href="fornecedores.html" class="nav-item"><i class="fas fa-truck"></i> Fornecedores</a>
+            <a href="vendas.html" class="nav-item active"><i class="fas fa-cash-register"></i> PDV Vendas</a>
+        </nav>
+    </aside>
+
+    <main class="content">
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="card" style="z-index: 102;">
+                <h2><i class="fas fa-user-circle"></i> Cliente</h2>
+                <div id="areaBuscaCliente" class="search-box">
+                    <input type="text" id="inputCliente" placeholder="Buscar cliente..." onkeyup="buscarCliente(this.value)" autocomplete="off">
+                    <div id="resCliente" class="search-results hidden"></div>
+                </div>
+                
+                <div id="areaClienteSelecionado" class="client-card hidden">
+                    <div class="client-header">
+                        <strong id="cliNome">Nome do Cliente</strong>
+                        <button onclick="limparCliente()" class="btn-trocar">Trocar</button>
+                    </div>
+                    <div class="client-grid">
+                        <div class="info-group"><span class="info-label">CPF</span><span id="cliCpf" class="info-value">-</span></div>
+                        <div class="info-group"><span class="info-label">WhatsApp</span><span id="cliWhats" class="info-value">-</span></div>
+                        <div class="info-group"><span class="info-label">E-mail</span><span id="cliEmail" class="info-value">-</span></div>
+                        <div class="info-group"><span class="info-label">Endereço</span><span id="cliEnd" class="info-value">-</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="flex:1; z-index: 101;">
+                <h2><i class="fas fa-barcode"></i> Adicionar Produtos</h2>
+                <div class="filter-tabs">
+                    <div class="f-tab active" onclick="filtrarCategoria('todos', this)">Todos</div>
+                    <div class="f-tab" onclick="filtrarCategoria('celular', this)">Celulares</div>
+                    <div class="f-tab" onclick="filtrarCategoria('roupa', this)">Roupas</div>
+                    <div class="f-tab" onclick="filtrarCategoria('acessorio', this)">Acessórios</div>
+                </div>
+                
+                <div class="search-box" style="z-index: 50;">
+                    <input type="text" id="inputProduto" placeholder="Pesquisar produto ou IMEI..." oninput="buscarProduto(this.value, 'venda')" autocomplete="off">
+                    <div id="resProduto" class="search-results hidden"></div>
+                </div>
+
+                <div class="search-box" style="margin-top:10px; z-index: 10;">
+                    <input type="text" id="inputBrinde" placeholder="Buscar BRINDE... (Grátis)" style="border-color: var(--success);" oninput="buscarProduto(this.value, 'brinde')" autocomplete="off">
+                    <div id="resBrinde" class="search-results hidden"></div>
+                </div>
+            </div>
+
+            <div class="card" style="z-index: 90;">
+                <h2><i class="fas fa-exchange-alt"></i> Entrada de Troca</h2>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <select id="trocaModelo"><option value="">Carregando Modelos...</option></select>
+                    <input type="text" id="trocaValor" placeholder="Valor Avaliado (R$)" onkeyup="mascaraMoeda(this)">
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                    <select id="trocaGB">
+                        <option value="">GB...</option>
+                        <option value="64GB">64GB</option><option value="128GB">128GB</option><option value="256GB">256GB</option><option value="512GB">512GB</option><option value="1TB">1TB</option>
+                    </select>
+                    <select id="trocaCor"><option value="">Carregando Cores...</option></select>
+                    <input type="text" id="trocaImei" placeholder="IMEI / Serial">
+                </div>
+                <button class="btn-action" style="background:var(--warning); color:#000;" onclick="adicionarTroca()">+ ADICIONAR TROCA</button>
+            </div>
+        </div>
+
+        <div class="card" style="height: fit-content; z-index: 99;">
+            <h2><i class="fas fa-shopping-cart"></i> Resumo da Venda</h2>
+            <div id="listaItens" class="item-list"><div style="text-align:center; color:#64748b; padding:20px;">Carrinho vazio</div></div>
+            <hr style="border:0; border-top:1px solid var(--border);">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div><label style="font-size:10px; color:#64748b;">DESCONTO</label><input type="text" id="vlrDesconto" onkeyup="mascaraMoeda(this); renderizarCarrinho()"></div>
+                <div>
+                    <label style="font-size:10px; color:#64748b;">PAGAMENTO</label>
+                    <select id="formaPagto" onchange="verificarPagamento()">
+                        <option value="Pix">Pix</option><option value="Dinheiro">Dinheiro</option><option value="Cartão de Crédito">Cartão de Crédito</option><option value="Cartão de Débito">Cartão de Débito</option>
+                    </select>
+                </div>
+            </div>
+            <div id="divParcelas" class="hidden" style="margin-top:10px;"><select id="qtdParcelas"></select></div>
+            <div id="displayTotal" class="total-display">R$ 0,00</div>
+            <button id="btnConcluir" class="btn-action btn-success" onclick="finalizarVenda()">CONCLUIR VENDA</button>
+            <button class="btn-action btn-print" onclick="gerarOrcamento()">GERAR ORÇAMENTO</button>
+        </div>
+    </main>
+
+    <script>
+        const NOME_LOJA = "LM IMPORTS";
+        const DEFAULTS_MODELOS = ["iPhone 11", "iPhone 12", "iPhone 13", "iPhone 14 Pro Max", "iPhone 15 Pro Max", "iPhone 16 Pro Max"];
+        const DEFAULTS_CORES = ["Preto", "Branco", "Dourado", "Azul", "Grafite", "Natural Titanium", "Roxo", "Prata"];
+
+        let dbClientes = [], dbEstoque = [], carrinho = [], trocas = [], clienteAtivo = null, filtroCategoriaAtual = 'todos', bloqueioVenda = false;
+
+        window.onload = () => { preencherSelectsIniciais(); preencherParcelas(); carregarDados(); };
+
+        function preencherSelectsIniciais() {
+            const m = document.getElementById('trocaModelo'), c = document.getElementById('trocaCor');
+            m.innerHTML = '<option value="">Selecione...</option>' + DEFAULTS_MODELOS.map(x => `<option value="${x}">${x}</option>`).join('');
+            c.innerHTML = '<option value="">Cor...</option>' + DEFAULTS_CORES.map(x => `<option value="${x}">${x}</option>`).join('');
+        }
+
+        function preencherParcelas() {
+            const sel = document.getElementById('qtdParcelas');
+            let opts = ''; for(let i=1; i<=24; i++) opts += `<option value="${i}x">${i}x${i===1?' (À vista)':''}</option>`;
+            sel.innerHTML = opts;
+        }
+
+        function carregarDados() {
+            db.collection("clientes").onSnapshot(s => { dbClientes = []; s.forEach(d => dbClientes.push({id:d.id, ...d.data()})); });
+            db.collection("estoque").onSnapshot(s => { 
+                dbEstoque = []; s.forEach(d => { if(d.data().status !== 'vendido') dbEstoque.push({id:d.id, ...d.data()}); });
+                renderizarCarrinho(); 
+            });
+            db.collection("lista_modelos_cel").orderBy('nome').onSnapshot(s => { if(!s.empty) document.getElementById('trocaModelo').innerHTML = '<option value="">Selecione...</option>' + s.docs.map(d => `<option value="${d.data().nome}">${d.data().nome}</option>`).join(''); });
+            db.collection("lista_cores_cel").orderBy('nome').onSnapshot(s => { if(!s.empty) document.getElementById('trocaCor').innerHTML = '<option value="">Cor...</option>' + s.docs.map(d => `<option value="${d.data().nome}">${d.data().nome}</option>`).join(''); });
+        }
+
+        function buscarCliente(t) {
+            t = t.toLowerCase(); const div = document.getElementById('resCliente');
+            if(t.length < 2) return div.classList.add('hidden');
+            const m = dbClientes.filter(c => (c.nome && c.nome.toLowerCase().includes(t)) || (c.cpf && c.cpf.includes(t)));
+            if(m.length > 0) {
+                div.innerHTML = m.map(c => `<div class="result-item" onclick='setCliente(${JSON.stringify(c).replace(/'/g, "&apos;")})'><strong>${c.nome}</strong> <span>${c.cpf||''}</span></div>`).join('');
+                div.classList.remove('hidden');
+            } else { div.classList.add('hidden'); }
+        }
+
+        function setCliente(o) { 
+            clienteAtivo = o; 
+            document.getElementById('cliNome').innerText = o.nome; 
+            document.getElementById('cliCpf').innerText = o.cpf || '-';
+            document.getElementById('cliWhats').innerText = o.whats || '-';
+            document.getElementById('cliEmail').innerText = o.email || '-';
+            document.getElementById('cliEnd').innerText = o.endereco || '-';
+            document.getElementById('areaBuscaCliente').classList.add('hidden'); 
+            document.getElementById('areaClienteSelecionado').classList.remove('hidden'); 
+        }
+
+        function limparCliente() { clienteAtivo = null; document.getElementById('inputCliente').value = ''; document.getElementById('areaBuscaCliente').classList.remove('hidden'); document.getElementById('areaClienteSelecionado').classList.add('hidden'); }
+
+        function filtrarCategoria(cat, el) {
+            filtroCategoriaAtual = cat;
+            document.querySelectorAll('.f-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            renderizarLista();
+        }
+
+        function buscarProduto(t, tipo) {
+            t = t.toLowerCase(); const div = tipo === 'venda' ? document.getElementById('resProduto') : document.getElementById('resBrinde');
+            if(t.length < 2) return div.classList.add('hidden');
+            const m = dbEstoque.filter(p => {
+                const termo = (p.modelo + ' ' + (p.imei1 || '') + ' ' + (p.serial || '')).toLowerCase();
+                const matchCat = filtroCategoriaAtual === 'todos' || (p.categoria || '').toLowerCase().includes(filtroCategoriaAtual);
+                return termo.includes(t) && matchCat;
+            });
+            if (m.length > 0) {
+                div.innerHTML = m.map(p => `<div class="result-item" onclick='addCarrinho("${p.id}", "${tipo}")'><div>${p.modelo} ${p.gb||''}</div><strong>${tipo==='brinde'?'GRÁTIS':'R$ '+parseFloat(p.venda).toFixed(2)}</strong></div>`).join('');
+                div.classList.remove('hidden');
+            } else { div.classList.add('hidden'); }
+        }
+
+        function addCarrinho(id, tipo) {
+            const p = dbEstoque.find(i => i.id === id);
+            if(!p || carrinho.find(i => i.id === id)) return;
+            carrinho.push({...p, tipo, valorCobrado: tipo === 'brinde' ? 0 : parseFloat(p.venda)});
+            document.querySelectorAll('.search-results').forEach(e => e.classList.add('hidden'));
+            document.getElementById('inputProduto').value = ''; document.getElementById('inputBrinde').value = '';
+            renderizarCarrinho();
+        }
+
+        function adicionarTroca() {
+            const mod = document.getElementById('trocaModelo').value, val = parseMoeda(document.getElementById('trocaValor').value);
+            if(!mod || val <= 0) return alert("Selecione modelo e valor.");
+            trocas.push({modelo: mod, valor: val, gb: document.getElementById('trocaGB').value, cor: document.getElementById('trocaCor').value, imei1: document.getElementById('trocaImei').value});
+            document.getElementById('trocaValor').value = ''; renderizarCarrinho();
+        }
+
+        function renderizarCarrinho() {
+            const lista = document.getElementById('listaItens'), btn = document.getElementById('btnConcluir');
+            let html = '', total = 0; bloqueioVenda = false;
+            if(carrinho.length === 0 && trocas.length === 0) {
+                lista.innerHTML = '<div style="text-align:center;color:#64748b;padding:20px;">Vazio</div>';
+                document.getElementById('displayTotal').innerText = 'R$ 0,00'; return;
+            }
+            carrinho.forEach((item, i) => {
+                const atual = dbEstoque.find(dbI => dbI.id === item.id);
+                if(!atual) { html += `<div class="item-row indisponivel"><b>${item.modelo} - VENDIDO!</b> <i class="fas fa-trash btn-remove" onclick="carrinho.splice(${i},1);renderizarCarrinho()"></i></div>`; bloqueioVenda = true; }
+                else { 
+                    html += `<div class="item-row"><div><b>${item.modelo}</b><br><small>${item.tipo.toUpperCase()}</small></div> <span>${item.tipo === 'brinde' ? 'GRÁTIS' : 'R$ '+item.valorCobrado.toFixed(2)}</span> <i class="fas fa-trash btn-remove" onclick="carrinho.splice(${i},1);renderizarCarrinho()"></i></div>`; 
+                    total += item.valorCobrado; 
+                }
+            });
+            trocas.forEach((t, i) => { html += `<div class="troca-badge"><span>TROCA: ${t.modelo}</span> <strong>- R$ ${t.valor.toFixed(2)}</strong> <i class="fas fa-times" onclick="trocas.splice(${i},1);renderizarCarrinho()"></i></div>`; total -= t.valor; });
+            total -= parseMoeda(document.getElementById('vlrDesconto').value);
+            lista.innerHTML = html;
+            const elTotal = document.getElementById('displayTotal');
+            if(total < 0) { elTotal.innerText = `TROCO: R$ ${Math.abs(total).toFixed(2)}`; elTotal.style.color = 'var(--warning)'; } 
+            else { elTotal.innerText = total.toLocaleString('pt-br', {style:'currency', currency:'BRL'}); elTotal.style.color = 'var(--success)'; }
+            btn.disabled = bloqueioVenda; btn.classList.toggle('btn-disabled', bloqueioVenda);
+            btn.innerHTML = bloqueioVenda ? '<i class="fas fa-ban"></i> ITEM INDISPONÍVEL' : 'CONCLUIR VENDA';
+        }
+
+        async function finalizarVenda() {
+            if(!clienteAtivo || (carrinho.length === 0 && trocas.length === 0)) return alert("Selecione cliente e itens.");
+            if(bloqueioVenda) return alert("Resolva itens indisponíveis.");
+            if(!confirm("Confirmar venda?")) return;
+
+            try {
+                // SANITIZAÇÃO: Garante que nada é undefined antes de enviar ao Firebase
+                const trocasClean = trocas.map(t => ({
+                    modelo: t.modelo || "Troca", valor: parseFloat(t.valor) || 0, gb: t.gb || "", cor: t.cor || "", imei1: t.imei1 || ""
+                }));
+                const itensClean = carrinho.map(i => ({ id: i.id || "", nome: i.modelo || "Produto", valor: parseFloat(i.valorCobrado) || 0 }));
+
+                const batch = db.batch(), agora = Date.now(), dataStr = new Date().toLocaleDateString('pt-BR');
+                const vendaId = db.collection("vendas").doc().id;
+                let totalTrocaValor = trocasClean.reduce((acc, t) => acc + t.valor, 0);
+                let calcTotal = itensClean.reduce((acc, i) => acc + i.valor, 0) - totalTrocaValor - (parseMoeda(document.getElementById('vlrDesconto').value));
+
+                batch.set(db.collection("vendas").doc(vendaId), { 
+                    clienteId: clienteAtivo.id, clienteNome: clienteAtivo.nome, data: agora, dataString: dataStr, itens: itensClean, trocas: trocasClean, total: calcTotal, formaPagamento: document.getElementById('formaPagto').value
+                });
+
+                carrinho.forEach(i => batch.update(db.collection("estoque").doc(i.id), { status: 'vendido', dataVenda: agora }));
+                trocasClean.forEach(t => batch.set(db.collection("estoque").doc(), { ...t, status: 'disponível', categoria: 'celular', custo: t.valor, dataEntrada: agora, observacao: `Troca - Cliente: ${clienteAtivo.nome}` }));
+
+                await batch.commit(); alert("Venda realizada!"); gerarOrcamento(true); setTimeout(() => location.reload(), 1000);
+            } catch (e) { alert("Erro ao salvar: " + e.message); }
+        }
+
+        function gerarOrcamento(isVenda = false) {
+            const { jsPDF } = window.jspdf; const doc = new jsPDF();
+            const desconto = parseMoeda(document.getElementById('vlrDesconto').value);
+            let subtotal = 0; carrinho.forEach(i => subtotal += i.valorCobrado);
+            let totalReal = subtotal - desconto; trocas.forEach(t => totalReal -= t.valor);
+            doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 40, 'F');
+            doc.setTextColor(255); doc.setFontSize(22); doc.text(NOME_LOJA, 105, 18, {align:'center'});
+            doc.setFontSize(10); doc.text(isVenda ? "RECIBO DE VENDA" : "ORÇAMENTO", 105, 26, {align:'center'});
+            doc.text(`${new Date().toLocaleString('pt-BR')}`, 200, 35, {align:'right'});
+            doc.setTextColor(0); doc.setFont("helvetica", "bold"); doc.text("CLIENTE", 14, 50); doc.setFont("helvetica", "normal"); 
+            let y = 56; if(clienteAtivo) { doc.text(`Nome: ${clienteAtivo.nome}`, 14, y); doc.text(`CPF: ${clienteAtivo.cpf || '-'}`, 120, y); y += 5; doc.text(`Contato: ${clienteAtivo.whats || '-'}`, 14, y); y += 10; }
+            const body = carrinho.map(i => [`${i.modelo} ${i.gb||''}`, (i.tipo==='brinde'||i.valorCobrado===0)?'BRINDE':'VENDA', (i.tipo==='brinde'||i.valorCobrado===0)?'GRÁTIS':`R$ ${i.valorCobrado.toFixed(2)}`]);
+            trocas.forEach(t => body.push([`[ENTRADA] ${t.modelo}`, 'TROCA', `- R$ ${t.valor.toFixed(2)}`]));
+            doc.autoTable({ startY: y, head: [['DESCRIÇÃO', 'TIPO', 'VALOR']], body, theme: 'grid', headStyles: {fillColor:[59, 130, 246]} });
+            let finalY = doc.lastAutoTable.finalY + 10; doc.setFontSize(14); doc.setFont("helvetica", "bold");
+            doc.text(`TOTAL: R$ ${totalReal.toFixed(2)}`, 196, finalY, {align:'right'});
+            doc.save(`${isVenda?'venda':'orcamento'}.pdf`);
+        }
+
+        function mascaraMoeda(i) { let v = i.value.replace(/\D/g,''); v = (v/100).toFixed(2) + ''; v = v.replace(".", ","); v = v.replace(/(\d)(\d{3}),/g, "$1.$2,"); i.value = "R$ " + v; }
+        function parseMoeda(s) { return parseFloat(s.replace(/[R$\s.]/g, '').replace(',', '.')) || 0; }
+        function verificarPagamento() { document.getElementById('divParcelas').classList.toggle('hidden', !document.getElementById('formaPagto').value.includes('Cartão')); }
+    </script>
+</body>
+</html>
