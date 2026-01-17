@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VÉRTICE - CENTRAL DE COMANDO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --accent: #00e0ff; /* Ciano Neon da sua imagem */
+            --text: #ffffff;
+        }
+
+        body {
+            /* AQUI ENTRA A SUA IMAGEM DE FUNDO */
+            background: url('fundo.png') no-repeat center center fixed;
+            background-size: cover; /* Faz a imagem cobrir toda a tela */
+            color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* EFEITO DE ESCURECER LEVEMENTE O FUNDO PARA LER MELHOR */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(2, 6, 23, 0.4); /* Filtro escuro transparente */
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        /* LOGO NO TOPO (CASO A IMAGEM JÁ TENHA O LOGO, ISSO FICA COMO REFORÇO OU PODE TIRAR) */
+        /* Como sua imagem JÁ TEM o logo escrito, vamos deixar o texto transparente para leitores de tela, 
+           ou podemos esconder o h1 visualmente e deixar só os botões flutuando sobre a imagem */
+        .header { 
+            margin-bottom: 40px; 
+            /* Se a imagem de fundo já tem o logo grande, podemos ocultar esse texto ou deixá-lo menor */
+            display: none; 
+        }
+
+        /* GRID DE BOTÕES COM EFEITO DE VIDRO */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-top: 150px; /* Empurra os botões para baixo para não tapar o logo da imagem */
+        }
+
+        .menu-card {
+            /* O SEGREDO DO VIDRO: */
+            background: rgba(15, 23, 42, 0.6); /* Fundo semi-transparente */
+            backdrop-filter: blur(12px); /* Desfoque do fundo (efeito vidro) */
+            -webkit-backdrop-filter: blur(12px);
+            
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Borda fina e discreta */
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text);
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-card:hover {
+            transform: translateY(-10px);
+            background: rgba(15, 23, 42, 0.8);
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(0, 224, 255, 0.4); /* Brilho neon ao passar o mouse */
+        }
+
+        .menu-card i {
+            font-size: 40px;
+            color: var(--accent);
+            text-shadow: 0 0 10px rgba(0, 224, 255, 0.5); /* Brilho no ícone */
+        }
+
+        .menu-card span {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .menu-card p {
+            font-size: 12px;
+            color: #94a3b8;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .footer {
+            margin-top: 60px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* ANIMAÇÃO DE ENTRADA SUAVE */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* AJUSTES PARA CELULAR */
+        @media (max-width: 600px) {
+            body { 
+                background-position: center top; /* Foca o logo no topo no celular */
+            }
+            .menu-grid {
+                margin-top: 200px; /* Garante que os botões não tapem o logo no celular */
+                grid-template-columns: 1fr; /* Um botão embaixo do outro */
+                gap: 15px;
+            }
+            .menu-card {
+                flex-direction: row; /* Ícone ao lado do texto no celular */
+                padding: 20px;
+                text-align: left;
+                align-items: center;
+            }
+            .menu-card i {
+                font-size: 28px;
+                width: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay"></div> <div class="container">
+        
+        <header class="header">
+            <h1>VÉRTICE</h1>
+        </header>
+
+        <nav class="menu-grid">
+            <a href="vendas.html" class="menu-card">
+                <i class="fas fa-cash-register"></i>
+                <div>
+                    <span>PDV Vendas</span>
+                    <p>Caixa e Trocas</p>
+                </div>
+            </a>
+
+            <a href="estoque.html" class="menu-card">
+                <i class="fas fa-boxes"></i>
+                <div>
+                    <span>Estoque</span>
+                    <p>Produtos e Preços</p>
+                </div>
+            </a>
+
+            <a href="clientes.html" class="menu-card">
+                <i class="fas fa-users"></i>
+                <div>
+                    <span>Clientes</span>
+                    <p>Lista e Histórico</p>
+                </div>
+            </a>
+
+            <a href="admin.html" class="menu-card" style="border-color: rgba(239, 68, 68, 0.4);">
+                <i class="fas fa-chart-pie" style="color: #ff4d4d; text-shadow: 0 0 10px rgba(255, 77, 77, 0.5);"></i>
+                <div>
+                    <span>Financeiro</span>
+                    <p>Gestão e Lucro</p>
+                </div>
+            </a>
+        </nav>
+
+        <footer class="footer">
+            Sistema VÉRTICE v2.0 &bull; Conectado
+        </footer>
+    </div>
+
+</body>
+</html>
+
+
+e essa ?
