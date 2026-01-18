@@ -78,6 +78,12 @@
         .sim-row:hover { background: rgba(255,255,255,0.05); cursor: pointer; }
         .sim-total { color: var(--success); font-weight: bold; }
 
+        /* MODAL CONFIGURAÇÃO TAXAS */
+        .taxas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 300px; overflow-y: auto; padding-right: 5px; }
+        .taxa-item { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 4px; }
+        .taxa-item label { width: 40px; font-size: 12px; color: #94a3b8; }
+        .taxa-item input { background: transparent; border: none; border-bottom: 1px solid var(--border); color: #fff; width: 100%; text-align: right; }
+
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal { background: var(--card); padding: 25px; border-radius: 15px; width: 400px; max-width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
         .modal input, .modal select { width: 100%; padding: 10px; margin: 5px 0; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 5px; box-sizing: border-box; }
@@ -167,13 +173,30 @@
 
     <div class="modal-overlay" id="modal-simulador">
         <div class="modal">
-            <h3>Simulação de Cartão</h3>
-            <p style="font-size:12px; color:#94a3b8;">Clique na opção desejada para aplicar a taxa ao total.</p>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Simulação de Cartão</h3>
+                <button onclick="abrirConfigTaxas()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:18px;" title="Configurar Taxas"><i class="fas fa-cog"></i></button>
+            </div>
+            
+            <p style="font-size:12px; color:#94a3b8;">Clique na opção desejada para aplicar a taxa.</p>
             <table class="sim-table">
                 <thead><tr><th>Parc.</th><th>Valor Parc.</th><th>Total Final</th></tr></thead>
                 <tbody id="lista-simulacao"></tbody>
             </table>
             <button onclick="document.getElementById('modal-simulador').style.display='none'" class="btn-cancel" style="margin-top:15px; width:100%;">Fechar</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-config-taxas">
+        <div class="modal">
+            <h3>Configurar Taxas (%)</h3>
+            <p style="font-size:11px; color:#94a3b8;">Edite a % de juros da sua maquininha para cada parcela.</p>
+            <div class="taxas-grid" id="grid-inputs-taxas">
+                </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="document.getElementById('modal-config-taxas').style.display='none'" class="btn-cancel">Cancelar</button>
+                <button onclick="salvarConfigTaxas()" class="btn-confirm">Salvar Alterações</button>
+            </div>
         </div>
     </div>
 
@@ -216,34 +239,16 @@
     </div>
 
     <script>
-        // --- CONFIGURAÇÃO DE TAXAS DA MAQUININHA (%) ---
-        // EDITE AQUI OS VALORES DA SUA OPERADORA
-        // Ex: Índice 1 é 1x, Índice 12 é 12x...
-        const TAXAS_MAQUININHA = {
-            1: 4.50,   // 1x
-            2: 5.50,   // 2x
-            3: 6.50,   // 3x
-            4: 7.50,
-            5: 8.50,
-            6: 9.50,
-            7: 10.50,
-            8: 11.50,
-            9: 12.50,
-            10: 13.50,
-            11: 14.50,
-            12: 15.50,  // 12x
-            18: 20.00,  // 18x (Exemplo)
-            24: 25.00   // 24x (Exemplo)
-        };
-        // Se a parcela não estiver aqui, ele calcula uma média aproximada (+1% ao mês)
-
         let dbEstoque = [], dbClientes = [], carrinho = [], trocas = [];
         let totalVendaGlobal = 0;
-        let valorTaxaAplicada = 0; // Armazena o juros aplicado
+        let valorTaxaAplicada = 0; 
+        let taxasAtuais = {}; // Carregadas do banco
 
         window.onload = function() {
             carregarOpcoesPagamento();
             restaurarRascunho();
+            carregarTaxasDoBanco(); // NOVA FUNÇÃO
+
             db.collection("estoque").where("status", "==", "disponível").onSnapshot(snap => {
                 dbEstoque = []; snap.forEach(doc => dbEstoque.push({ id: doc.id, ...doc.data() }));
                 renderizarProdutos();
@@ -255,13 +260,55 @@
             carregarListasAuxiliares();
         };
 
-        // --- SISTEMA DE SIMULAÇÃO DE JUROS ---
+        // --- GESTÃO DE TAXAS (NOVO) ---
+        function carregarTaxasDoBanco() {
+            db.collection("config_taxas").doc("geral").onSnapshot(doc => {
+                if (doc.exists) {
+                    taxasAtuais = doc.data();
+                } else {
+                    // Valores padrão se não tiver nada no banco
+                    taxasAtuais = {1:4.5, 2:5.5, 3:6.5, 4:7.5, 5:8.5, 6:9.5, 7:10.5, 8:11.5, 9:12.5, 10:13.5, 11:14.5, 12:15.5, 18:20, 24:25};
+                }
+            });
+        }
+
+        function abrirConfigTaxas() {
+            const container = document.getElementById('grid-inputs-taxas');
+            container.innerHTML = "";
+            for(let i=1; i<=24; i++) {
+                // Cria inputs para 1x até 24x
+                let val = taxasAtuais[i] !== undefined ? taxasAtuais[i] : (4 + (i * 1.2)); // Pega valor ou estima
+                container.innerHTML += `
+                    <div class="taxa-item">
+                        <label>${i}x</label>
+                        <input type="number" id="taxa-input-${i}" value="${parseFloat(val).toFixed(2)}" step="0.01"> %
+                    </div>
+                `;
+            }
+            document.getElementById('modal-config-taxas').style.display = 'flex';
+        }
+
+        async function salvarConfigTaxas() {
+            let novasTaxas = {};
+            for(let i=1; i<=24; i++) {
+                let val = parseFloat(document.getElementById(`taxa-input-${i}`).value) || 0;
+                novasTaxas[i] = val;
+            }
+            try {
+                await db.collection("config_taxas").doc("geral").set(novasTaxas);
+                alert("Taxas atualizadas com sucesso!");
+                document.getElementById('modal-config-taxas').style.display = 'none';
+                abrirSimulador(); // Reabre o simulador para ver o efeito
+            } catch(e) {
+                alert("Erro ao salvar: " + e.message);
+            }
+        }
+
+        // --- SISTEMA DE SIMULAÇÃO ---
         function abrirSimulador() {
-            // Calcula o valor base (Subtotal - Trocas - Desconto Manual)
             let sub = 0; carrinho.forEach(i => sub += i.isBrinde ? 0 : parseFloat(i.venda||0));
             let descTroca = 0; trocas.forEach(i => descTroca += i.valor);
             let descManual = parseFloat(document.getElementById('valor-desconto-manual').value) || 0;
-            
             const valorBase = sub - descTroca - descManual;
 
             if (valorBase <= 0) return alert("Adicione itens ao carrinho primeiro.");
@@ -269,13 +316,8 @@
             const tbody = document.getElementById('lista-simulacao');
             tbody.innerHTML = "";
 
-            // Gera tabela de 1x a 24x
             for (let i = 1; i <= 24; i++) {
-                // Pega a taxa configurada ou estima (1.5% + 1% por parcela) se não existir
-                let taxa = TAXAS_MAQUININHA[i];
-                if (!taxa) taxa = 4 + (i * 1.2); // Fallback caso não configure
-
-                // Cálculo: Valor Final = Valor Base + (Valor Base * Taxa / 100)
+                let taxa = parseFloat(taxasAtuais[i]) || (4 + (i*1.2)); // Pega do objeto carregado
                 const valorComJuros = valorBase * (1 + (taxa / 100));
                 const valorParcela = valorComJuros / i;
                 const diferencaJuros = valorComJuros - valorBase;
@@ -283,14 +325,9 @@
                 const tr = document.createElement('tr');
                 tr.className = "sim-row";
                 tr.onclick = () => aplicarParcelamento(i, diferencaJuros);
-                tr.innerHTML = `
-                    <td><strong>${i}x</strong> <small>(${taxa.toFixed(2)}%)</small></td>
-                    <td>R$ ${valorParcela.toFixed(2)}</td>
-                    <td class="sim-total">R$ ${valorComJuros.toFixed(2)}</td>
-                `;
+                tr.innerHTML = `<td><strong>${i}x</strong> <small>(${taxa.toFixed(2)}%)</small></td><td>R$ ${valorParcela.toFixed(2)}</td><td class="sim-total">R$ ${valorComJuros.toFixed(2)}</td>`;
                 tbody.appendChild(tr);
             }
-
             document.getElementById('modal-simulador').style.display = 'flex';
         }
 
@@ -302,8 +339,7 @@
             salvarRascunho();
         }
 
-        // --- OUTRAS FUNÇÕES ---
-
+        // --- OUTRAS FUNÇÕES (MANTIDAS) ---
         function salvarRascunho() {
             const estado = { carrinho, trocas, cliente: document.getElementById('cliente-input').value, desconto: document.getElementById('valor-desconto-manual').value, pagamento: document.getElementById('forma-pagamento').value, taxa: valorTaxaAplicada };
             localStorage.setItem('pdv_rascunho', JSON.stringify(estado));
@@ -345,9 +381,6 @@
             let descTroca=0; trocas.forEach((t,i)=>{ descTroca+=t.valor; dt.innerHTML+=`<div class="trade-in-box"><div class="trade-in-text"><strong>ENTRADA:</strong> ${t.modelo}<br><small>${t.imei} | R$ ${t.valor}</small></div><i class="fas fa-times btn-remove" onclick="removerTroca(${i})"></i></div>`; });
             
             let descMan = parseFloat(document.getElementById('valor-desconto-manual').value)||0;
-            
-            // Lógica de Taxas
-            // Se o pagamento mudar para algo que não seja Crédito, zera a taxa
             const pgto = document.getElementById('forma-pagamento').value;
             if(!pgto.includes("Crédito")) valorTaxaAplicada = 0;
 
@@ -375,7 +408,6 @@
                 const b=db.batch();
                 carrinho.forEach(i=>{ b.update(db.collection("estoque").doc(i.id),{status:"vendido",dataVenda:Date.now(),clienteVenda:cli,foiBrinde:i.isBrinde}); });
                 trocas.forEach(t=>{ const r=db.collection("estoque").doc(); b.set(r,{categoria:'celular',modelo:`${t.modelo} (TROCA ${cli})`,nomeP:`${t.modelo} (TROCA)`,marca:'Apple',cor:t.cor,gb:t.gb,imei1:t.imei,bateria:t.bateria,custo:t.valor,venda:0,status:'disponível',fornecedor:`Cliente: ${cli}`,dataEntrada:Date.now()}); });
-                
                 const snap=await db.collection("vendas").get(); const num=String(snap.size+1).padStart(4,'0');
                 b.set(db.collection("vendas").doc(),{
                     numeroPedido: num, cliente: cli, data: new Date().toISOString(),
@@ -396,10 +428,6 @@
             const cFull=dbClientes.find(c=>c.nome===cli)||{nome:cli};
             let itensR=carrinho.map(i=>({nome:i.modelo||i.nomeP,desc:i.cor||'',preco:i.venda,isBrinde:i.isBrinde}));
             trocas.forEach(t=>itensR.push({nome:"TROCA: "+t.modelo,desc:t.imei,preco:-t.valor,isTroca:true}));
-            
-            // Adiciona a taxa como item "invisível" ou no total
-            // Mas no recibo vamos mostrar o total final já com a taxa
-            
             const dados={
                 numeroPedido: num, cliente: cFull.nome, cpf: cFull.cpf||'', tel: cFull.whats||'', endereco: cFull.logradouro||'',
                 itens: itensR, descontoManual: parseFloat(document.getElementById('valor-desconto-manual').value)||0,
