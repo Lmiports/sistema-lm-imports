@@ -3,85 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Imprimir Recibo</title> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Imprimir Recibo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* ESTILOS DE TELA (DARK MODE) */
         :root { --bg: #020617; --card: #0f172a; --accent: #00e0ff; --text: #f8fafc; --border: rgba(255, 255, 255, 0.1); }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
-        
         .container { max-width: 900px; margin: 0 auto; background: var(--card); padding: 30px; border-radius: 15px; border: 1px solid var(--border); }
-        
-        input, select { 
-            width: 100%; padding: 8px; background: #1e293b; border: 1px solid var(--border); 
-            color: #fff; border-radius: 4px; box-sizing: border-box; font-family: inherit; margin-bottom: 5px;
-        }
-        
+        input { width: 100%; padding: 8px; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 4px; box-sizing: border-box; font-family: inherit; margin-bottom: 5px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 8px; text-align: left; border-bottom: 1px solid var(--border); }
         th { color: var(--accent); }
-        
         .btn { background: var(--accent); color: #000; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 20px; }
-        .btn-back { background: transparent; border: 1px solid var(--accent); color: var(--accent); margin-right: 10px; }
-        
-        /* ÁREA DO CONTRATO NA TELA (MUDANÇA AQUI: DIV EDITÁVEL) */
-        .contract-area { 
-            margin-top: 30px; 
-            background: #fff; 
-            color: #000; 
-            padding: 25px; 
-            border-radius: 5px; 
-        }
-        
-        /* O segredo para não cortar o texto: div contenteditable */
-        #texto-contrato {
-            outline: none;
-            text-align: justify;
-            font-size: 11px;
-            line-height: 1.4;
-            min-height: 400px; /* Altura mínima na tela */
-            white-space: pre-wrap; /* Respeita os parágrafos */
-        }
+        .contract-area { margin-top: 30px; background: #fff; color: #000; padding: 25px; border-radius: 5px; }
+        #texto-contrato { outline: none; text-align: justify; font-size: 11px; line-height: 1.4; min-height: 400px; white-space: pre-wrap; }
 
-        /* --- MÁGICA DA IMPRESSÃO (A4 - PRETO E BRANCO) --- */
+        .total-row { display: flex; justify-content: space-between; margin-top: 5px; font-size: 14px; }
+        .final-total { font-size: 22px; font-weight: bold; color: var(--accent); margin-top: 10px; border-top: 1px solid #444; padding-top: 10px; }
+
         @media print {
-            @page { margin: 1.5cm; size: A4; } /* Margens seguras */
-            
+            @page { margin: 1.5cm; size: A4; }
             body { background: #fff; color: #000; padding: 0; margin: 0; font-size: 12pt; }
             .container { box-shadow: none; border: none; max-width: 100%; width: 100%; padding: 0; margin: 0; }
             .no-print { display: none !important; } 
-            
             input { background: transparent; border: none; color: #000; padding: 0; font-size: 12px; font-weight: bold; }
             h2, h1, h3 { color: #000; border-bottom: 1px solid #000; }
             table th { color: #000; border-bottom: 1px solid #000; }
             table td { border-bottom: 1px solid #ccc; color: #000; }
-            
-            /* FORÇA O CONTRATO PARA A PÁGINA 2 */
-            .contract-area { 
-                page-break-before: always; 
-                margin-top: 0; 
-                padding: 0;
-                padding-top: 20px;
-                border: none;
-            }
-            
-            /* Garante que o texto expande e não corta */
-            #texto-contrato { 
-                min-height: auto; 
-                height: auto; 
-                overflow: visible; 
-                font-size: 10px; /* Letra um pouco menor para caber tudo */
-            }
-
-            /* Assinaturas */
+            .contract-area { page-break-before: always; margin-top: 0; padding: 0; padding-top: 20px; border: none; }
+            #texto-contrato { min-height: auto; height: auto; overflow: visible; font-size: 10px; }
             .signatures { display: flex !important; margin-top: 50px; justify-content: space-between; page-break-inside: avoid; }
             .sig-line { width: 45%; border-top: 1px solid #000; text-align: center; font-size: 11px; padding-top: 5px; }
-
-            /* Rodapé Discreto */
-            .footer-print {
-                position: fixed; bottom: 0; left: 0; width: 100%; text-align: center;
-                font-size: 8px; color: #888; text-transform: uppercase; letter-spacing: 2px;
-            }
+            .footer-print { position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 8px; color: #888; text-transform: uppercase; letter-spacing: 2px; }
+            .final-total { color: #000 !important; border-top: 1px solid #000; }
         }
     </style>
 </head>
@@ -89,8 +43,8 @@
 
     <div class="container">
         <div class="no-print" style="margin-bottom: 20px; display: flex; justify-content: space-between;">
-            <button onclick="window.history.back()" class="btn btn-back"><i class="fas fa-arrow-left"></i> Voltar</button>
-            <button onclick="window.print()" class="btn"><i class="fas fa-print"></i> Imprimir / PDF</button>
+            <button onclick="window.history.back()" class="btn" style="background:transparent; border:1px solid var(--accent); color:var(--accent);">Voltar</button>
+            <button onclick="window.print()" class="btn">Imprimir / PDF</button>
         </div>
 
         <div class="receipt-page">
@@ -112,25 +66,23 @@
                         <input type="text" id="cliente-cpf" placeholder="CPF">
                         <input type="text" id="cliente-tel" placeholder="Telefone/WhatsApp">
                     </div>
-                    <input type="text" placeholder="Endereço Completo (Opcional)">
+                    <input type="text" id="cliente-endereco" placeholder="Endereço Completo">
                 </div>
             </div>
 
             <h3 style="font-size: 14px; margin-top: 20px; text-transform: uppercase; border-bottom: 2px solid #000;">Produtos / Serviços</h3>
             <table>
                 <thead>
-                    <tr>
-                        <th width="10%">Qtd</th>
-                        <th>Descrição</th>
-                        <th width="20%">Valor</th>
-                    </tr>
+                    <tr><th>Descrição</th><th width="20%">Valor</th></tr>
                 </thead>
-                <tbody id="lista-produtos">
-                    </tbody>
+                <tbody id="lista-produtos"></tbody>
             </table>
 
-            <div style="margin-top: 20px; text-align: right; border-top: 2px solid #000; padding-top: 10px;">
-                <div style="font-size: 22px; font-weight: bold; color: var(--accent);" id="display-total">TOTAL: R$ 0,00</div>
+            <div style="margin-top: 20px; text-align: right; padding-top: 10px;">
+                <div class="total-row"><span>Subtotal:</span> <span id="recibo-sub">R$ 0,00</span></div>
+                <div class="total-row"><span>Descontos/Trocas:</span> <span id="recibo-desc">R$ 0,00</span></div>
+                <div class="final-total" id="recibo-total">TOTAL: R$ 0,00</div>
+                
                 <div style="margin-top: 10px;">
                     <label style="font-size: 12px;">Forma de Pagamento:</label>
                     <input type="text" id="forma-pagamento" style="text-align: right; font-weight: bold;">
@@ -179,14 +131,8 @@ Cláusula 10: O comprador declara ter conferido o aparelho (câmeras, face ID, �
             </div>
 
             <div class="signatures" style="display: none;">
-                <div class="sig-line">
-                    ASSINATURA DO COMPRADOR<br>
-                    CPF: _______________________
-                </div>
-                <div class="sig-line">
-                    LM IMPORTS<br>
-                    VISTO DO VENDEDOR
-                </div>
+                <div class="sig-line">ASSINATURA DO COMPRADOR<br>CPF: _______________________</div>
+                <div class="sig-line">LM IMPORTS<br>VISTO DO VENDEDOR</div>
             </div>
             
             <div class="footer-print">Sistema Vértice • Gestão Inteligente</div>
@@ -196,41 +142,65 @@ Cláusula 10: O comprador declara ter conferido o aparelho (câmeras, face ID, �
 
     <script>
         window.onload = function() {
-            const dadosRecebidos = localStorage.getItem('dadosRecibo');
-            
-            if (dadosRecebidos) {
-                const venda = JSON.parse(dadosRecebidos);
-
-                document.getElementById('cliente-nome').value = venda.cliente || "Cliente Balcão";
-                document.getElementById('data-venda').value = venda.data;
-                document.getElementById('forma-pagamento').value = venda.pagamento;
+            const dados = JSON.parse(localStorage.getItem('dadosRecibo'));
+            if (dados) {
+                document.getElementById('cliente-nome').value = dados.cliente || "";
+                document.getElementById('cliente-cpf').value = dados.cpf || "";
+                document.getElementById('cliente-tel').value = dados.tel || "";
+                document.getElementById('cliente-endereco').value = dados.endereco || "";
+                document.getElementById('data-venda').value = dados.data;
+                document.getElementById('forma-pagamento').value = dados.pagamento;
                 document.getElementById('pedido-num').value = Math.floor(Math.random() * 9000) + 1000;
 
                 const tbody = document.getElementById('lista-produtos');
                 tbody.innerHTML = ''; 
 
-                venda.itens.forEach(item => {
+                let subTotal = 0;
+                let descontos = 0;
+
+                dados.itens.forEach(item => {
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td><input type="number" value="1"></td>
-                        <td><input type="text" value="${item.nome} - ${item.desc || ''}"></td>
-                        <td><input type="text" value="R$ ${parseFloat(item.preco).toFixed(2)}"></td>
-                    `;
+                    
+                    // Lógica para mostrar Brinde
+                    let desc = item.nome;
+                    if(item.desc) desc += ` - ${item.desc}`;
+                    
+                    let valorTexto = "";
+                    let valorNumerico = parseFloat(item.preco);
+
+                    if(item.isBrinde) {
+                        desc += " (BRINDE/GRÁTIS)";
+                        valorTexto = "R$ 0,00";
+                        // Para fins de cálculo de "Valor do Brinde" para mostrar quanto ganhou,
+                        // teríamos que ter passado o valor original. Mas aqui é o recibo final.
+                    } else if (item.isTroca) {
+                        // É uma troca
+                        valorTexto = "- R$ " + Math.abs(valorNumerico).toFixed(2);
+                        descontos += Math.abs(valorNumerico);
+                    } else {
+                        // Produto Normal
+                        valorTexto = "R$ " + valorNumerico.toFixed(2);
+                        subTotal += valorNumerico;
+                    }
+                    
+                    tr.innerHTML = `<td>${desc}</td><td>${valorTexto}</td>`;
                     tbody.appendChild(tr);
                 });
 
-                const totalFormatado = parseFloat(venda.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                document.getElementById('display-total').innerText = 'TOTAL: R$ ' + totalFormatado;
-                
-                // Muda a cor do total na impressão para preto
-                if (window.matchMedia) {
-                    var mediaQueryList = window.matchMedia('print');
-                    mediaQueryList.addListener(function(mql) {
-                        if (mql.matches) {
-                            document.getElementById('display-total').style.color = '#000';
-                        }
-                    });
+                // Soma o Desconto Manual que veio do PDV
+                if(dados.descontoManual > 0) {
+                    descontos += parseFloat(dados.descontoManual);
+                    // Adiciona linha visual do desconto manual
+                    const trDesc = document.createElement('tr');
+                    trDesc.innerHTML = `<td style="color:#000;">Desconto Promocional</td><td>- R$ ${parseFloat(dados.descontoManual).toFixed(2)}</td>`;
+                    tbody.appendChild(trDesc);
                 }
+
+                document.getElementById('recibo-sub').innerText = 'R$ ' + subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                document.getElementById('recibo-desc').innerText = '- R$ ' + descontos.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                document.getElementById('recibo-total').innerText = 'TOTAL: R$ ' + parseFloat(dados.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            } else {
+                alert("Nenhuma venda encontrada.");
             }
         }
     </script>
