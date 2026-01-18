@@ -65,6 +65,7 @@
         .btn-finalizar { background: var(--success); color: #000; padding: 15px; width: 100%; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
         .btn-troca { background: transparent; border: 1px solid var(--warning); color: var(--warning); padding: 10px; width: 100%; border-radius: 8px; margin-bottom: 10px; cursor: pointer; }
         .btn-recibo { background: #eab308; color: #000; padding: 15px; width: 100%; border: none; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        .btn-limpar { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px; width: 100%; border-radius: 5px; margin-bottom: 10px; cursor: pointer; font-size: 11px; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal { background: var(--card); padding: 25px; border-radius: 15px; width: 400px; max-width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
@@ -118,16 +119,16 @@
                 <div style="text-align: center; color: #64748b; margin-top: 20px;">Carrinho vazio</div>
             </div>
 
+            <button class="btn-limpar" onclick="cancelarVendaTotal()"><i class="fas fa-trash-alt"></i> CANCELAR / DESTRAVAR ITENS</button>
+
             <div id="lista-trocas"></div>
 
             <div class="totals">
                 <div class="row"><span>Subtotal:</span><span id="valor-subtotal">R$ 0,00</span></div>
-                
                 <div class="row" style="color: var(--danger);">
                     <span>Desconto (R$):</span>
                     <input type="number" class="input-desconto" id="valor-desconto-manual" value="" placeholder="0,00" oninput="atualizarTotais()">
                 </div>
-                
                 <div class="row" style="color: var(--warning);"><span>Troca/Abatimento:</span><span id="valor-abatimento">- R$ 0,00</span></div>
                 <div class="row total-final"><span>TOTAL:</span><span id="valor-total">R$ 0,00</span></div>
             </div>
@@ -151,18 +152,10 @@
             <input list="dl-modelos-list" id="troca-modelo" placeholder="Selecione...">
             <datalist id="dl-modelos-list"></datalist>
             <div class="modal-grid">
-                <div>
-                    <label style="font-size: 11px; color: #999;">GB:</label>
-                    <select id="troca-gb"><option value="">-</option><option value="64GB">64GB</option><option value="128GB">128GB</option><option value="256GB">256GB</option><option value="512GB">512GB</option></select>
-                </div>
-                <div>
-                    <label style="font-size: 11px; color: #999;">Cor:</label>
-                    <input list="dl-cores-list" id="troca-cor" placeholder="Cor">
-                    <datalist id="dl-cores-list"></datalist>
-                </div>
+                <div><label style="font-size: 11px; color: #999;">GB:</label><select id="troca-gb"><option value="">-</option><option value="64GB">64GB</option><option value="128GB">128GB</option><option value="256GB">256GB</option><option value="512GB">512GB</option></select></div>
+                <div><label style="font-size: 11px; color: #999;">Cor:</label><input list="dl-cores-list" id="troca-cor" placeholder="Cor"><datalist id="dl-cores-list"></datalist></div>
             </div>
-            <label style="font-size: 11px; color: #999;">IMEI:</label>
-            <input type="text" id="troca-imei" placeholder="15 dígitos" maxlength="15">
+            <label style="font-size: 11px; color: #999;">IMEI:</label><input type="text" id="troca-imei" placeholder="15 dígitos" maxlength="15">
             <div class="modal-grid">
                 <div><label style="font-size: 11px; color: #999;">Valor (R$):</label><input type="number" id="troca-valor"></div>
                 <div><label style="font-size: 11px; color: #999;">Bateria (%):</label><input type="number" id="troca-bateria"></div>
@@ -194,13 +187,12 @@
         let dbEstoque = [], dbClientes = [], carrinho = [], trocas = [];
         let totalVendaGlobal = 0;
 
-        // INICIALIZAÇÃO
         window.onload = function() {
             carregarOpcoesPagamento();
-            
-            // Tenta restaurar Rascunho (Se existir)
             restaurarRascunho();
 
+            // SÓ MOSTRA PRODUTOS DISPONÍVEIS
+            // Se estiver em_negociacao, some da lista dos outros
             db.collection("estoque").where("status", "==", "disponível").onSnapshot(snap => {
                 dbEstoque = []; snap.forEach(doc => dbEstoque.push({ id: doc.id, ...doc.data() }));
                 renderizarProdutos();
@@ -212,46 +204,6 @@
             carregarListasAuxiliares();
         };
 
-        // --- SISTEMA DE RASCUNHO (MEMÓRIA) ---
-        function salvarRascunho() {
-            const estado = {
-                carrinho: carrinho,
-                trocas: trocas,
-                cliente: document.getElementById('cliente-input').value,
-                desconto: document.getElementById('valor-desconto-manual').value,
-                pagamento: document.getElementById('forma-pagamento').value
-            };
-            localStorage.setItem('pdv_rascunho', JSON.stringify(estado));
-        }
-
-        function restaurarRascunho() {
-            const salvo = localStorage.getItem('pdv_rascunho');
-            if (salvo) {
-                const estado = JSON.parse(salvo);
-                carrinho = estado.carrinho || [];
-                trocas = estado.trocas || [];
-                document.getElementById('cliente-input').value = estado.cliente || "";
-                document.getElementById('valor-desconto-manual').value = estado.desconto || "";
-                
-                // Aguarda um pouco para o select carregar antes de setar o valor
-                setTimeout(() => {
-                    document.getElementById('forma-pagamento').value = estado.pagamento || "Pix";
-                }, 500);
-
-                atualizarTotais(); // Atualiza a tela com os dados recuperados
-            }
-        }
-
-        function limparRascunho() {
-            localStorage.removeItem('pdv_rascunho');
-            carrinho = [];
-            trocas = [];
-            document.getElementById('cliente-input').value = "";
-            document.getElementById('valor-desconto-manual').value = "";
-            atualizarTotais();
-        }
-
-        // --- FUNÇÕES DO SISTEMA ---
         function carregarListasAuxiliares() {
             db.collection("lista_modelos_cel").orderBy("nome").onSnapshot(snap => {
                 document.getElementById('dl-modelos-list').innerHTML = "";
@@ -289,21 +241,53 @@
             dbClientes.forEach(c => dl.innerHTML += `<option value="${c.nome}">${c.cpf || c.whats || ''}</option>`);
         }
 
-        function adicionarAoCarrinho(p) {
-            carrinho.push({ ...p, isBrinde: false });
-            atualizarTotais();
-            salvarRascunho(); // Salva a cada adição
+        // --- LÓGICA DE RESERVA DE ESTOQUE ---
+        async function adicionarAoCarrinho(p) {
+            // 1. Muda status no banco para "em_negociacao"
+            try {
+                await db.collection("estoque").doc(p.id).update({ status: "em_negociacao" });
+                
+                // 2. Adiciona localmente (mesmo que suma da lista)
+                carrinho.push({ ...p, isBrinde: false });
+                atualizarTotais();
+                salvarRascunho();
+            } catch(e) {
+                alert("Erro: Alguém pode ter pego este item agora!");
+            }
         }
+
+        async function removerDoCarrinho(i) { 
+            const item = carrinho[i];
+            
+            // 1. Devolve para o estoque (disponível)
+            try {
+                await db.collection("estoque").doc(item.id).update({ status: "disponível" });
+            } catch(e) { console.log("Item já não existe ou erro"); }
+
+            // 2. Remove local
+            carrinho.splice(i, 1); 
+            atualizarTotais(); 
+            salvarRascunho();
+        }
+
+        // Se cancelar tudo, devolve tudo
+        async function cancelarVendaTotal() {
+            if(!confirm("Tem certeza? Isso vai limpar o carrinho e destravar os produtos.")) return;
+            
+            // Devolve cada item pro estoque
+            for (const item of carrinho) {
+                try {
+                    await db.collection("estoque").doc(item.id).update({ status: "disponível" });
+                } catch(e) { console.log("Erro ao devolver item", item.modelo); }
+            }
+            limparRascunho();
+        }
+
+        // --- FIM LÓGICA RESERVA ---
 
         function toggleBrinde(index) {
             carrinho[index].isBrinde = !carrinho[index].isBrinde;
             atualizarTotais();
-            salvarRascunho();
-        }
-
-        function removerDoCarrinho(i) { 
-            carrinho.splice(i, 1); 
-            atualizarTotais(); 
             salvarRascunho();
         }
 
@@ -330,7 +314,6 @@
             carrinho.forEach((item, i) => {
                 const valorItem = item.isBrinde ? 0 : parseFloat(item.venda || 0);
                 sub += valorItem;
-                
                 const classeBrinde = item.isBrinde ? 'brinde' : '';
                 const iconePresente = item.isBrinde ? 'fas fa-gift active' : 'fas fa-gift';
                 const textoValor = item.isBrinde ? '<span style="color:#00e0ff; font-weight:bold;">GRÁTIS</span>' : `R$ ${parseFloat(item.venda).toFixed(2)}`;
@@ -360,8 +343,7 @@
             document.getElementById('valor-subtotal').innerText = `R$ ${sub.toFixed(2)}`;
             document.getElementById('valor-abatimento').innerText = `- R$ ${descTroca.toFixed(2)}`;
             document.getElementById('valor-total').innerText = `R$ ${totalVendaGlobal.toFixed(2)}`;
-            
-            salvarRascunho(); // Garante que o desconto manual seja salvo
+            salvarRascunho();
         }
 
         async function finalizarVenda() {
@@ -373,9 +355,13 @@
 
             try {
                 const batch = db.batch();
+                
+                // Marca como VENDIDO
                 carrinho.forEach(item => {
                     batch.update(db.collection("estoque").doc(item.id), { status: "vendido", dataVenda: Date.now(), clienteVenda: cli, foiBrinde: item.isBrinde });
                 });
+                
+                // Entrada TROCAS
                 trocas.forEach(t => {
                     const ref = db.collection("estoque").doc();
                     batch.set(ref, { 
@@ -384,7 +370,14 @@
                         status:'disponível', fornecedor:`Cliente: ${cli}`, dataEntrada:Date.now() 
                     });
                 });
+
+                // GERA NÚMERO SEQUENCIAL (Baseado no tamanho da coleção vendas)
+                const snapshotVendas = await db.collection("vendas").get();
+                const numeroPedido = snapshotVendas.size + 1; // Ex: 50 -> 51
+                const numeroFormatado = String(numeroPedido).padStart(4, '0'); // 0051
+
                 batch.set(db.collection("vendas").doc(), {
+                    numeroPedido: numeroFormatado,
                     cliente: cli, data: new Date().toISOString(),
                     itens: carrinho.map(c => ({ modelo: c.modelo||c.nomeP, isBrinde: c.isBrinde })),
                     trocas: trocas.map(t => t.modelo),
@@ -393,28 +386,31 @@
                 });
                 await batch.commit();
                 
-                limparRascunho(); // LIMPA O RASCUNHO AO FINALIZAR
-                alert("Venda Sucesso!"); 
+                limparRascunho();
+                alert(`Venda Nº ${numeroFormatado} finalizada com Sucesso!`); 
                 window.location.reload();
             } catch(e) { alert("Erro: "+e.message); }
         }
 
-        function gerarRecibo() {
+        // GERAR RECIBO COM NÚMERO SEQUENCIAL SIMULADO
+        async function gerarRecibo() {
             const cli = document.getElementById('cliente-input').value;
             if(!cli) return alert("Selecione cliente!");
             if(carrinho.length===0 && trocas.length===0) return alert("Vazio!");
 
+            // Pega o número provável do pedido
+            const snapshotVendas = await db.collection("vendas").get();
+            const proximoNumero = String(snapshotVendas.size + 1).padStart(4, '0');
+
             const cFull = dbClientes.find(c => c.nome === cli) || { nome: cli };
             
             let itensR = carrinho.map(i => ({ 
-                nome: i.modelo || i.nomeP, 
-                desc: i.cor || '', 
-                preco: i.venda,
-                isBrinde: i.isBrinde
+                nome: i.modelo || i.nomeP, desc: i.cor || '', preco: i.venda, isBrinde: i.isBrinde
             }));
             trocas.forEach(t => itensR.push({ nome: "TROCA: "+t.modelo, desc: t.imei, preco: -t.valor, isTroca: true }));
 
             const dados = {
+                numeroPedido: proximoNumero, // Envia o número para o recibo
                 cliente: cFull.nome, cpf: cFull.cpf||'', tel: cFull.whats||'', 
                 endereco: cFull.logradouro ? `${cFull.logradouro}, ${cFull.numero} - ${cFull.bairro}` : '',
                 itens: itensR,
@@ -424,11 +420,38 @@
                 data: new Date().toLocaleDateString('pt-BR')
             };
             localStorage.setItem('dadosRecibo', JSON.stringify(dados));
-            
-            // ABRIR EM NOVA ABA (A MÁGICA PARA NÃO PERDER O PDV)
             window.open('orcamento.html', '_blank');
         }
 
+        // SISTEMA DE RASCUNHO (Memória Local)
+        function salvarRascunho() {
+            const estado = {
+                carrinho: carrinho, trocas: trocas,
+                cliente: document.getElementById('cliente-input').value,
+                desconto: document.getElementById('valor-desconto-manual').value,
+                pagamento: document.getElementById('forma-pagamento').value
+            };
+            localStorage.setItem('pdv_rascunho', JSON.stringify(estado));
+        }
+        function restaurarRascunho() {
+            const salvo = localStorage.getItem('pdv_rascunho');
+            if (salvo) {
+                const est = JSON.parse(salvo);
+                carrinho = est.carrinho || []; trocas = est.trocas || [];
+                document.getElementById('cliente-input').value = est.cliente || "";
+                document.getElementById('valor-desconto-manual').value = est.desconto || "";
+                setTimeout(() => { document.getElementById('forma-pagamento').value = est.pagamento || "Pix"; }, 500);
+                atualizarTotais();
+            }
+        }
+        function limparRascunho() {
+            localStorage.removeItem('pdv_rascunho'); carrinho=[]; trocas=[];
+            document.getElementById('cliente-input').value="";
+            document.getElementById('valor-desconto-manual').value="";
+            atualizarTotais();
+        }
+
+        // Modais e Auxiliares
         function abrirModalTroca(){document.getElementById('modal-troca').style.display='flex';}
         function fecharModalTroca(){document.getElementById('modal-troca').style.display='none';}
         function abrirModalCliente(){document.getElementById('modal-cliente').style.display='flex';}
