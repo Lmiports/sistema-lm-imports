@@ -90,7 +90,6 @@
         .client-area { margin-bottom: 15px; }
         .client-row { display: flex; gap: 5px; }
         
-        /* MUDANÇA AQUI: INPUT DE BUSCA DE CLIENTE */
         .client-input-wrapper { width: 100%; position: relative; }
         .client-row input[list] {
             width: 100%; padding: 10px; background: #1e293b; border: 1px solid var(--border);
@@ -142,7 +141,7 @@
             width: 400px; max-width: 90%; max-height: 90vh; overflow-y: auto;
             border: 1px solid var(--border); 
         }
-        .modal input { width: 100%; padding: 10px; margin: 5px 0; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 5px; box-sizing: border-box; }
+        .modal input, .modal select { width: 100%; padding: 10px; margin: 5px 0; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 5px; box-sizing: border-box; }
         .modal h3 { margin-top: 0; color: var(--accent); }
         .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
@@ -179,18 +178,15 @@
             </div>
 
             <div class="products-list" id="lista-produtos">
-                <div style="grid-column: 1/-1; text-align: center; color: #888; padding: 20px;">
-                    Carregando produtos ou estoque vazio...
                 </div>
-            </div>
         </div>
 
         <div class="cart-section">
             <div class="client-area">
-                <label style="font-size: 12px; color: #94a3b8;">Cliente (Busca por Nome ou CPF):</label>
+                <label style="font-size: 12px; color: #94a3b8;">Cliente (Busca por Nome, CPF ou Zap):</label>
                 <div class="client-row">
                     <div class="client-input-wrapper">
-                        <input list="lista-clientes" id="cliente-input" placeholder="Digite para buscar...">
+                        <input list="lista-clientes" id="cliente-input" placeholder="Digite para buscar..." autocomplete="off">
                         <datalist id="lista-clientes">
                             </datalist>
                     </div>
@@ -225,7 +221,37 @@
     <div class="modal-overlay" id="modal-troca">
         <div class="modal" style="border-color: var(--warning);">
             <h3 style="color: var(--warning);">Entrada de Troca</h3>
-            <input type="text" id="troca-modelo" placeholder="Modelo (Ex: iPhone 11)">
+            
+            <input list="lista-modelos-estoque" id="troca-modelo" placeholder="Modelo (Digite ou selecione da lista)">
+            <datalist id="lista-modelos-estoque">
+                </datalist>
+
+            <div class="modal-grid">
+                <select id="troca-gb">
+                    <option value="">Selecione GB...</option>
+                    <option value="64GB">64GB</option>
+                    <option value="128GB">128GB</option>
+                    <option value="256GB">256GB</option>
+                    <option value="512GB">512GB</option>
+                    <option value="1TB">1TB</option>
+                    <option value="Outro">Outro</option>
+                </select>
+
+                <select id="troca-cor">
+                    <option value="">Selecione a Cor...</option>
+                    <option value="Preto">Preto</option>
+                    <option value="Branco">Branco</option>
+                    <option value="Dourado">Dourado</option>
+                    <option value="Prata">Prata</option>
+                    <option value="Azul">Azul</option>
+                    <option value="Vermelho">Vermelho</option>
+                    <option value="Verde">Verde</option>
+                    <option value="Roxo">Roxo</option>
+                    <option value="Rosa">Rosa</option>
+                    <option value="Cinza">Cinza</option>
+                    <option value="Titânio">Titânio</option>
+                </select>
+            </div>
             
             <input type="text" id="troca-imei" placeholder="IMEI (15 Dígitos)" maxlength="15" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 15)">
             
@@ -282,13 +308,12 @@
         let trocas = [];
 
         window.onload = function() {
-            // Garante que carrega mesmo que não tenha filtro selecionado
             carregarProdutos();
             carregarClientes();
             carregarOpcoesPagamento();
+            carregarListaModelos(); // Preenche a lista de sugestão para troca
         };
 
-        // --- CARREGAMENTO DE OPÇÕES DE PAGAMENTO ---
         function carregarOpcoesPagamento() {
             const select = document.getElementById('forma-pagamento');
             select.innerHTML = `
@@ -307,7 +332,6 @@
             }
         }
 
-        // --- BUSCA CEP ---
         function buscarCep() {
             const cep = document.getElementById('novo-cep').value.replace(/\D/g, '');
             if (cep.length === 8) {
@@ -351,14 +375,22 @@
                 historico: []
             };
 
+            // Salva
             db_clientes.push(novoCliente);
             localStorage.setItem('db_clientes', JSON.stringify(db_clientes));
-            carregarClientes();
-            document.getElementById('cliente-input').value = nome; // Seleciona no input
             
+            // Recarrega a lista
+            carregarClientes();
+            
+            // Define o novo cliente no input
+            document.getElementById('cliente-input').value = nome; 
+            
+            // Limpa Modal
             document.querySelectorAll('#modal-cliente input').forEach(input => input.value = '');
             fecharModalCliente();
-            alert("Cliente cadastrado com sucesso!");
+            
+            // Confirmação
+            alert("Cliente cadastrado com sucesso e já selecionado!");
         }
 
         // --- PRODUTOS ---
@@ -372,7 +404,6 @@
             }
 
             db_produtos.forEach(prod => {
-                // Check básico de quantidade e existência
                 if (prod && prod.qtd > 0) {
                     const div = document.createElement('div');
                     div.className = 'product-card';
@@ -390,7 +421,7 @@
                         <span class="prod-name">${prod.modelo}</span>
                         <span class="prod-detail">${prod.cor} | ${prod.gb || ''}</span>
                         <span class="prod-price">R$ ${parseFloat(prod.pvenda).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
-                    `;
+                        <div style="display:none;">${prod.categoria} ${prod.modelo} ${prod.cor}</div> `;
                     lista.appendChild(div);
                 }
             });
@@ -401,34 +432,41 @@
             const cat = document.getElementById('filtro-cat').value; 
             
             const cards = document.querySelectorAll('.product-card');
-            let encontrou = false;
 
             cards.forEach(card => {
-                const textoCard = card.innerText.toLowerCase();
+                const textoCard = card.innerText.toLowerCase(); 
+                // A tag categoria tem o texto exato da categoria
                 const catTag = card.querySelector('.prod-cat-tag').innerText.toLowerCase();
                 
+                // Verifica se o texto digitado existe no card
                 const matchNome = textoCard.includes(termo);
+                // Verifica se a categoria bate (ou se está vazio "Todas")
                 const matchCat = cat === "" || catTag.includes(cat.toLowerCase());
 
                 if (matchNome && matchCat) {
                     card.style.display = 'flex';
-                    encontrou = true;
                 } else {
                     card.style.display = 'none';
                 }
             });
         }
 
-        // --- CLIENTES (AGORA COM DATALIST PARA BUSCA) ---
+        // --- CLIENTES ---
         function carregarClientes() {
             const datalist = document.getElementById('lista-clientes');
-            datalist.innerHTML = ''; // Limpa
+            datalist.innerHTML = ''; 
             
             db_clientes.forEach(cli => {
                 const opt = document.createElement('option');
                 opt.value = cli.nome;
-                // Mostra CPF ou Zap como dica extra na busca
-                opt.innerText = cli.cpf ? `CPF: ${cli.cpf}` : (cli.contato ? `Zap: ${cli.contato}` : '');
+                // Exibe info extra se existir
+                let infoExtra = [];
+                if(cli.cpf) infoExtra.push(`CPF: ${cli.cpf}`);
+                if(cli.contato) infoExtra.push(`Zap: ${cli.contato}`);
+                
+                if (infoExtra.length > 0) {
+                    opt.innerText = infoExtra.join(' | ');
+                }
                 datalist.appendChild(opt);
             });
         }
@@ -444,6 +482,19 @@
             atualizarCarrinho();
         }
 
+        // --- TROCA ---
+        function carregarListaModelos() {
+            const datalist = document.getElementById('lista-modelos-estoque');
+            datalist.innerHTML = '';
+            // Pega modelos únicos do estoque para sugerir
+            const modelosUnicos = [...new Set(db_produtos.map(p => p.modelo))];
+            modelosUnicos.forEach(mod => {
+                const opt = document.createElement('option');
+                opt.value = mod;
+                datalist.appendChild(opt);
+            });
+        }
+
         function abrirModalTroca() { document.getElementById('modal-troca').style.display = 'flex'; }
         function fecharModalTroca() { document.getElementById('modal-troca').style.display = 'none'; }
 
@@ -452,14 +503,16 @@
             const valor = parseFloat(document.getElementById('troca-valor').value);
             const bateria = document.getElementById('troca-bateria').value;
             const imei = document.getElementById('troca-imei').value;
+            const cor = document.getElementById('troca-cor').value;
+            const gb = document.getElementById('troca-gb').value;
 
-            if (modelo && valor && imei) {
+            if (modelo && valor && imei && cor && gb) {
                 if(imei.length !== 15) {
-                    alert("Atenção: O IMEI deve ter exatamente 15 dígitos.");
+                    alert("O IMEI deve ter exatamente 15 dígitos.");
                     return;
                 }
 
-                trocas.push({ modelo, valor, bateria, imei });
+                trocas.push({ modelo, valor, bateria, imei, cor, gb });
                 fecharModalTroca();
                 atualizarCarrinho();
                 
@@ -468,7 +521,9 @@
                 document.getElementById('troca-valor').value = '';
                 document.getElementById('troca-bateria').value = '';
                 document.getElementById('troca-imei').value = '';
-            } else { alert("Preencha Modelo, IMEI e Valor!"); }
+                document.getElementById('troca-cor').value = '';
+                document.getElementById('troca-gb').value = '';
+            } else { alert("Preencha todos os campos da troca!"); }
         }
 
         function removerTroca(index) {
@@ -499,7 +554,8 @@
                     <div class="trade-in-box">
                         <div class="trade-in-text">
                             <strong>ENTRADA:</strong> ${item.modelo} <br>
-                            <small>IMEI: ${item.imei} | Bat: ${item.bateria}% | Valor: R$ ${item.valor}</small>
+                            <small>${item.cor} | ${item.gb} | Bat: ${item.bateria}% | IMEI: ${item.imei}</small><br>
+                            <small>Valor: R$ ${item.valor}</small>
                         </div>
                         <i class="fas fa-times btn-remove" onclick="removerTroca(${index})"></i>
                     </div>`;
@@ -513,7 +569,6 @@
         }
 
         function gerarRecibo() {
-            // PEGA O NOME DO INPUT TEXT AGORA
             const clienteNome = document.getElementById('cliente-input').value;
             const pagto = document.getElementById('forma-pagamento').value;
             if (carrinho.length === 0) { alert("Carrinho vazio!"); return; }
@@ -523,12 +578,12 @@
             trocas.forEach(t => {
                 itensRecibo.push({ 
                     nome: "TROCA: " + t.modelo, 
-                    desc: `IMEI: ${t.imei} | Bat: ${t.bateria}%`, 
+                    desc: `${t.cor} ${t.gb} - IMEI: ${t.imei}`, 
                     preco: -t.valor 
                 });
             });
 
-            const clienteFull = db_clientes.find(c => c.nome === clienteNome) || {};
+            const clienteFull = db_clientes.find(c => c.nome === clienteNome) || { nome: clienteNome };
 
             const dadosVenda = {
                 cliente: clienteNome,
@@ -550,22 +605,27 @@
             if (carrinho.length === 0) { alert("Carrinho vazio!"); return; }
             if (!clienteNome) { alert("Selecione um cliente!"); return; }
 
+            // Baixa no estoque
             carrinho.forEach(item => {
                 const prod = db_produtos.find(p => p.id === item.id);
                 if (prod) prod.qtd--;
             });
 
+            // Entrada de Trocas no Estoque
             trocas.forEach(troca => {
                 db_produtos.push({
                     id: Date.now() + Math.random(),
                     modelo: `${troca.modelo} (TROCA: ${clienteNome})`,
-                    cor: "Usado", gb: "", categoria: "Celular",
+                    cor: troca.cor, 
+                    gb: troca.gb, 
+                    categoria: "Celular",
                     pcusto: troca.valor, pvenda: 0, qtd: 1,
                     dataEntrada: new Date().toLocaleDateString('pt-BR'),
                     obs: `IMEI: ${troca.imei} | Bat: ${troca.bateria}% | Origem: Troca`
                 });
             });
             
+            // Fornecedor
              if (trocas.length > 0) {
                 const fornecedorExiste = db_fornecedores.find(f => f.nome === clienteNome);
                 if (!fornecedorExiste) {
