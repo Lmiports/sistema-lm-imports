@@ -28,7 +28,6 @@
         .header-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
         .action-group { display: flex; gap: 10px; }
-        /* Botão de Relatório Bonito */
         .btn-print { background: var(--accent); color: #000; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; box-shadow: 0 0 10px rgba(0,224,255,0.2); }
         .btn-print:hover { opacity: 0.9; transform: scale(1.02); }
 
@@ -64,21 +63,29 @@
         th { text-align: left; color: #94a3b8; padding: 10px; border-bottom: 1px solid var(--border); }
         td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-        /* --- ESTILO DE IMPRESSÃO (RELATÓRIO EMPRESARIAL) --- */
-        #print-area { display: none; } /* Esconde na tela normal */
+        /* --- RELATÓRIO DE IMPRESSÃO (ESCONDIDO NA TELA) --- */
+        #print-area { display: none; }
 
         @media print {
-            @page { margin: 0; size: A4; } /* TIRA MARGENS PADRÃO (URL E DATA SOMEM) */
-            body * { visibility: hidden; } /* Esconde o Dashboard Escuro */
-            .sidebar { display: none; }
+            @page { margin: 0; size: A4; }
             
-            #print-area, #print-area * { visibility: visible; } /* Mostra só o relatório */
+            /* ESCONDE TUDO DO DASHBOARD */
+            .sidebar, .content { display: none !important; }
+            
+            /* MOSTRA SÓ O RELATÓRIO */
             #print-area { 
-                position: absolute; left: 0; top: 0; width: 100%; height: 100%;
-                background: #fff; color: #000; padding: 1.5cm; box-sizing: border-box;
+                display: block !important; 
+                position: absolute; 
+                left: 0; 
+                top: 0; 
+                width: 100%; 
+                background: #fff; 
+                color: #000; 
+                padding: 1.5cm; 
+                box-sizing: border-box;
+                font-family: Arial, sans-serif;
             }
 
-            /* Estilo do Relatório Impresso */
             .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 20px; }
             .print-header h1 { margin: 0; font-size: 24px; text-transform: uppercase; color: #000; }
             .print-meta { display: flex; justify-content: space-between; font-size: 12px; margin-top: 10px; }
@@ -162,43 +169,35 @@
 
     <div id="print-area">
         <div class="print-header">
-            <h1>LM IMPORTS - RELATÓRIO DE FECHAMENTO</h1>
-            <div class="print-meta">
-                <span>Emitido em: <b id="print-date"></b></span>
-                <span>Sistema Vértice BI</span>
-            </div>
+            <h1>LM IMPORTS - RELATÓRIO GERENCIAL</h1>
+            <div class="print-meta"><span>Emitido em: <b id="print-date"></b></span><span>Sistema Vértice BI</span></div>
         </div>
-
         <div class="print-section">
-            <h3>Resumo Financeiro (Período Selecionado)</h3>
-            <div class="print-row"><div>Faturamento Bruto (Entrada Caixa):</div><span id="print-faturamento">R$ 0,00</span></div>
-            <div class="print-row"><div>Entrada em Trocas (Aparelhos):</div><span id="print-trocas">R$ 0,00</span></div>
-            <div class="print-row"><div>Descontos Concedidos:</div><span id="print-descontos">R$ 0,00</span></div>
-            <br>
-            <div class="print-row" style="font-size:16px; border:none;"><div>TOTAL GERAL MOVIMENTADO:</div><span id="print-total-mov">R$ 0,00</span></div>
+            <h3>Resumo Financeiro</h3>
+            <div class="print-row"><div>Faturamento Bruto:</div><span id="print-faturamento">R$ 0,00</span></div>
+            <div class="print-row"><div>Entrada em Trocas:</div><span id="print-trocas">R$ 0,00</span></div>
+            <div class="print-row"><div>Descontos:</div><span id="print-descontos">R$ 0,00</span></div>
+            <div class="print-row" style="margin-top:10px; font-size:14px; border:none;"><div>TOTAL GERAL:</div><span id="print-total-mov">R$ 0,00</span></div>
         </div>
-
         <div class="print-section">
-            <h3>Indicadores Operacionais</h3>
-            <div class="print-row"><div>Total de Vendas (Qtd):</div><span id="print-qtd-vendas">0</span></div>
+            <h3>Indicadores</h3>
+            <div class="print-row"><div>Qtd Vendas:</div><span id="print-qtd-vendas">0</span></div>
             <div class="print-row"><div>Ticket Médio:</div><span id="print-ticket">R$ 0,00</span></div>
-            <div class="print-row"><div>Brindes Ofertados:</div><span id="print-qtd-brindes">0</span></div>
+            <div class="print-row"><div>Brindes:</div><span id="print-qtd-brindes">0</span></div>
         </div>
-
         <div class="print-section">
-            <h3>Extrato Detalhado de Vendas</h3>
+            <h3>Extrato de Vendas</h3>
             <table class="print-table">
-                <thead><tr><th>Data</th><th>Cliente</th><th>Itens / Detalhes</th><th>Valor</th></tr></thead>
+                <thead><tr><th>Data</th><th>Cliente</th><th>Itens</th><th>Valor</th></tr></thead>
                 <tbody id="print-tabela-body"></tbody>
             </table>
         </div>
-
         <div class="print-footer">
             <div style="display:flex; justify-content:space-between; margin-bottom:40px; margin-top:40px;">
-                <div style="border-top:1px solid #000; width:40%; text-align:center; padding-top:5px;">Assinatura Gerente</div>
-                <div style="border-top:1px solid #000; width:40%; text-align:center; padding-top:5px;">Conferência Caixa</div>
+                <div style="border-top:1px solid #000; width:40%; text-align:center;">Assinatura Gerente</div>
+                <div style="border-top:1px solid #000; width:40%; text-align:center;">Conferência Caixa</div>
             </div>
-            Relatório gerado automaticamente pelo Sistema Vértice • Gestão Inteligente
+            Relatório gerado automaticamente pelo Sistema Vértice.
         </div>
     </div>
 
@@ -207,19 +206,18 @@
         let chartLinhaInstance = null, chartRoscaInstance = null;
 
         window.onload = function() { 
-            // Define data da impressão
             document.getElementById('print-date').innerText = new Date().toLocaleString('pt-BR');
             carregarDados(); 
         };
 
-        // --- FUNÇÃO CORRETORA DE VALORES (A SALVADORA) ---
+        // --- CORREÇÃO DE VALORES (EVITA NaN) ---
         function limparMoeda(valor) {
             if (typeof valor === 'number') return valor;
             if (!valor) return 0;
-            // Remove R$, espaços e converte corretamente 1.000,00 para 1000.00
-            let limpo = valor.toString().replace(/[R$\s]/g, '');
-            if(limpo.includes(',') && limpo.includes('.')) { limpo = limpo.replace(/\./g, '').replace(',', '.'); } 
-            else if(limpo.includes(',')) { limpo = limpo.replace(',', '.'); } 
+            // Limpa R$, espaços e ajusta vírgula/ponto
+            let limpo = valor.toString().replace(/[R$\s]/g, '').trim();
+            if (limpo.indexOf(',') > -1 && limpo.indexOf('.') > -1) { limpo = limpo.replace(/\./g, '').replace(',', '.'); }
+            else if (limpo.indexOf(',') > -1) { limpo = limpo.replace(',', '.'); }
             return parseFloat(limpo) || 0;
         }
 
@@ -227,15 +225,13 @@
             try {
                 const snapVendas = await db.collection("vendas").orderBy("data", "desc").get();
                 vendasData = []; snapVendas.forEach(doc => vendasData.push({ id: doc.id, ...doc.data() }));
-                
                 const snapEstoque = await db.collection("estoque").get();
                 estoqueData = []; snapEstoque.forEach(doc => estoqueData.push({ id: doc.id, ...doc.data() }));
-
+                
                 calcularValuationEstoque(); 
                 aplicarFiltroData();
             } catch (error) {
                 console.error("Erro ao carregar dados:", error);
-                document.getElementById('tabela-vendas').innerHTML = `<tr><td colspan="5">Erro ao carregar dados. Verifique o console.</td></tr>`;
             }
         }
 
@@ -291,7 +287,6 @@
                 if (v.itens) v.itens.forEach(item => { if (item.isBrinde) qtdBrindes++; });
             });
 
-            // Estimativa de trocas baseado no estoque (já que venda não salva valor da troca separado ainda)
             let valorEntradaTroca = 0;
             estoqueData.forEach(p => {
                 if(p.modelo && p.modelo.includes("TROCA")) valorEntradaTroca += limparMoeda(p.custo);
@@ -301,15 +296,14 @@
             document.getElementById('kpi-faturamento').innerText = formatMoeda(faturamento);
             document.getElementById('kpi-descontos').innerText = formatMoeda(totalDescontos);
             document.getElementById('kpi-brindes').innerText = qtdBrindes;
-            document.getElementById('kpi-trocas').innerText = formatMoeda(valorEntradaTroca); // Valor total histórico
-            document.getElementById('kpi-qtd-trocas').innerText = `${qtdTrocas} itens (período)`;
+            document.getElementById('kpi-trocas').innerText = formatMoeda(valorEntradaTroca); 
+            document.getElementById('kpi-qtd-trocas').innerText = `${qtdTrocas} itens`;
 
-            // Atualiza Relatório de Impressão
+            // Atualiza Relatório
             document.getElementById('print-faturamento').innerText = formatMoeda(faturamento);
             document.getElementById('print-descontos').innerText = formatMoeda(totalDescontos);
-            document.getElementById('print-trocas').innerText = formatMoeda(valorEntradaTroca); 
-            document.getElementById('print-total-mov').innerText = formatMoeda(faturamento + valorEntradaTroca); // Soma caixa + ativos
-            
+            document.getElementById('print-trocas').innerText = formatMoeda(valorEntradaTroca);
+            document.getElementById('print-total-mov').innerText = formatMoeda(faturamento + valorEntradaTroca);
             document.getElementById('print-qtd-vendas').innerText = dados.length;
             document.getElementById('print-ticket').innerText = dados.length > 0 ? formatMoeda(faturamento / dados.length) : "R$ 0,00";
             document.getElementById('print-qtd-brindes').innerText = qtdBrindes;
@@ -338,11 +332,13 @@
                 dados.forEach(v => {
                     if(v.itens) {
                         v.itens.forEach(i => {
-                            let n = (i.modelo||i).toLowerCase();
-                            if(n.includes('iphone') || n.includes('celular')) cats['Celular']++;
-                            else if(n.includes('capa')||n.includes('película')) cats['Acessório']++;
-                            else if(n.includes('camisa')||n.includes('calça')) cats['Roupa']++;
-                            else if(n.includes('perfume')) cats['Perfume']++;
+                            // PROTEÇÃO AQUI: Garante que i seja objeto ou string
+                            let nomeItem = (i.modelo || i || '').toString().toLowerCase();
+                            
+                            if(nomeItem.includes('iphone') || nomeItem.includes('celular') || nomeItem.includes('samsung')) cats['Celular']++;
+                            else if(nomeItem.includes('capa')||nomeItem.includes('película')||nomeItem.includes('fonte')) cats['Acessório']++;
+                            else if(nomeItem.includes('camisa')||nomeItem.includes('calça')) cats['Roupa']++;
+                            else if(nomeItem.includes('perfume')) cats['Perfume']++;
                             else cats['Outros']++;
                         });
                     }
@@ -368,10 +364,8 @@
                 let itensStr = v.itens ? v.itens.map(i => i.modelo || i).join(", ") : "-";
                 let itensResumo = itensStr.length > 30 ? itensStr.substring(0,30)+"..." : itensStr;
                 
-                // Tabela Dashboard
                 tbody.innerHTML += `<tr><td>${new Date(v.data).toLocaleDateString('pt-BR')}</td><td style="font-weight:bold; color:#fff;">${v.cliente}</td><td style="color:#94a3b8;">#${v.numeroPedido || '---'}</td><td style="color:#94a3b8;">${itensResumo}</td><td style="color:#10b981; font-weight:bold;">${formatMoeda(limparMoeda(v.total))}</td></tr>`;
                 
-                // Tabela Impressão (Mais detalhes)
                 printBody.innerHTML += `<tr><td>${new Date(v.data).toLocaleDateString('pt-BR')}</td><td>${v.cliente}</td><td>${itensStr}</td><td>${formatMoeda(limparMoeda(v.total))}</td></tr>`;
             });
         }
