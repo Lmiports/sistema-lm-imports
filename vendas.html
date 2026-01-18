@@ -17,15 +17,12 @@
         }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; height: 100vh; display: flex; flex-direction: column; box-sizing: border-box; }
         
-        /* HEADER */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
         .header h2 { margin: 0; color: var(--accent); letter-spacing: 2px; }
         .btn-voltar { color: #fff; text-decoration: none; font-size: 20px; }
 
-        /* GRID */
         .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; flex: 1; overflow: hidden; }
 
-        /* PRODUTOS */
         .products-section { display: flex; flex-direction: column; gap: 15px; overflow-y: hidden; }
         .search-box { display: flex; gap: 10px; }
         .search-box input, .search-box select { width: 100%; padding: 12px; background: var(--card); border: 1px solid var(--border); color: #fff; border-radius: 8px; outline: none; }
@@ -38,7 +35,6 @@
         .prod-detail { font-size: 11px; color: #94a3b8; margin-bottom: 5px; }
         .prod-price { color: var(--success); font-weight: bold; font-size: 16px; margin-top: auto; }
 
-        /* CARRINHO */
         .cart-section { background: var(--card); border-radius: 15px; border: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
         .client-area { margin-bottom: 15px; }
         .client-row { display: flex; gap: 5px; }
@@ -48,23 +44,32 @@
         
         .cart-items { flex: 1; overflow-y: auto; margin-bottom: 15px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 0; }
         .cart-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin-bottom: 8px; }
+        .cart-item.brinde { border: 1px solid var(--accent); background: rgba(0, 224, 255, 0.1); } /* Estilo para Brinde */
+        
         .item-info div { font-size: 13px; font-weight: bold; }
         .item-info small { font-size: 10px; color: #94a3b8; display: block; }
-        .btn-remove { color: var(--danger); cursor: pointer; padding: 5px; }
+        
+        /* Botões de Ação no Item */
+        .item-actions { display: flex; gap: 10px; align-items: center; }
+        .btn-icon { cursor: pointer; padding: 5px; font-size: 14px; transition: 0.2s; }
+        .btn-remove { color: var(--danger); }
+        .btn-gift { color: #94a3b8; }
+        .btn-gift.active { color: var(--accent); text-shadow: 0 0 5px var(--accent); }
 
-        /* TROCA & TOTAIS */
         .trade-in-box { background: rgba(234, 179, 8, 0.1); border: 1px solid var(--warning); padding: 10px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
         .trade-in-text { font-size: 12px; color: var(--warning); }
+        
         .totals { margin-bottom: 15px; font-size: 14px; }
-        .row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .row { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: center;}
         .total-final { font-size: 24px; font-weight: 900; color: var(--success); border-top: 1px solid var(--border); padding-top: 10px; }
+        
+        /* Campo de Desconto */
+        .input-desconto { width: 100px !important; padding: 5px !important; text-align: right; background: #0f172a; border: 1px solid #334155; color: var(--danger); font-weight: bold; }
 
-        /* BOTÕES */
         .btn-finalizar { background: var(--success); color: #000; padding: 15px; width: 100%; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
         .btn-troca { background: transparent; border: 1px solid var(--warning); color: var(--warning); padding: 10px; width: 100%; border-radius: 8px; margin-bottom: 10px; cursor: pointer; }
         .btn-recibo { background: #eab308; color: #000; padding: 15px; width: 100%; border: none; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; }
 
-        /* MODAIS */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal { background: var(--card); padding: 25px; border-radius: 15px; width: 400px; max-width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
         .modal input, .modal select { width: 100%; padding: 10px; margin: 5px 0; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 5px; box-sizing: border-box; }
@@ -85,7 +90,6 @@
     </div>
 
     <div class="main-grid">
-        
         <div class="products-section">
             <div class="search-box">
                 <input type="text" id="busca" placeholder="Buscar produto..." onkeyup="filtrarProdutos()">
@@ -97,7 +101,6 @@
                     <option value="acessorio">🎧 Acessórios</option>
                 </select>
             </div>
-
             <div class="products-list" id="lista-produtos">
                 <div style="padding:20px; text-align:center; color:#888;">Carregando Estoque...</div>
             </div>
@@ -105,14 +108,13 @@
 
         <div class="cart-section">
             <div class="client-area">
-                <label style="font-size: 12px; color: #94a3b8;">Cliente (Busca por Nome, CPF ou Telefone):</label>
+                <label style="font-size: 12px; color: #94a3b8;">Cliente:</label>
                 <div class="client-row">
                     <div class="client-input-wrapper">
-                        <input list="lista-clientes-db" id="cliente-input" placeholder="Digite para buscar..." autocomplete="off">
-                        <datalist id="lista-clientes-db">
-                            </datalist>
+                        <input list="lista-clientes-db" id="cliente-input" placeholder="Busca inteligente..." autocomplete="off">
+                        <datalist id="lista-clientes-db"></datalist>
                     </div>
-                    <button class="btn-add-client" onclick="abrirModalCliente()" title="Novo Cliente">+</button>
+                    <button class="btn-add-client" onclick="abrirModalCliente()">+</button>
                 </div>
             </div>
 
@@ -124,7 +126,13 @@
 
             <div class="totals">
                 <div class="row"><span>Subtotal:</span><span id="valor-subtotal">R$ 0,00</span></div>
-                <div class="row" style="color: var(--warning);"><span>Troca/Desc:</span><span id="valor-desconto">- R$ 0,00</span></div>
+                
+                <div class="row" style="color: var(--danger);">
+                    <span>Desconto (R$):</span>
+                    <input type="number" class="input-desconto" id="valor-desconto-manual" value="" placeholder="0,00" oninput="atualizarTotais()">
+                </div>
+                
+                <div class="row" style="color: var(--warning);"><span>Troca/Abatimento:</span><span id="valor-abatimento">- R$ 0,00</span></div>
                 <div class="row total-final"><span>TOTAL:</span><span id="valor-total">R$ 0,00</span></div>
             </div>
 
@@ -143,45 +151,26 @@
     <div class="modal-overlay" id="modal-troca">
         <div class="modal" style="border-color: var(--warning);">
             <h3 style="color: var(--warning);">Entrada de Troca</h3>
-            
-            <label style="font-size: 11px; color: #999;">Modelo (Lista Gerenciada):</label>
-            <input list="dl-modelos-list" id="troca-modelo" placeholder="Digite ou selecione...">
+            <label style="font-size: 11px; color: #999;">Modelo:</label>
+            <input list="dl-modelos-list" id="troca-modelo" placeholder="Selecione...">
             <datalist id="dl-modelos-list"></datalist>
-
             <div class="modal-grid">
                 <div>
-                    <label style="font-size: 11px; color: #999;">Memória:</label>
-                    <select id="troca-gb">
-                        <option value="">Selecione...</option>
-                        <option value="64GB">64GB</option>
-                        <option value="128GB">128GB</option>
-                        <option value="256GB">256GB</option>
-                        <option value="512GB">512GB</option>
-                        <option value="1TB">1TB</option>
-                        <option value="Outro">Outro</option>
-                    </select>
+                    <label style="font-size: 11px; color: #999;">GB:</label>
+                    <select id="troca-gb"><option value="">-</option><option value="64GB">64GB</option><option value="128GB">128GB</option><option value="256GB">256GB</option><option value="512GB">512GB</option></select>
                 </div>
                 <div>
-                    <label style="font-size: 11px; color: #999;">Cor (Lista Gerenciada):</label>
-                    <input list="dl-cores-list" id="troca-cor" placeholder="Selecione...">
+                    <label style="font-size: 11px; color: #999;">Cor:</label>
+                    <input list="dl-cores-list" id="troca-cor" placeholder="Cor">
                     <datalist id="dl-cores-list"></datalist>
                 </div>
             </div>
-            
-            <label style="font-size: 11px; color: #999;">IMEI (15 dígitos):</label>
-            <input type="text" id="troca-imei" placeholder="000000000000000" maxlength="15" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 15)">
-            
+            <label style="font-size: 11px; color: #999;">IMEI:</label>
+            <input type="text" id="troca-imei" placeholder="15 dígitos" maxlength="15">
             <div class="modal-grid">
-                <div>
-                    <label style="font-size: 11px; color: #999;">Valor (R$):</label>
-                    <input type="number" id="troca-valor" placeholder="0,00">
-                </div>
-                <div>
-                    <label style="font-size: 11px; color: #999;">Bateria (%):</label>
-                    <input type="number" id="troca-bateria" placeholder="100">
-                </div>
+                <div><label style="font-size: 11px; color: #999;">Valor (R$):</label><input type="number" id="troca-valor"></div>
+                <div><label style="font-size: 11px; color: #999;">Bateria (%):</label><input type="number" id="troca-bateria"></div>
             </div>
-
             <div style="display: flex; gap: 10px; margin-top: 10px;">
                 <button onclick="fecharModalTroca()" class="btn-cancel">Cancelar</button>
                 <button onclick="confirmarTroca()" class="btn-confirm" style="background: var(--warning);">Confirmar</button>
@@ -191,371 +180,225 @@
 
     <div class="modal-overlay" id="modal-cliente">
         <div class="modal">
-            <h3>Novo Cliente Completo</h3>
-            <label style="font-size: 12px; color: #888;">Dados Pessoais</label>
-            <input type="text" id="novo-nome" placeholder="Nome Completo (Obrigatório)">
-            <div class="modal-grid">
-                <input type="text" id="novo-zap" placeholder="WhatsApp">
-                <input type="text" id="novo-cpf" placeholder="CPF">
-            </div>
+            <h3>Novo Cliente</h3>
+            <input type="text" id="novo-nome" placeholder="Nome Completo">
+            <div class="modal-grid"><input type="text" id="novo-zap" placeholder="Zap"><input type="text" id="novo-cpf" placeholder="CPF"></div>
             <input type="email" id="novo-email" placeholder="Email">
-
-            <label style="font-size: 12px; color: #888; margin-top: 10px; display: block;">Endereço</label>
-            <div class="modal-grid">
-                <input type="text" id="novo-cep" placeholder="CEP" onblur="buscarCep()">
-                <input type="text" id="novo-numero" placeholder="Número">
-            </div>
-            <input type="text" id="novo-endereco" placeholder="Rua / Avenida">
-            <div class="modal-grid">
-                <input type="text" id="novo-bairro" placeholder="Bairro">
-                <input type="text" id="novo-cidade" placeholder="Cidade - UF">
-            </div>
-
+            <div class="modal-grid"><input type="text" id="novo-cep" placeholder="CEP" onblur="buscarCep()"><input type="text" id="novo-numero" placeholder="Nº"></div>
+            <input type="text" id="novo-endereco" placeholder="Endereço">
+            <div class="modal-grid"><input type="text" id="novo-bairro" placeholder="Bairro"><input type="text" id="novo-cidade" placeholder="Cidade"></div>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button onclick="fecharModalCliente()" class="btn-cancel">Cancelar</button>
-                <button onclick="salvarNovoCliente()" class="btn-confirm">Salvar Cadastro</button>
+                <button onclick="salvarNovoCliente()" class="btn-confirm">Salvar</button>
             </div>
         </div>
     </div>
 
     <script>
-        // VARIAVEIS GLOBAIS
-        let dbEstoque = [];
-        let dbClientes = [];
-        let carrinho = [];
-        let trocas = [];
+        let dbEstoque = [], dbClientes = [], carrinho = [], trocas = [];
         let totalVendaGlobal = 0;
 
-        // 1. CONECTAR AO FIREBASE AO ABRIR
         window.onload = function() {
-            // A. Carregar Estoque Disponível
             db.collection("estoque").where("status", "==", "disponível").onSnapshot(snap => {
-                dbEstoque = [];
-                snap.forEach(doc => {
-                    dbEstoque.push({ id: doc.id, ...doc.data() });
-                });
+                dbEstoque = []; snap.forEach(doc => dbEstoque.push({ id: doc.id, ...doc.data() }));
                 renderizarProdutos();
             });
-
-            // B. Carregar Clientes
             db.collection("clientes").orderBy("nome").onSnapshot(snap => {
-                dbClientes = [];
-                snap.forEach(doc => {
-                    dbClientes.push({ id: doc.id, ...doc.data() });
-                });
+                dbClientes = []; snap.forEach(doc => dbClientes.push({ id: doc.id, ...doc.data() }));
                 renderizarDatalistClientes();
             });
-
+            carregarListasAuxiliares();
             carregarOpcoesPagamento();
-            carregarListasAuxiliares(); // IMPORTANTE: Carrega as listas do menu Estoque
         };
 
-        // 2. CARREGAR LISTAS DE MODELOS E CORES (Conexão com suas Listas)
         function carregarListasAuxiliares() {
-            // Lista de Modelos
             db.collection("lista_modelos_cel").orderBy("nome").onSnapshot(snap => {
-                const dl = document.getElementById('dl-modelos-list');
-                dl.innerHTML = "";
-                snap.forEach(doc => {
-                    dl.innerHTML += `<option value="${doc.data().nome}">`;
-                });
+                document.getElementById('dl-modelos-list').innerHTML = "";
+                snap.forEach(doc => document.getElementById('dl-modelos-list').innerHTML += `<option value="${doc.data().nome}">`);
             });
-
-            // Lista de Cores
             db.collection("lista_cores_cel").orderBy("nome").onSnapshot(snap => {
-                const dl = document.getElementById('dl-cores-list');
-                dl.innerHTML = "";
-                snap.forEach(doc => {
-                    dl.innerHTML += `<option value="${doc.data().nome}">`;
-                });
+                document.getElementById('dl-cores-list').innerHTML = "";
+                snap.forEach(doc => document.getElementById('dl-cores-list').innerHTML += `<option value="${doc.data().nome}">`);
             });
         }
 
-        // 3. RENDERIZAR PRODUTOS
         function renderizarProdutos() {
-            const div = document.getElementById('lista-produtos');
-            div.innerHTML = "";
-            
-            if (dbEstoque.length === 0) {
-                div.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 20px;">Nenhum produto disponível no estoque.</div>';
-                return;
-            }
-
+            const div = document.getElementById('lista-produtos'); div.innerHTML = "";
+            if (dbEstoque.length === 0) return div.innerHTML = '<div style="padding:20px; text-align:center; color:#888;">Estoque vazio.</div>';
             dbEstoque.forEach(p => {
-                const el = document.createElement('div');
-                el.className = 'product-card';
-                el.onclick = () => adicionarAoCarrinho(p);
-
+                const el = document.createElement('div'); el.className = 'product-card'; el.onclick = () => adicionarAoCarrinho(p);
                 let cat = (p.categoria || 'outros').toLowerCase();
-                let icon = '📦';
-                if(cat.includes('celular')) icon = '📱';
-                if(cat.includes('roupa')) icon = '👕';
-                if(cat.includes('perfume')) icon = '🌸';
-                if(cat.includes('acessorio')) icon = '🎧';
-
-                // Compatibilidade: tenta modelo ou nomeP
-                let nome = p.modelo || p.nomeP || 'Produto sem nome';
-                let detalhe = p.cor ? `${p.cor} ${p.gb || ''}` : '';
-
-                el.innerHTML = `
-                    <span class="prod-cat-tag">${icon} ${cat.toUpperCase()}</span>
-                    <span class="prod-name">${nome}</span>
-                    <span class="prod-detail">${detalhe}</span>
-                    <span class="prod-price">R$ ${parseFloat(p.venda || 0).toFixed(2)}</span>
-                    <div style="display:none;">${cat} ${nome} ${p.cor}</div> 
-                `;
+                let icon = cat.includes('celular') ? '📱' : cat.includes('roupa') ? '👕' : cat.includes('perfume') ? '🌸' : '📦';
+                let nome = p.modelo || p.nomeP || 'Item';
+                el.innerHTML = `<span class="prod-cat-tag">${icon} ${cat.toUpperCase()}</span><span class="prod-name">${nome}</span><span class="prod-detail">${p.cor || ''} ${p.gb || ''}</span><span class="prod-price">R$ ${parseFloat(p.venda||0).toFixed(2)}</span><div style="display:none;">${cat} ${nome} ${p.cor}</div>`;
                 div.appendChild(el);
             });
         }
 
-        // 4. FILTRO DE BUSCA
         function filtrarProdutos() {
-            const termo = document.getElementById('busca').value.toLowerCase();
-            const catFiltro = document.getElementById('filtro-cat').value;
-            
-            const cards = document.querySelectorAll('.product-card');
-            cards.forEach(card => {
-                const texto = card.innerText.toLowerCase();
-                const tagCat = card.querySelector('.prod-cat-tag').innerText.toLowerCase();
-                
-                const matchNome = texto.includes(termo);
-                const matchCat = catFiltro === "" || tagCat.includes(catFiltro);
-
-                card.style.display = (matchNome && matchCat) ? 'flex' : 'none';
+            const t = document.getElementById('busca').value.toLowerCase(); const c = document.getElementById('filtro-cat').value;
+            document.querySelectorAll('.product-card').forEach(card => {
+                const txt = card.innerText.toLowerCase(); const cat = card.querySelector('.prod-cat-tag').innerText.toLowerCase();
+                card.style.display = (txt.includes(t) && (c === "" || cat.includes(c))) ? 'flex' : 'none';
             });
         }
 
-        // 5. CLIENTES E DATALIST
         function renderizarDatalistClientes() {
-            const dl = document.getElementById('lista-clientes-db');
-            dl.innerHTML = "";
-            dbClientes.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.nome;
-                let extra = [];
-                if(c.cpf) extra.push(c.cpf);
-                if(c.whats) extra.push(c.whats);
-                opt.innerText = extra.length > 0 ? extra.join(' - ') : '';
-                dl.appendChild(opt);
-            });
+            const dl = document.getElementById('lista-clientes-db'); dl.innerHTML = "";
+            dbClientes.forEach(c => dl.innerHTML += `<option value="${c.nome}">${c.cpf || c.whats || ''}</option>`);
         }
 
-        // 6. CARRINHO
-        function adicionarAoCarrinho(produto) {
-            carrinho.push(produto);
-            atualizarTotais();
-        }
-        function removerDoCarrinho(index) {
-            carrinho.splice(index, 1);
+        function adicionarAoCarrinho(p) {
+            // Adiciona propriedade isBrinde false por padrão
+            carrinho.push({ ...p, isBrinde: false });
             atualizarTotais();
         }
 
-        // 7. TROCAS (MODAL)
-        function abrirModalTroca() { document.getElementById('modal-troca').style.display = 'flex'; }
-        function fecharModalTroca() { document.getElementById('modal-troca').style.display = 'none'; }
+        // --- FUNÇÃO PARA MARCAR COMO BRINDE ---
+        function toggleBrinde(index) {
+            carrinho[index].isBrinde = !carrinho[index].isBrinde;
+            atualizarTotais();
+        }
+
+        function removerDoCarrinho(i) { carrinho.splice(i, 1); atualizarTotais(); }
 
         function confirmarTroca() {
-            const troca = {
+            const t = {
                 modelo: document.getElementById('troca-modelo').value,
                 gb: document.getElementById('troca-gb').value,
                 cor: document.getElementById('troca-cor').value,
                 imei: document.getElementById('troca-imei').value,
-                valor: parseFloat(document.getElementById('troca-valor').value) || 0,
+                valor: parseFloat(document.getElementById('troca-valor').value)||0,
                 bateria: document.getElementById('troca-bateria').value
             };
-
-            if(!troca.modelo || !troca.valor || !troca.imei) return alert("Preencha Modelo, IMEI e Valor!");
-            if(troca.imei.length !== 15) return alert("IMEI deve ter 15 dígitos.");
-
-            trocas.push(troca);
-            fecharModalTroca();
-            atualizarTotais();
-            document.querySelectorAll('#modal-troca input').forEach(i => i.value = '');
+            if(!t.modelo || !t.valor || t.imei.length !== 15) return alert("Dados inválidos (IMEI 15 dígitos)");
+            trocas.push(t); fecharModalTroca(); atualizarTotais();
+            document.querySelectorAll('#modal-troca input').forEach(i=>i.value='');
         }
-
-        function removerTroca(index) {
-            trocas.splice(index, 1);
-            atualizarTotais();
-        }
+        function removerTroca(i) { trocas.splice(i, 1); atualizarTotais(); }
 
         function atualizarTotais() {
-            const divC = document.getElementById('carrinho-lista');
-            const divT = document.getElementById('lista-trocas');
-            divC.innerHTML = ""; divT.innerHTML = "";
-
+            const dc = document.getElementById('carrinho-lista'); const dt = document.getElementById('lista-trocas');
+            dc.innerHTML = ""; dt.innerHTML = "";
+            
             let sub = 0;
             carrinho.forEach((item, i) => {
-                sub += parseFloat(item.venda || 0);
-                divC.innerHTML += `
-                    <div class="cart-item">
-                        <div class="item-info"><div>${item.modelo || item.nomeP}</div><small>R$ ${parseFloat(item.venda).toFixed(2)}</small></div>
-                        <i class="fas fa-trash btn-remove" onclick="removerDoCarrinho(${i})"></i>
+                // Se for brinde, soma 0. Se não, soma valor normal.
+                const valorItem = item.isBrinde ? 0 : parseFloat(item.venda || 0);
+                sub += valorItem;
+                
+                const classeBrinde = item.isBrinde ? 'brinde' : '';
+                const iconePresente = item.isBrinde ? 'fas fa-gift active' : 'fas fa-gift';
+                const textoValor = item.isBrinde ? '<span style="color:#00e0ff; font-weight:bold;">GRÁTIS</span>' : `R$ ${parseFloat(item.venda).toFixed(2)}`;
+
+                dc.innerHTML += `
+                    <div class="cart-item ${classeBrinde}">
+                        <div class="item-info">
+                            <div>${item.modelo || item.nomeP}</div>
+                            <small>${textoValor}</small>
+                        </div>
+                        <div class="item-actions">
+                            <i class="btn-icon btn-gift ${iconePresente}" onclick="toggleBrinde(${i})" title="Dar como Brinde"></i>
+                            <i class="btn-icon btn-remove fas fa-trash" onclick="removerDoCarrinho(${i})"></i>
+                        </div>
                     </div>`;
             });
 
-            let desc = 0;
+            let descTroca = 0;
             trocas.forEach((item, i) => {
-                desc += item.valor;
-                divT.innerHTML += `
-                    <div class="trade-in-box">
-                        <div class="trade-in-text"><strong>ENTRADA:</strong> ${item.modelo}<br><small>IMEI: ${item.imei} | R$ ${item.valor}</small></div>
-                        <i class="fas fa-times btn-remove" onclick="removerTroca(${i})"></i>
-                    </div>`;
+                descTroca += item.valor;
+                dt.innerHTML += `<div class="trade-in-box"><div class="trade-in-text"><strong>ENTRADA:</strong> ${item.modelo}<br><small>${item.imei} | R$ ${item.valor}</small></div><i class="fas fa-times btn-remove" onclick="removerTroca(${i})"></i></div>`;
             });
 
-            totalVendaGlobal = sub - desc;
+            // Lógica do Desconto Manual
+            let descManual = parseFloat(document.getElementById('valor-desconto-manual').value) || 0;
+
+            totalVendaGlobal = sub - descTroca - descManual;
+            
             document.getElementById('valor-subtotal').innerText = `R$ ${sub.toFixed(2)}`;
-            document.getElementById('valor-desconto').innerText = `- R$ ${desc.toFixed(2)}`;
+            document.getElementById('valor-abatimento').innerText = `- R$ ${descTroca.toFixed(2)}`;
             document.getElementById('valor-total').innerText = `R$ ${totalVendaGlobal.toFixed(2)}`;
         }
 
-        // 8. FINALIZAR VENDA (BAIXA CORRETA)
         async function finalizarVenda() {
-            const nomeCliente = document.getElementById('cliente-input').value;
-            const pagto = document.getElementById('forma-pagamento').value;
-
-            if(carrinho.length === 0) return alert("Carrinho vazio!");
-            if(!nomeCliente) return alert("Selecione um cliente!");
-
-            if(!confirm(`Confirmar venda de R$ ${totalVendaGlobal.toFixed(2)} para ${nomeCliente}?`)) return;
+            const cli = document.getElementById('cliente-input').value;
+            const pg = document.getElementById('forma-pagamento').value;
+            if(carrinho.length===0) return alert("Carrinho vazio!");
+            if(!cli) return alert("Cliente obrigatório!");
+            if(!confirm(`Fechar venda de R$ ${totalVendaGlobal.toFixed(2)}?`)) return;
 
             try {
-                const batch = db.batch(); 
-                
-                // 1. BAIXA NO ESTOQUE (Usa ID do item do carrinho)
+                const batch = db.batch();
                 carrinho.forEach(item => {
-                    const ref = db.collection("estoque").doc(item.id);
-                    batch.update(ref, { status: "vendido", dataVenda: Date.now(), clienteVenda: nomeCliente });
+                    // Marca como vendido, mas registra se foi brinde ou não
+                    batch.update(db.collection("estoque").doc(item.id), { status: "vendido", dataVenda: Date.now(), clienteVenda: cli, foiBrinde: item.isBrinde });
                 });
-
-                // 2. ENTRADA DA TROCA
                 trocas.forEach(t => {
                     const ref = db.collection("estoque").doc();
-                    batch.set(ref, {
-                        categoria: 'celular',
-                        modelo: `${t.modelo} (TROCA ${nomeCliente})`, 
-                        nomeP: `${t.modelo} (TROCA)`, // Garante compatibilidade
-                        marca: 'Apple',
-                        cor: t.cor,
-                        gb: t.gb,
-                        imei1: t.imei,
-                        bateria: t.bateria,
-                        custo: t.valor,
-                        venda: 0,
-                        status: 'disponível',
-                        fornecedor: `Cliente: ${nomeCliente}`,
-                        dataEntrada: Date.now(),
-                        obs: 'Entrada via troca no PDV'
+                    batch.set(ref, { 
+                        categoria:'celular', modelo:`${t.modelo} (TROCA ${cli})`, nomeP:`${t.modelo} (TROCA)`, 
+                        marca:'Apple', cor:t.cor, gb:t.gb, imei1:t.imei, bateria:t.bateria, custo:t.valor, venda:0, 
+                        status:'disponível', fornecedor:`Cliente: ${cli}`, dataEntrada:Date.now() 
                     });
                 });
-
-                // 3. REGISTRO DA VENDA
-                const vendaRef = db.collection("vendas").doc();
-                batch.set(vendaRef, {
-                    cliente: nomeCliente,
-                    data: new Date().toISOString(),
-                    itens: carrinho.map(c => c.modelo || c.nomeP),
+                batch.set(db.collection("vendas").doc(), {
+                    cliente: cli, data: new Date().toISOString(),
+                    itens: carrinho.map(c => ({ modelo: c.modelo||c.nomeP, isBrinde: c.isBrinde })), // Salva info do brinde
                     trocas: trocas.map(t => t.modelo),
-                    total: totalVendaGlobal,
-                    pagamento: pagto
+                    desconto: parseFloat(document.getElementById('valor-desconto-manual').value) || 0,
+                    total: totalVendaGlobal, pagamento: pg
                 });
-
                 await batch.commit();
-                alert("Venda realizada com sucesso!");
-                window.location.reload();
-
-            } catch(e) {
-                console.error(e);
-                alert("Erro ao processar venda: " + e.message);
-            }
+                alert("Venda Sucesso!"); window.location.reload();
+            } catch(e) { alert("Erro: "+e.message); }
         }
 
-        // 9. GERAR RECIBO (REDIRECIONAMENTO)
         function gerarRecibo() {
-            const nomeCliente = document.getElementById('cliente-input').value;
-            if(!nomeCliente) return alert("Informe o cliente antes de gerar o recibo!");
+            const cli = document.getElementById('cliente-input').value;
+            if(!cli) return alert("Selecione cliente!");
+            if(carrinho.length===0 && trocas.length===0) return alert("Vazio!");
+
+            const cFull = dbClientes.find(c => c.nome === cli) || { nome: cli };
             
-            if(carrinho.length === 0 && trocas.length === 0) return alert("Adicione produtos ou trocas primeiro!");
-
-            const clienteFull = dbClientes.find(c => c.nome === nomeCliente) || { nome: nomeCliente };
-
-            let itensRecibo = carrinho.map(i => ({ 
+            let itensR = carrinho.map(i => ({ 
                 nome: i.modelo || i.nomeP, 
                 desc: i.cor || '', 
-                preco: i.venda 
+                preco: i.venda,
+                isBrinde: i.isBrinde // Passa a flag pro recibo
             }));
-            
-            trocas.forEach(t => {
-                itensRecibo.push({
-                    nome: "TROCA: " + t.modelo,
-                    desc: `IMEI: ${t.imei} | ${t.gb}`,
-                    preco: -t.valor
-                });
-            });
+            trocas.forEach(t => itensR.push({ nome: "TROCA: "+t.modelo, desc: t.imei, preco: -t.valor, isTroca: true }));
 
             const dados = {
-                cliente: clienteFull.nome,
-                cpf: clienteFull.cpf || '',
-                tel: clienteFull.whats || '',
-                endereco: clienteFull.logradouro ? `${clienteFull.logradouro}, ${clienteFull.numero} - ${clienteFull.bairro}` : '',
-                itens: itensRecibo,
+                cliente: cFull.nome, cpf: cFull.cpf||'', tel: cFull.whats||'', 
+                endereco: cFull.logradouro ? `${cFull.logradouro}, ${cFull.numero} - ${cFull.bairro}` : '',
+                itens: itensR,
+                descontoManual: parseFloat(document.getElementById('valor-desconto-manual').value) || 0,
                 total: totalVendaGlobal,
                 pagamento: document.getElementById('forma-pagamento').value,
                 data: new Date().toLocaleDateString('pt-BR')
             };
-
             localStorage.setItem('dadosRecibo', JSON.stringify(dados));
             window.location.href = 'orcamento.html';
         }
 
-        // 10. CLIENTES E CEP
-        function abrirModalCliente() { document.getElementById('modal-cliente').style.display = 'flex'; }
-        function fecharModalCliente() { document.getElementById('modal-cliente').style.display = 'none'; }
-        
-        function buscarCep() {
-            let cep = document.getElementById('novo-cep').value.replace(/\D/g, '');
-            if(cep.length === 8) {
-                fetch(`https://viacep.com.br/ws/${cep}/json/`).then(r=>r.json()).then(d=>{
-                    if(!d.erro){
-                        document.getElementById('novo-endereco').value = d.logradouro;
-                        document.getElementById('novo-bairro').value = d.bairro;
-                        document.getElementById('novo-cidade').value = `${d.localidade}-${d.uf}`;
-                        document.getElementById('novo-numero').focus();
-                    }
-                });
-            }
+        // Modais e Auxiliares
+        function abrirModalTroca(){document.getElementById('modal-troca').style.display='flex';}
+        function fecharModalTroca(){document.getElementById('modal-troca').style.display='none';}
+        function abrirModalCliente(){document.getElementById('modal-cliente').style.display='flex';}
+        function fecharModalCliente(){document.getElementById('modal-cliente').style.display='none';}
+        function buscarCep(){
+            let cep=document.getElementById('novo-cep').value.replace(/\D/g,'');
+            if(cep.length===8) fetch(`https://viacep.com.br/ws/${cep}/json/`).then(r=>r.json()).then(d=>{if(!d.erro){document.getElementById('novo-endereco').value=d.logradouro;document.getElementById('novo-bairro').value=d.bairro;document.getElementById('novo-cidade').value=`${d.localidade}-${d.uf}`;document.getElementById('novo-numero').focus();}});
         }
-
-        async function salvarNovoCliente() {
-            const nome = document.getElementById('novo-nome').value;
-            if(!nome) return alert("Nome obrigatório");
-
-            const novo = {
-                nome: nome,
-                cpf: document.getElementById('novo-cpf').value,
-                whats: document.getElementById('novo-zap').value,
-                email: document.getElementById('novo-email').value,
-                cep: document.getElementById('novo-cep').value,
-                logradouro: document.getElementById('novo-endereco').value,
-                numero: document.getElementById('novo-numero').value,
-                bairro: document.getElementById('novo-bairro').value,
-                cidade: document.getElementById('novo-cidade').value
-            };
-
-            try {
-                await db.collection("clientes").add(novo);
-                alert("Cliente cadastrado!");
-                document.getElementById('cliente-input').value = nome;
-                fecharModalCliente();
-            } catch(e) {
-                alert("Erro ao salvar: " + e.message);
-            }
+        async function salvarNovoCliente(){
+            let n=document.getElementById('novo-nome').value; if(!n)return alert("Nome?");
+            try{ await db.collection("clientes").add({nome:n, cpf:document.getElementById('novo-cpf').value, whats:document.getElementById('novo-zap').value, email:document.getElementById('novo-email').value, cep:document.getElementById('novo-cep').value, logradouro:document.getElementById('novo-endereco').value, numero:document.getElementById('novo-numero').value, bairro:document.getElementById('novo-bairro').value, cidade:document.getElementById('novo-cidade').value}); alert("Ok!"); document.getElementById('cliente-input').value=n; fecharModalCliente(); }catch(e){alert("Erro");}
         }
-
-        function carregarOpcoesPagamento() {
-            const s = document.getElementById('forma-pagamento');
-            s.innerHTML = `<optgroup label="À Vista"><option>Pix</option><option>Dinheiro</option><option>Débito</option></optgroup><optgroup label="Crédito">`;
-            for(let i=1; i<=18; i++) s.innerHTML += `<option>Crédito ${i}x</option>`;
+        function carregarOpcoesPagamento(){
+            let s=document.getElementById('forma-pagamento'); 
+            s.innerHTML=`<optgroup label="À Vista"><option>Pix</option><option>Dinheiro</option><option>Débito</option></optgroup><optgroup label="Crédito">`;
+            // ATÉ 24X
+            for(let i=1;i<=24;i++) s.innerHTML+=`<option>Crédito ${i}x</option>`;
         }
     </script>
 </body>
