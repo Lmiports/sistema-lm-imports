@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Imprimir Recibo</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Recibo LM Imports</title> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
         :root { --bg: #020617; --card: #0f172a; --accent: #00e0ff; --text: #f8fafc; --border: rgba(255, 255, 255, 0.1); }
@@ -25,20 +24,44 @@
         .total-row { display: flex; justify-content: space-between; margin-top: 5px; font-size: 14px; }
         .final-total { font-size: 22px; font-weight: bold; color: var(--accent); margin-top: 10px; border-top: 1px solid #444; padding-top: 10px; }
 
+        /* --- CONFIGURAÇÃO DE IMPRESSÃO LIMPA --- */
         @media print {
-            @page { margin: 1.5cm; size: A4; }
-            body { background: #fff; color: #000; padding: 0; margin: 0; font-size: 12pt; }
+            @page { 
+                margin: 0; /* TIRA AS MARGENS DO NAVEGADOR (Remove URL e Data) */
+                size: A4; 
+            }
+            body { 
+                background: #fff; 
+                color: #000; 
+                padding: 0; 
+                margin: 1.5cm; /* Adiciona margem interna para o conteúdo não colar na borda */
+                font-size: 12pt; 
+            }
             .container { box-shadow: none; border: none; max-width: 100%; width: 100%; padding: 0; margin: 0; }
             .no-print { display: none !important; } 
+            
             input { background: transparent; border: none; color: #000; padding: 0; font-size: 12px; font-weight: bold; }
             h2, h1, h3 { color: #000; border-bottom: 1px solid #000; }
             table th { color: #000; border-bottom: 1px solid #000; }
             table td { border-bottom: 1px solid #ccc; color: #000; }
-            .contract-area { page-break-before: always; margin-top: 0; padding: 0; padding-top: 20px; border: none; }
+            
+            .contract-area { 
+                page-break-before: always; 
+                margin-top: 0; 
+                padding: 0; 
+                padding-top: 30px; 
+                border: none; 
+            }
             #texto-contrato { min-height: auto; height: auto; overflow: visible; font-size: 10px; }
+            
             .signatures { display: flex !important; margin-top: 50px; justify-content: space-between; page-break-inside: avoid; }
             .sig-line { width: 45%; border-top: 1px solid #000; text-align: center; font-size: 11px; padding-top: 5px; }
-            .footer-print { position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 8px; color: #888; text-transform: uppercase; letter-spacing: 2px; }
+            
+            .footer-print { 
+                position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; 
+                font-size: 8px; color: #888; text-transform: uppercase; letter-spacing: 2px; 
+                padding-bottom: 10px; /* Espaço para não cortar */
+            }
             .final-total { color: #000 !important; border-top: 1px solid #000; }
         }
     </style>
@@ -50,7 +73,6 @@
             <button onclick="fecharOuVoltar()" class="btn btn-outline">
                 <i class="fas fa-arrow-left"></i> Voltar ao PDV
             </button>
-            
             <button onclick="window.print()" class="btn">
                 <i class="fas fa-print"></i> Imprimir / PDF
             </button>
@@ -166,10 +188,9 @@ Cláusula 10: O comprador declara ter conferido o aparelho (câmeras, face ID, �
     <script>
         // --- FUNÇÃO DE VOLTAR INTELIGENTE ---
         function fecharOuVoltar() {
-            // Primeiro tenta fechar a aba (já que abrimos em _blank)
+            // Tenta fechar a aba
             window.close();
-            
-            // Se o navegador bloquear o fechamento, ele redireciona para o PDV em meio segundo
+            // Se não fechar, redireciona
             setTimeout(() => {
                 window.location.href = 'vendas.html';
             }, 500);
@@ -178,13 +199,16 @@ Cláusula 10: O comprador declara ter conferido o aparelho (câmeras, face ID, �
         window.onload = function() {
             const dados = JSON.parse(localStorage.getItem('dadosRecibo'));
             if (dados) {
+                // Preenche dados do recibo
                 document.getElementById('cliente-nome').value = dados.cliente || "";
                 document.getElementById('cliente-cpf').value = dados.cpf || "";
                 document.getElementById('cliente-tel').value = dados.tel || "";
                 document.getElementById('cliente-endereco').value = dados.endereco || "";
                 document.getElementById('data-venda').value = dados.data;
                 document.getElementById('forma-pagamento').value = dados.pagamento;
-                document.getElementById('pedido-num').value = Math.floor(Math.random() * 9000) + 1000;
+                
+                // Exibe número do pedido formatado (Ex: 0053)
+                document.getElementById('pedido-num').value = dados.numeroPedido || Math.floor(Math.random() * 9000);
 
                 const tbody = document.getElementById('lista-produtos');
                 tbody.innerHTML = ''; 
@@ -195,7 +219,6 @@ Cláusula 10: O comprador declara ter conferido o aparelho (câmeras, face ID, �
                 dados.itens.forEach(item => {
                     const tr = document.createElement('tr');
                     
-                    // Lógica para mostrar Brinde
                     let desc = item.nome;
                     if(item.desc) desc += ` - ${item.desc}`;
                     
@@ -206,11 +229,9 @@ Cláusula 10: O comprador declara ter conferido o aparelho (câmeras, face ID, �
                         desc += " (BRINDE/GRÁTIS)";
                         valorTexto = "R$ 0,00";
                     } else if (item.isTroca) {
-                        // É uma troca
                         valorTexto = "- R$ " + Math.abs(valorNumerico).toFixed(2);
                         descontos += Math.abs(valorNumerico);
                     } else {
-                        // Produto Normal
                         valorTexto = "R$ " + valorNumerico.toFixed(2);
                         subTotal += valorNumerico;
                     }
@@ -219,10 +240,8 @@ Cláusula 10: O comprador declara ter conferido o aparelho (câmeras, face ID, �
                     tbody.appendChild(tr);
                 });
 
-                // Soma o Desconto Manual que veio do PDV
                 if(dados.descontoManual > 0) {
                     descontos += parseFloat(dados.descontoManual);
-                    // Adiciona linha visual do desconto manual
                     const trDesc = document.createElement('tr');
                     trDesc.innerHTML = `<td style="color:#000;">Desconto Promocional</td><td>- R$ ${parseFloat(dados.descontoManual).toFixed(2)}</td>`;
                     tbody.appendChild(trDesc);
@@ -232,7 +251,6 @@ Cláusula 10: O comprador declara ter conferido o aparelho (câmeras, face ID, �
                 document.getElementById('recibo-desc').innerText = '- R$ ' + descontos.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
                 document.getElementById('recibo-total').innerText = 'TOTAL: R$ ' + parseFloat(dados.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
                 
-                // Ajuste de cor na impressão
                 if (window.matchMedia) {
                     var mediaQueryList = window.matchMedia('print');
                     mediaQueryList.addListener(function(mql) {
