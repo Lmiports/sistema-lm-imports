@@ -144,9 +144,9 @@
         <div class="modal" style="border-color: var(--warning);">
             <h3 style="color: var(--warning);">Entrada de Troca</h3>
             
-            <label style="font-size: 11px; color: #999;">Modelo (Sugeridos):</label>
-            <input list="dl-modelos-estoque" id="troca-modelo" placeholder="Digite ou selecione...">
-            <datalist id="dl-modelos-estoque"></datalist>
+            <label style="font-size: 11px; color: #999;">Modelo (Lista Gerenciada):</label>
+            <input list="dl-modelos-list" id="troca-modelo" placeholder="Digite ou selecione...">
+            <datalist id="dl-modelos-list"></datalist>
 
             <div class="modal-grid">
                 <div>
@@ -162,9 +162,9 @@
                     </select>
                 </div>
                 <div>
-                    <label style="font-size: 11px; color: #999;">Cor (Sugeridas):</label>
-                    <input list="dl-cores-estoque" id="troca-cor" placeholder="Selecione...">
-                    <datalist id="dl-cores-estoque"></datalist>
+                    <label style="font-size: 11px; color: #999;">Cor (Lista Gerenciada):</label>
+                    <input list="dl-cores-list" id="troca-cor" placeholder="Selecione...">
+                    <datalist id="dl-cores-list"></datalist>
                 </div>
             </div>
             
@@ -235,7 +235,6 @@
                     dbEstoque.push({ id: doc.id, ...doc.data() });
                 });
                 renderizarProdutos();
-                popularSugestoesTroca(); 
             });
 
             // B. Carregar Clientes
@@ -248,9 +247,31 @@
             });
 
             carregarOpcoesPagamento();
+            carregarListasAuxiliares(); // IMPORTANTE: Carrega as listas do menu Estoque
         };
 
-        // 2. RENDERIZAR PRODUTOS (DO FIREBASE)
+        // 2. CARREGAR LISTAS DE MODELOS E CORES (Conexão com suas Listas)
+        function carregarListasAuxiliares() {
+            // Lista de Modelos
+            db.collection("lista_modelos_cel").orderBy("nome").onSnapshot(snap => {
+                const dl = document.getElementById('dl-modelos-list');
+                dl.innerHTML = "";
+                snap.forEach(doc => {
+                    dl.innerHTML += `<option value="${doc.data().nome}">`;
+                });
+            });
+
+            // Lista de Cores
+            db.collection("lista_cores_cel").orderBy("nome").onSnapshot(snap => {
+                const dl = document.getElementById('dl-cores-list');
+                dl.innerHTML = "";
+                snap.forEach(doc => {
+                    dl.innerHTML += `<option value="${doc.data().nome}">`;
+                });
+            });
+        }
+
+        // 3. RENDERIZAR PRODUTOS
         function renderizarProdutos() {
             const div = document.getElementById('lista-produtos');
             div.innerHTML = "";
@@ -272,7 +293,7 @@
                 if(cat.includes('perfume')) icon = '🌸';
                 if(cat.includes('acessorio')) icon = '🎧';
 
-                // CORREÇÃO: Busca 'modelo' OU 'nomeP' (suporte legado)
+                // Compatibilidade: tenta modelo ou nomeP
                 let nome = p.modelo || p.nomeP || 'Produto sem nome';
                 let detalhe = p.cor ? `${p.cor} ${p.gb || ''}` : '';
 
@@ -287,7 +308,7 @@
             });
         }
 
-        // 3. FILTRO DE BUSCA
+        // 4. FILTRO DE BUSCA
         function filtrarProdutos() {
             const termo = document.getElementById('busca').value.toLowerCase();
             const catFiltro = document.getElementById('filtro-cat').value;
@@ -304,7 +325,7 @@
             });
         }
 
-        // 4. CLIENTES E DATALIST
+        // 5. CLIENTES E DATALIST
         function renderizarDatalistClientes() {
             const dl = document.getElementById('lista-clientes-db');
             dl.innerHTML = "";
@@ -319,7 +340,7 @@
             });
         }
 
-        // 5. CARRINHO
+        // 6. CARRINHO
         function adicionarAoCarrinho(produto) {
             carrinho.push(produto);
             atualizarTotais();
@@ -329,28 +350,7 @@
             atualizarTotais();
         }
 
-        // 6. TROCAS (SUGESTÕES CORRIGIDAS)
-        function popularSugestoesTroca() {
-            // CORREÇÃO: Busca 'modelo' OU 'nomeP' para popular a lista
-            const modelos = [...new Set(dbEstoque.map(p => p.modelo || p.nomeP).filter(Boolean))];
-            const cores = [...new Set(dbEstoque.map(p => p.cor).filter(Boolean))];
-
-            const dlMod = document.getElementById('dl-modelos-estoque');
-            const dlCor = document.getElementById('dl-cores-estoque');
-            dlMod.innerHTML = ""; dlCor.innerHTML = "";
-
-            modelos.sort().forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m;
-                dlMod.appendChild(opt);
-            });
-            cores.sort().forEach(c => {
-                 const opt = document.createElement('option');
-                opt.value = c;
-                dlCor.appendChild(opt);
-            });
-        }
-
+        // 7. TROCAS (MODAL)
         function abrirModalTroca() { document.getElementById('modal-troca').style.display = 'flex'; }
         function fecharModalTroca() { document.getElementById('modal-troca').style.display = 'none'; }
 
@@ -385,7 +385,6 @@
 
             let sub = 0;
             carrinho.forEach((item, i) => {
-                // CORREÇÃO: Usa venda ou 0
                 sub += parseFloat(item.venda || 0);
                 divC.innerHTML += `
                     <div class="cart-item">
@@ -410,7 +409,7 @@
             document.getElementById('valor-total').innerText = `R$ ${totalVendaGlobal.toFixed(2)}`;
         }
 
-        // 7. FINALIZAR VENDA (AGORA COM BAIXA NO FIREBASE CORRETA)
+        // 8. FINALIZAR VENDA (BAIXA CORRETA)
         async function finalizarVenda() {
             const nomeCliente = document.getElementById('cliente-input').value;
             const pagto = document.getElementById('forma-pagamento').value;
@@ -423,20 +422,19 @@
             try {
                 const batch = db.batch(); 
                 
-                // 1. Marcar produtos como VENDIDOS no Banco
+                // 1. BAIXA NO ESTOQUE (Usa ID do item do carrinho)
                 carrinho.forEach(item => {
-                    // Aqui usamos item.id, que veio direto do firebase
                     const ref = db.collection("estoque").doc(item.id);
                     batch.update(ref, { status: "vendido", dataVenda: Date.now(), clienteVenda: nomeCliente });
                 });
 
-                // 2. Dar entrada nas TROCAS no Banco
+                // 2. ENTRADA DA TROCA
                 trocas.forEach(t => {
                     const ref = db.collection("estoque").doc();
                     batch.set(ref, {
                         categoria: 'celular',
-                        modelo: `${t.modelo} (TROCA ${nomeCliente})`, // Nome visual para identificar
-                        nomeP: `${t.modelo} (TROCA)`, // Nome para compatibilidade
+                        modelo: `${t.modelo} (TROCA ${nomeCliente})`, 
+                        nomeP: `${t.modelo} (TROCA)`, // Garante compatibilidade
                         marca: 'Apple',
                         cor: t.cor,
                         gb: t.gb,
@@ -451,7 +449,7 @@
                     });
                 });
 
-                // 3. Registrar a VENDA
+                // 3. REGISTRO DA VENDA
                 const vendaRef = db.collection("vendas").doc();
                 batch.set(vendaRef, {
                     cliente: nomeCliente,
@@ -472,11 +470,12 @@
             }
         }
 
-        // 8. GERAR RECIBO (FORÇANDO O REDIRECIONAMENTO)
+        // 9. GERAR RECIBO (REDIRECIONAMENTO)
         function gerarRecibo() {
             const nomeCliente = document.getElementById('cliente-input').value;
             if(!nomeCliente) return alert("Informe o cliente antes de gerar o recibo!");
-            if(carrinho.length === 0) return alert("Adicione produtos primeiro!");
+            
+            if(carrinho.length === 0 && trocas.length === 0) return alert("Adicione produtos ou trocas primeiro!");
 
             const clienteFull = dbClientes.find(c => c.nome === nomeCliente) || { nome: nomeCliente };
 
@@ -506,11 +505,10 @@
             };
 
             localStorage.setItem('dadosRecibo', JSON.stringify(dados));
-            // Redirecionamento forçado
-            window.location = 'orcamento.html';
+            window.location.href = 'orcamento.html';
         }
 
-        // 9. CLIENTES E CEP
+        // 10. CLIENTES E CEP
         function abrirModalCliente() { document.getElementById('modal-cliente').style.display = 'flex'; }
         function fecharModalCliente() { document.getElementById('modal-cliente').style.display = 'none'; }
         
