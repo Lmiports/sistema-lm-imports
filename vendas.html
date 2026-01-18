@@ -183,7 +183,7 @@
 
         <div class="cart-section">
             <div class="client-area">
-                <label style="font-size: 12px; color: #94a3b8;">Cliente (Busca por Nome, CPF ou Zap):</label>
+                <label style="font-size: 12px; color: #94a3b8;">Cliente (Busca por Nome, CPF ou Telefone):</label>
                 <div class="client-row">
                     <div class="client-input-wrapper">
                         <input list="lista-clientes" id="cliente-input" placeholder="Digite para buscar..." autocomplete="off">
@@ -222,42 +222,45 @@
         <div class="modal" style="border-color: var(--warning);">
             <h3 style="color: var(--warning);">Entrada de Troca</h3>
             
-            <input list="lista-modelos-estoque" id="troca-modelo" placeholder="Modelo (Digite ou selecione da lista)">
+            <label style="font-size: 11px; color: #999;">Modelo (Sugeridos do Estoque):</label>
+            <input list="lista-modelos-estoque" id="troca-modelo" placeholder="Digite ou selecione o modelo...">
             <datalist id="lista-modelos-estoque">
                 </datalist>
 
             <div class="modal-grid">
-                <select id="troca-gb">
-                    <option value="">Selecione GB...</option>
-                    <option value="64GB">64GB</option>
-                    <option value="128GB">128GB</option>
-                    <option value="256GB">256GB</option>
-                    <option value="512GB">512GB</option>
-                    <option value="1TB">1TB</option>
-                    <option value="Outro">Outro</option>
-                </select>
+                <div>
+                    <label style="font-size: 11px; color: #999;">Memória:</label>
+                    <select id="troca-gb">
+                        <option value="">Selecione GB...</option>
+                        <option value="64GB">64GB</option>
+                        <option value="128GB">128GB</option>
+                        <option value="256GB">256GB</option>
+                        <option value="512GB">512GB</option>
+                        <option value="1TB">1TB</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
 
-                <select id="troca-cor">
-                    <option value="">Selecione a Cor...</option>
-                    <option value="Preto">Preto</option>
-                    <option value="Branco">Branco</option>
-                    <option value="Dourado">Dourado</option>
-                    <option value="Prata">Prata</option>
-                    <option value="Azul">Azul</option>
-                    <option value="Vermelho">Vermelho</option>
-                    <option value="Verde">Verde</option>
-                    <option value="Roxo">Roxo</option>
-                    <option value="Rosa">Rosa</option>
-                    <option value="Cinza">Cinza</option>
-                    <option value="Titânio">Titânio</option>
-                </select>
+                <div>
+                    <label style="font-size: 11px; color: #999;">Cor (Sugeridas do Estoque):</label>
+                    <input list="lista-cores-estoque" id="troca-cor" placeholder="Digite ou selecione...">
+                    <datalist id="lista-cores-estoque">
+                        </datalist>
+                </div>
             </div>
             
-            <input type="text" id="troca-imei" placeholder="IMEI (15 Dígitos)" maxlength="15" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 15)">
+            <label style="font-size: 11px; color: #999;">IMEI (15 dígitos):</label>
+            <input type="text" id="troca-imei" placeholder="000000000000000" maxlength="15" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 15)">
             
             <div class="modal-grid">
-                <input type="number" id="troca-valor" placeholder="Valor Avaliado (R$)">
-                <input type="number" id="troca-bateria" placeholder="Saúde Bateria (%)">
+                <div>
+                    <label style="font-size: 11px; color: #999;">Valor Avaliado (R$):</label>
+                    <input type="number" id="troca-valor" placeholder="0,00">
+                </div>
+                <div>
+                    <label style="font-size: 11px; color: #999;">Saúde Bateria (%):</label>
+                    <input type="number" id="troca-bateria" placeholder="100">
+                </div>
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 10px;">
@@ -311,7 +314,7 @@
             carregarProdutos();
             carregarClientes();
             carregarOpcoesPagamento();
-            carregarListaModelos(); // Preenche a lista de sugestão para troca
+            carregarDadosEstoqueParaTroca(); // NOVA FUNÇÃO PARA POPULAR MODELOS E CORES
         };
 
         function carregarOpcoesPagamento() {
@@ -375,22 +378,15 @@
                 historico: []
             };
 
-            // Salva
             db_clientes.push(novoCliente);
             localStorage.setItem('db_clientes', JSON.stringify(db_clientes));
             
-            // Recarrega a lista
             carregarClientes();
-            
-            // Define o novo cliente no input
             document.getElementById('cliente-input').value = nome; 
             
-            // Limpa Modal
             document.querySelectorAll('#modal-cliente input').forEach(input => input.value = '');
             fecharModalCliente();
-            
-            // Confirmação
-            alert("Cliente cadastrado com sucesso e já selecionado!");
+            alert("Cliente cadastrado com sucesso!");
         }
 
         // --- PRODUTOS ---
@@ -398,8 +394,9 @@
             const lista = document.getElementById('lista-produtos');
             lista.innerHTML = '';
             
+            // SE O ESTOQUE ESTIVER VAZIO
             if (db_produtos.length === 0) {
-                lista.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 20px;">Estoque vazio. Vá em "Estoque" para cadastrar produtos.</div>';
+                lista.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 20px;">Estoque vazio ou erro ao carregar. Verifique o menu Estoque.</div>';
                 return;
             }
 
@@ -421,7 +418,8 @@
                         <span class="prod-name">${prod.modelo}</span>
                         <span class="prod-detail">${prod.cor} | ${prod.gb || ''}</span>
                         <span class="prod-price">R$ ${parseFloat(prod.pvenda).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
-                        <div style="display:none;">${prod.categoria} ${prod.modelo} ${prod.cor}</div> `;
+                        <div style="display:none;">${prod.categoria} ${prod.modelo} ${prod.cor}</div>
+                    `;
                     lista.appendChild(div);
                 }
             });
@@ -435,19 +433,12 @@
 
             cards.forEach(card => {
                 const textoCard = card.innerText.toLowerCase(); 
-                // A tag categoria tem o texto exato da categoria
-                const catTag = card.querySelector('.prod-cat-tag').innerText.toLowerCase();
+                const catTag = card.querySelector('.prod-cat-tag') ? card.querySelector('.prod-cat-tag').innerText.toLowerCase() : "";
                 
-                // Verifica se o texto digitado existe no card
                 const matchNome = textoCard.includes(termo);
-                // Verifica se a categoria bate (ou se está vazio "Todas")
                 const matchCat = cat === "" || catTag.includes(cat.toLowerCase());
 
-                if (matchNome && matchCat) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
+                card.style.display = (matchNome && matchCat) ? 'flex' : 'none';
             });
         }
 
@@ -456,19 +447,20 @@
             const datalist = document.getElementById('lista-clientes');
             datalist.innerHTML = ''; 
             
-            db_clientes.forEach(cli => {
-                const opt = document.createElement('option');
-                opt.value = cli.nome;
-                // Exibe info extra se existir
-                let infoExtra = [];
-                if(cli.cpf) infoExtra.push(`CPF: ${cli.cpf}`);
-                if(cli.contato) infoExtra.push(`Zap: ${cli.contato}`);
-                
-                if (infoExtra.length > 0) {
-                    opt.innerText = infoExtra.join(' | ');
-                }
-                datalist.appendChild(opt);
-            });
+            if (db_clientes.length > 0) {
+                db_clientes.forEach(cli => {
+                    const opt = document.createElement('option');
+                    // O value é o que o cliente seleciona
+                    opt.value = cli.nome;
+                    // O innerText ajuda na busca
+                    let info = [];
+                    if(cli.cpf) info.push(cli.cpf);
+                    if(cli.contato) info.push(cli.contato);
+                    if(info.length > 0) opt.innerText = info.join(" - ");
+                    
+                    datalist.appendChild(opt);
+                });
+            }
         }
 
         function adicionarAoCarrinho(id) {
@@ -482,16 +474,30 @@
             atualizarCarrinho();
         }
 
-        // --- TROCA ---
-        function carregarListaModelos() {
-            const datalist = document.getElementById('lista-modelos-estoque');
-            datalist.innerHTML = '';
-            // Pega modelos únicos do estoque para sugerir
-            const modelosUnicos = [...new Set(db_produtos.map(p => p.modelo))];
+        // --- LÓGICA DE TROCA ---
+        
+        // ESSA FUNÇÃO BUSCA CORES E MODELOS DIRETO DO SEU ESTOQUE
+        function carregarDadosEstoqueParaTroca() {
+            const listaModelos = document.getElementById('lista-modelos-estoque');
+            const listaCores = document.getElementById('lista-cores-estoque');
+            
+            listaModelos.innerHTML = '';
+            listaCores.innerHTML = '';
+
+            // Extrai modelos únicos e cores únicas do banco de dados
+            const modelosUnicos = [...new Set(db_produtos.map(p => p.modelo).filter(Boolean))];
+            const coresUnicas = [...new Set(db_produtos.map(p => p.cor).filter(Boolean))];
+
             modelosUnicos.forEach(mod => {
                 const opt = document.createElement('option');
                 opt.value = mod;
-                datalist.appendChild(opt);
+                listaModelos.appendChild(opt);
+            });
+
+            coresUnicas.forEach(cor => {
+                const opt = document.createElement('option');
+                opt.value = cor;
+                listaCores.appendChild(opt);
             });
         }
 
@@ -605,13 +611,11 @@
             if (carrinho.length === 0) { alert("Carrinho vazio!"); return; }
             if (!clienteNome) { alert("Selecione um cliente!"); return; }
 
-            // Baixa no estoque
             carrinho.forEach(item => {
                 const prod = db_produtos.find(p => p.id === item.id);
                 if (prod) prod.qtd--;
             });
 
-            // Entrada de Trocas no Estoque
             trocas.forEach(troca => {
                 db_produtos.push({
                     id: Date.now() + Math.random(),
@@ -625,7 +629,6 @@
                 });
             });
             
-            // Fornecedor
              if (trocas.length > 0) {
                 const fornecedorExiste = db_fornecedores.find(f => f.nome === clienteNome);
                 if (!fornecedorExiste) {
