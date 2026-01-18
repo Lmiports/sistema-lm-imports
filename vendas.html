@@ -44,12 +44,10 @@
         
         .cart-items { flex: 1; overflow-y: auto; margin-bottom: 15px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 0; }
         .cart-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin-bottom: 8px; }
-        .cart-item.brinde { border: 1px solid var(--accent); background: rgba(0, 224, 255, 0.1); } /* Estilo para Brinde */
+        .cart-item.brinde { border: 1px solid var(--accent); background: rgba(0, 224, 255, 0.1); }
         
         .item-info div { font-size: 13px; font-weight: bold; }
         .item-info small { font-size: 10px; color: #94a3b8; display: block; }
-        
-        /* Botões de Ação no Item */
         .item-actions { display: flex; gap: 10px; align-items: center; }
         .btn-icon { cursor: pointer; padding: 5px; font-size: 14px; transition: 0.2s; }
         .btn-remove { color: var(--danger); }
@@ -62,8 +60,6 @@
         .totals { margin-bottom: 15px; font-size: 14px; }
         .row { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: center;}
         .total-final { font-size: 24px; font-weight: 900; color: var(--success); border-top: 1px solid var(--border); padding-top: 10px; }
-        
-        /* Campo de Desconto */
         .input-desconto { width: 100px !important; padding: 5px !important; text-align: right; background: #0f172a; border: 1px solid #334155; color: var(--danger); font-weight: bold; }
 
         .btn-finalizar { background: var(--success); color: #000; padding: 15px; width: 100%; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
@@ -111,7 +107,7 @@
                 <label style="font-size: 12px; color: #94a3b8;">Cliente:</label>
                 <div class="client-row">
                     <div class="client-input-wrapper">
-                        <input list="lista-clientes-db" id="cliente-input" placeholder="Busca inteligente..." autocomplete="off">
+                        <input list="lista-clientes-db" id="cliente-input" placeholder="Busca inteligente..." autocomplete="off" onchange="salvarRascunho()">
                         <datalist id="lista-clientes-db"></datalist>
                     </div>
                     <button class="btn-add-client" onclick="abrirModalCliente()">+</button>
@@ -138,7 +134,7 @@
 
             <div style="margin-bottom: 10px;">
                 <label style="font-size: 12px;">Pagamento:</label>
-                <select id="forma-pagamento" style="width: 100%; padding: 8px; background: #1e293b; color: #fff; border: 1px solid var(--border); border-radius: 5px;">
+                <select id="forma-pagamento" style="width: 100%; padding: 8px; background: #1e293b; color: #fff; border: 1px solid var(--border); border-radius: 5px;" onchange="salvarRascunho()">
                     </select>
             </div>
 
@@ -198,7 +194,13 @@
         let dbEstoque = [], dbClientes = [], carrinho = [], trocas = [];
         let totalVendaGlobal = 0;
 
+        // INICIALIZAÇÃO
         window.onload = function() {
+            carregarOpcoesPagamento();
+            
+            // Tenta restaurar Rascunho (Se existir)
+            restaurarRascunho();
+
             db.collection("estoque").where("status", "==", "disponível").onSnapshot(snap => {
                 dbEstoque = []; snap.forEach(doc => dbEstoque.push({ id: doc.id, ...doc.data() }));
                 renderizarProdutos();
@@ -208,9 +210,48 @@
                 renderizarDatalistClientes();
             });
             carregarListasAuxiliares();
-            carregarOpcoesPagamento();
         };
 
+        // --- SISTEMA DE RASCUNHO (MEMÓRIA) ---
+        function salvarRascunho() {
+            const estado = {
+                carrinho: carrinho,
+                trocas: trocas,
+                cliente: document.getElementById('cliente-input').value,
+                desconto: document.getElementById('valor-desconto-manual').value,
+                pagamento: document.getElementById('forma-pagamento').value
+            };
+            localStorage.setItem('pdv_rascunho', JSON.stringify(estado));
+        }
+
+        function restaurarRascunho() {
+            const salvo = localStorage.getItem('pdv_rascunho');
+            if (salvo) {
+                const estado = JSON.parse(salvo);
+                carrinho = estado.carrinho || [];
+                trocas = estado.trocas || [];
+                document.getElementById('cliente-input').value = estado.cliente || "";
+                document.getElementById('valor-desconto-manual').value = estado.desconto || "";
+                
+                // Aguarda um pouco para o select carregar antes de setar o valor
+                setTimeout(() => {
+                    document.getElementById('forma-pagamento').value = estado.pagamento || "Pix";
+                }, 500);
+
+                atualizarTotais(); // Atualiza a tela com os dados recuperados
+            }
+        }
+
+        function limparRascunho() {
+            localStorage.removeItem('pdv_rascunho');
+            carrinho = [];
+            trocas = [];
+            document.getElementById('cliente-input').value = "";
+            document.getElementById('valor-desconto-manual').value = "";
+            atualizarTotais();
+        }
+
+        // --- FUNÇÕES DO SISTEMA ---
         function carregarListasAuxiliares() {
             db.collection("lista_modelos_cel").orderBy("nome").onSnapshot(snap => {
                 document.getElementById('dl-modelos-list').innerHTML = "";
@@ -249,18 +290,22 @@
         }
 
         function adicionarAoCarrinho(p) {
-            // Adiciona propriedade isBrinde false por padrão
             carrinho.push({ ...p, isBrinde: false });
             atualizarTotais();
+            salvarRascunho(); // Salva a cada adição
         }
 
-        // --- FUNÇÃO PARA MARCAR COMO BRINDE ---
         function toggleBrinde(index) {
             carrinho[index].isBrinde = !carrinho[index].isBrinde;
             atualizarTotais();
+            salvarRascunho();
         }
 
-        function removerDoCarrinho(i) { carrinho.splice(i, 1); atualizarTotais(); }
+        function removerDoCarrinho(i) { 
+            carrinho.splice(i, 1); 
+            atualizarTotais(); 
+            salvarRascunho();
+        }
 
         function confirmarTroca() {
             const t = {
@@ -272,10 +317,10 @@
                 bateria: document.getElementById('troca-bateria').value
             };
             if(!t.modelo || !t.valor || t.imei.length !== 15) return alert("Dados inválidos (IMEI 15 dígitos)");
-            trocas.push(t); fecharModalTroca(); atualizarTotais();
+            trocas.push(t); fecharModalTroca(); atualizarTotais(); salvarRascunho();
             document.querySelectorAll('#modal-troca input').forEach(i=>i.value='');
         }
-        function removerTroca(i) { trocas.splice(i, 1); atualizarTotais(); }
+        function removerTroca(i) { trocas.splice(i, 1); atualizarTotais(); salvarRascunho(); }
 
         function atualizarTotais() {
             const dc = document.getElementById('carrinho-lista'); const dt = document.getElementById('lista-trocas');
@@ -283,7 +328,6 @@
             
             let sub = 0;
             carrinho.forEach((item, i) => {
-                // Se for brinde, soma 0. Se não, soma valor normal.
                 const valorItem = item.isBrinde ? 0 : parseFloat(item.venda || 0);
                 sub += valorItem;
                 
@@ -310,14 +354,14 @@
                 dt.innerHTML += `<div class="trade-in-box"><div class="trade-in-text"><strong>ENTRADA:</strong> ${item.modelo}<br><small>${item.imei} | R$ ${item.valor}</small></div><i class="fas fa-times btn-remove" onclick="removerTroca(${i})"></i></div>`;
             });
 
-            // Lógica do Desconto Manual
             let descManual = parseFloat(document.getElementById('valor-desconto-manual').value) || 0;
-
             totalVendaGlobal = sub - descTroca - descManual;
             
             document.getElementById('valor-subtotal').innerText = `R$ ${sub.toFixed(2)}`;
             document.getElementById('valor-abatimento').innerText = `- R$ ${descTroca.toFixed(2)}`;
             document.getElementById('valor-total').innerText = `R$ ${totalVendaGlobal.toFixed(2)}`;
+            
+            salvarRascunho(); // Garante que o desconto manual seja salvo
         }
 
         async function finalizarVenda() {
@@ -330,7 +374,6 @@
             try {
                 const batch = db.batch();
                 carrinho.forEach(item => {
-                    // Marca como vendido, mas registra se foi brinde ou não
                     batch.update(db.collection("estoque").doc(item.id), { status: "vendido", dataVenda: Date.now(), clienteVenda: cli, foiBrinde: item.isBrinde });
                 });
                 trocas.forEach(t => {
@@ -343,13 +386,16 @@
                 });
                 batch.set(db.collection("vendas").doc(), {
                     cliente: cli, data: new Date().toISOString(),
-                    itens: carrinho.map(c => ({ modelo: c.modelo||c.nomeP, isBrinde: c.isBrinde })), // Salva info do brinde
+                    itens: carrinho.map(c => ({ modelo: c.modelo||c.nomeP, isBrinde: c.isBrinde })),
                     trocas: trocas.map(t => t.modelo),
                     desconto: parseFloat(document.getElementById('valor-desconto-manual').value) || 0,
                     total: totalVendaGlobal, pagamento: pg
                 });
                 await batch.commit();
-                alert("Venda Sucesso!"); window.location.reload();
+                
+                limparRascunho(); // LIMPA O RASCUNHO AO FINALIZAR
+                alert("Venda Sucesso!"); 
+                window.location.reload();
             } catch(e) { alert("Erro: "+e.message); }
         }
 
@@ -364,7 +410,7 @@
                 nome: i.modelo || i.nomeP, 
                 desc: i.cor || '', 
                 preco: i.venda,
-                isBrinde: i.isBrinde // Passa a flag pro recibo
+                isBrinde: i.isBrinde
             }));
             trocas.forEach(t => itensR.push({ nome: "TROCA: "+t.modelo, desc: t.imei, preco: -t.valor, isTroca: true }));
 
@@ -378,10 +424,11 @@
                 data: new Date().toLocaleDateString('pt-BR')
             };
             localStorage.setItem('dadosRecibo', JSON.stringify(dados));
-            window.location.href = 'orcamento.html';
+            
+            // ABRIR EM NOVA ABA (A MÁGICA PARA NÃO PERDER O PDV)
+            window.open('orcamento.html', '_blank');
         }
 
-        // Modais e Auxiliares
         function abrirModalTroca(){document.getElementById('modal-troca').style.display='flex';}
         function fecharModalTroca(){document.getElementById('modal-troca').style.display='none';}
         function abrirModalCliente(){document.getElementById('modal-cliente').style.display='flex';}
@@ -392,12 +439,11 @@
         }
         async function salvarNovoCliente(){
             let n=document.getElementById('novo-nome').value; if(!n)return alert("Nome?");
-            try{ await db.collection("clientes").add({nome:n, cpf:document.getElementById('novo-cpf').value, whats:document.getElementById('novo-zap').value, email:document.getElementById('novo-email').value, cep:document.getElementById('novo-cep').value, logradouro:document.getElementById('novo-endereco').value, numero:document.getElementById('novo-numero').value, bairro:document.getElementById('novo-bairro').value, cidade:document.getElementById('novo-cidade').value}); alert("Ok!"); document.getElementById('cliente-input').value=n; fecharModalCliente(); }catch(e){alert("Erro");}
+            try{ await db.collection("clientes").add({nome:n, cpf:document.getElementById('novo-cpf').value, whats:document.getElementById('novo-zap').value, email:document.getElementById('novo-email').value, cep:document.getElementById('novo-cep').value, logradouro:document.getElementById('novo-endereco').value, numero:document.getElementById('novo-numero').value, bairro:document.getElementById('novo-bairro').value, cidade:document.getElementById('novo-cidade').value}); alert("Ok!"); document.getElementById('cliente-input').value=n; fecharModalCliente(); salvarRascunho(); }catch(e){alert("Erro");}
         }
         function carregarOpcoesPagamento(){
             let s=document.getElementById('forma-pagamento'); 
             s.innerHTML=`<optgroup label="À Vista"><option>Pix</option><option>Dinheiro</option><option>Débito</option></optgroup><optgroup label="Crédito">`;
-            // ATÉ 24X
             for(let i=1;i<=24;i++) s.innerHTML+=`<option>Crédito ${i}x</option>`;
         }
     </script>
