@@ -89,10 +89,14 @@
 
         .client-area { margin-bottom: 15px; }
         .client-row { display: flex; gap: 5px; }
-        .client-row select {
+        
+        /* MUDANÇA AQUI: INPUT DE BUSCA DE CLIENTE */
+        .client-input-wrapper { width: 100%; position: relative; }
+        .client-row input[list] {
             width: 100%; padding: 10px; background: #1e293b; border: 1px solid var(--border);
-            color: #fff; border-radius: 5px;
+            color: #fff; border-radius: 5px; box-sizing: border-box;
         }
+
         .btn-add-client {
             background: var(--success); color: #000; border: none; width: 40px; border-radius: 5px;
             cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;
@@ -108,6 +112,7 @@
             background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin-bottom: 8px;
         }
         .item-info div { font-size: 13px; font-weight: bold; }
+        .item-info small { font-size: 10px; color: #94a3b8; display: block; }
         .btn-remove { color: var(--danger); cursor: pointer; padding: 5px; }
 
         /* TROCA */
@@ -174,16 +179,21 @@
             </div>
 
             <div class="products-list" id="lista-produtos">
+                <div style="grid-column: 1/-1; text-align: center; color: #888; padding: 20px;">
+                    Carregando produtos ou estoque vazio...
                 </div>
+            </div>
         </div>
 
         <div class="cart-section">
             <div class="client-area">
-                <label style="font-size: 12px; color: #94a3b8;">Cliente:</label>
+                <label style="font-size: 12px; color: #94a3b8;">Cliente (Busca por Nome ou CPF):</label>
                 <div class="client-row">
-                    <select id="cliente-select">
-                        <option value="">Selecionar Cliente...</option>
-                    </select>
+                    <div class="client-input-wrapper">
+                        <input list="lista-clientes" id="cliente-input" placeholder="Digite para buscar...">
+                        <datalist id="lista-clientes">
+                            </datalist>
+                    </div>
                     <button class="btn-add-client" onclick="abrirModalCliente()" title="Novo Cliente Completo">+</button>
                 </div>
             </div>
@@ -216,8 +226,14 @@
         <div class="modal" style="border-color: var(--warning);">
             <h3 style="color: var(--warning);">Entrada de Troca</h3>
             <input type="text" id="troca-modelo" placeholder="Modelo (Ex: iPhone 11)">
-            <input type="number" id="troca-valor" placeholder="Valor Avaliado (R$)">
-            <input type="number" id="troca-bateria" placeholder="Saúde Bateria (%)">
+            
+            <input type="text" id="troca-imei" placeholder="IMEI (15 Dígitos)" maxlength="15" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 15)">
+            
+            <div class="modal-grid">
+                <input type="number" id="troca-valor" placeholder="Valor Avaliado (R$)">
+                <input type="number" id="troca-bateria" placeholder="Saúde Bateria (%)">
+            </div>
+
             <div style="display: flex; gap: 10px; margin-top: 10px;">
                 <button onclick="fecharModalTroca()" class="btn-cancel">Cancelar</button>
                 <button onclick="confirmarTroca()" class="btn-confirm" style="background: var(--warning);">Confirmar</button>
@@ -266,12 +282,13 @@
         let trocas = [];
 
         window.onload = function() {
+            // Garante que carrega mesmo que não tenha filtro selecionado
             carregarProdutos();
             carregarClientes();
-            carregarOpcoesPagamento(); // Nova função para os parcelamentos
+            carregarOpcoesPagamento();
         };
 
-        // --- GERA AS OPÇÕES DE PAGAMENTO (1x a 24x) ---
+        // --- CARREGAMENTO DE OPÇÕES DE PAGAMENTO ---
         function carregarOpcoesPagamento() {
             const select = document.getElementById('forma-pagamento');
             select.innerHTML = `
@@ -282,8 +299,6 @@
                 </optgroup>
                 <optgroup label="Crédito Parcelado">
             `;
-            
-            // Loop para criar de 1x até 24x
             for (let i = 1; i <= 24; i++) {
                 const option = document.createElement('option');
                 option.value = `Crédito ${i}x`;
@@ -292,12 +307,11 @@
             }
         }
 
-        // --- BUSCA CEP AUTOMÁTICA ---
+        // --- BUSCA CEP ---
         function buscarCep() {
             const cep = document.getElementById('novo-cep').value.replace(/\D/g, '');
             if (cep.length === 8) {
                 document.getElementById('novo-endereco').value = "Buscando...";
-                
                 fetch(`https://viacep.com.br/ws/${cep}/json/`)
                     .then(response => response.json())
                     .then(data => {
@@ -305,7 +319,7 @@
                             document.getElementById('novo-endereco').value = data.logradouro;
                             document.getElementById('novo-bairro').value = data.bairro;
                             document.getElementById('novo-cidade').value = `${data.localidade} - ${data.uf}`;
-                            document.getElementById('novo-numero').focus(); // Joga o foco pro número
+                            document.getElementById('novo-numero').focus();
                         } else {
                             alert("CEP não encontrado.");
                             document.getElementById('novo-endereco').value = "";
@@ -315,7 +329,7 @@
             }
         }
 
-        // --- MODAIS E CADASTRO ---
+        // --- MODAIS ---
         function abrirModalCliente() { document.getElementById('modal-cliente').style.display = 'flex'; }
         function fecharModalCliente() { document.getElementById('modal-cliente').style.display = 'none'; }
 
@@ -340,24 +354,30 @@
             db_clientes.push(novoCliente);
             localStorage.setItem('db_clientes', JSON.stringify(db_clientes));
             carregarClientes();
-            document.getElementById('cliente-select').value = nome; 
+            document.getElementById('cliente-input').value = nome; // Seleciona no input
+            
             document.querySelectorAll('#modal-cliente input').forEach(input => input.value = '');
             fecharModalCliente();
             alert("Cliente cadastrado com sucesso!");
         }
 
-        // --- PRODUTOS COM AS SUAS CATEGORIAS ---
+        // --- PRODUTOS ---
         function carregarProdutos() {
             const lista = document.getElementById('lista-produtos');
             lista.innerHTML = '';
             
+            if (db_produtos.length === 0) {
+                lista.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 20px;">Estoque vazio. Vá em "Estoque" para cadastrar produtos.</div>';
+                return;
+            }
+
             db_produtos.forEach(prod => {
-                if (prod.qtd > 0) {
+                // Check básico de quantidade e existência
+                if (prod && prod.qtd > 0) {
                     const div = document.createElement('div');
                     div.className = 'product-card';
                     div.onclick = () => adicionarAoCarrinho(prod.id);
                     
-                    // SELEÇÃO DE ÍCONES CONFORME SUA LISTA
                     let iconCat = '📦';
                     if(prod.categoria === 'Celular') iconCat = '📱';
                     if(prod.categoria === 'Acessorio') iconCat = '🎧';
@@ -381,33 +401,36 @@
             const cat = document.getElementById('filtro-cat').value; 
             
             const cards = document.querySelectorAll('.product-card');
+            let encontrou = false;
+
             cards.forEach(card => {
                 const textoCard = card.innerText.toLowerCase();
-                // Pegamos o texto da categoria de dentro do HTML gerado
-                // Ex: "📱 Celular" contém "celular"
                 const catTag = card.querySelector('.prod-cat-tag').innerText.toLowerCase();
                 
-                // O filtro verifica se a tag do produto CONTÉM o valor do select
-                // Ex: Select "Roupa" -> Tag "👕 Roupa" (Match!)
                 const matchNome = textoCard.includes(termo);
                 const matchCat = cat === "" || catTag.includes(cat.toLowerCase());
 
-                card.style.display = (matchNome && matchCat) ? 'flex' : 'none';
+                if (matchNome && matchCat) {
+                    card.style.display = 'flex';
+                    encontrou = true;
+                } else {
+                    card.style.display = 'none';
+                }
             });
         }
 
-        // --- MANIPULAÇÃO DE DADOS ---
+        // --- CLIENTES (AGORA COM DATALIST PARA BUSCA) ---
         function carregarClientes() {
-            const select = document.getElementById('cliente-select');
-            const valorAtual = select.value;
-            select.innerHTML = '<option value="">Selecionar Cliente...</option>';
+            const datalist = document.getElementById('lista-clientes');
+            datalist.innerHTML = ''; // Limpa
+            
             db_clientes.forEach(cli => {
                 const opt = document.createElement('option');
                 opt.value = cli.nome;
-                opt.innerText = cli.nome;
-                select.appendChild(opt);
+                // Mostra CPF ou Zap como dica extra na busca
+                opt.innerText = cli.cpf ? `CPF: ${cli.cpf}` : (cli.contato ? `Zap: ${cli.contato}` : '');
+                datalist.appendChild(opt);
             });
-            select.value = valorAtual;
         }
 
         function adicionarAoCarrinho(id) {
@@ -428,15 +451,24 @@
             const modelo = document.getElementById('troca-modelo').value;
             const valor = parseFloat(document.getElementById('troca-valor').value);
             const bateria = document.getElementById('troca-bateria').value;
+            const imei = document.getElementById('troca-imei').value;
 
-            if (modelo && valor) {
-                trocas.push({ modelo, valor, bateria });
+            if (modelo && valor && imei) {
+                if(imei.length !== 15) {
+                    alert("Atenção: O IMEI deve ter exatamente 15 dígitos.");
+                    return;
+                }
+
+                trocas.push({ modelo, valor, bateria, imei });
                 fecharModalTroca();
                 atualizarCarrinho();
+                
+                // Limpa campos
                 document.getElementById('troca-modelo').value = '';
                 document.getElementById('troca-valor').value = '';
                 document.getElementById('troca-bateria').value = '';
-            } else { alert("Preencha modelo e valor!"); }
+                document.getElementById('troca-imei').value = '';
+            } else { alert("Preencha Modelo, IMEI e Valor!"); }
         }
 
         function removerTroca(index) {
@@ -465,7 +497,10 @@
                 totalTroca += item.valor;
                 divTrocas.innerHTML += `
                     <div class="trade-in-box">
-                        <div class="trade-in-text"><strong>ENTRADA:</strong> ${item.modelo} <br><small>Bat: ${item.bateria}% | Valor: R$ ${item.valor}</small></div>
+                        <div class="trade-in-text">
+                            <strong>ENTRADA:</strong> ${item.modelo} <br>
+                            <small>IMEI: ${item.imei} | Bat: ${item.bateria}% | Valor: R$ ${item.valor}</small>
+                        </div>
                         <i class="fas fa-times btn-remove" onclick="removerTroca(${index})"></i>
                     </div>`;
             });
@@ -478,16 +513,21 @@
         }
 
         function gerarRecibo() {
-            const clienteNome = document.getElementById('cliente-select').value;
+            // PEGA O NOME DO INPUT TEXT AGORA
+            const clienteNome = document.getElementById('cliente-input').value;
             const pagto = document.getElementById('forma-pagamento').value;
             if (carrinho.length === 0) { alert("Carrinho vazio!"); return; }
+            if (!clienteNome) { alert("Selecione um cliente!"); return; }
 
             let itensRecibo = carrinho.map(i => ({ nome: i.modelo, desc: i.cor, preco: i.pvenda }));
             trocas.forEach(t => {
-                itensRecibo.push({ nome: "TROCA: " + t.modelo, desc: "Bat: " + t.bateria + "%", preco: -t.valor });
+                itensRecibo.push({ 
+                    nome: "TROCA: " + t.modelo, 
+                    desc: `IMEI: ${t.imei} | Bat: ${t.bateria}%`, 
+                    preco: -t.valor 
+                });
             });
 
-            // BUSCA DADOS COMPLETOS DO CLIENTE PARA O RECIBO
             const clienteFull = db_clientes.find(c => c.nome === clienteNome) || {};
 
             const dadosVenda = {
@@ -506,7 +546,7 @@
         }
 
         function finalizarVenda() {
-            const clienteNome = document.getElementById('cliente-select').value;
+            const clienteNome = document.getElementById('cliente-input').value;
             if (carrinho.length === 0) { alert("Carrinho vazio!"); return; }
             if (!clienteNome) { alert("Selecione um cliente!"); return; }
 
@@ -522,7 +562,7 @@
                     cor: "Usado", gb: "", categoria: "Celular",
                     pcusto: troca.valor, pvenda: 0, qtd: 1,
                     dataEntrada: new Date().toLocaleDateString('pt-BR'),
-                    obs: `Bat: ${troca.bateria}% | Origem: Troca`
+                    obs: `IMEI: ${troca.imei} | Bat: ${troca.bateria}% | Origem: Troca`
                 });
             });
             
