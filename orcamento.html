@@ -14,7 +14,11 @@
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 8px; text-align: left; border-bottom: 1px solid var(--border); }
         th { color: var(--accent); }
+        
         .btn { background: var(--accent); color: #000; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 20px; }
+        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+        .btn-outline:hover { background: rgba(0, 224, 255, 0.1); }
+
         .contract-area { margin-top: 30px; background: #fff; color: #000; padding: 25px; border-radius: 5px; }
         #texto-contrato { outline: none; text-align: justify; font-size: 11px; line-height: 1.4; min-height: 400px; white-space: pre-wrap; }
 
@@ -43,8 +47,13 @@
 
     <div class="container">
         <div class="no-print" style="margin-bottom: 20px; display: flex; justify-content: space-between;">
-            <button onclick="window.history.back()" class="btn" style="background:transparent; border:1px solid var(--accent); color:var(--accent);">Voltar</button>
-            <button onclick="window.print()" class="btn">Imprimir / PDF</button>
+            <button onclick="fecharOuVoltar()" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Voltar ao PDV
+            </button>
+            
+            <button onclick="window.print()" class="btn">
+                <i class="fas fa-print"></i> Imprimir / PDF
+            </button>
         </div>
 
         <div class="receipt-page">
@@ -75,12 +84,20 @@
                 <thead>
                     <tr><th>Descrição</th><th width="20%">Valor</th></tr>
                 </thead>
-                <tbody id="lista-produtos"></tbody>
+                <tbody id="lista-produtos">
+                    </tbody>
             </table>
 
             <div style="margin-top: 20px; text-align: right; padding-top: 10px;">
-                <div class="total-row"><span>Subtotal:</span> <span id="recibo-sub">R$ 0,00</span></div>
-                <div class="total-row"><span>Descontos/Trocas:</span> <span id="recibo-desc">R$ 0,00</span></div>
+                <div class="total-row">
+                    <span>Subtotal:</span> 
+                    <span id="recibo-sub">R$ 0,00</span>
+                </div>
+                <div class="total-row">
+                    <span>Descontos/Trocas:</span> 
+                    <span id="recibo-desc">R$ 0,00</span>
+                </div>
+                
                 <div class="final-total" id="recibo-total">TOTAL: R$ 0,00</div>
                 
                 <div style="margin-top: 10px;">
@@ -131,8 +148,14 @@ Cláusula 10: O comprador declara ter conferido o aparelho (câmeras, face ID, �
             </div>
 
             <div class="signatures" style="display: none;">
-                <div class="sig-line">ASSINATURA DO COMPRADOR<br>CPF: _______________________</div>
-                <div class="sig-line">LM IMPORTS<br>VISTO DO VENDEDOR</div>
+                <div class="sig-line">
+                    ASSINATURA DO COMPRADOR<br>
+                    CPF: _______________________
+                </div>
+                <div class="sig-line">
+                    LM IMPORTS<br>
+                    VISTO DO VENDEDOR
+                </div>
             </div>
             
             <div class="footer-print">Sistema Vértice • Gestão Inteligente</div>
@@ -141,6 +164,17 @@ Cláusula 10: O comprador declara ter conferido o aparelho (câmeras, face ID, �
     </div>
 
     <script>
+        // --- FUNÇÃO DE VOLTAR INTELIGENTE ---
+        function fecharOuVoltar() {
+            // Primeiro tenta fechar a aba (já que abrimos em _blank)
+            window.close();
+            
+            // Se o navegador bloquear o fechamento, ele redireciona para o PDV em meio segundo
+            setTimeout(() => {
+                window.location.href = 'vendas.html';
+            }, 500);
+        }
+
         window.onload = function() {
             const dados = JSON.parse(localStorage.getItem('dadosRecibo'));
             if (dados) {
@@ -171,8 +205,6 @@ Cláusula 10: O comprador declara ter conferido o aparelho (câmeras, face ID, �
                     if(item.isBrinde) {
                         desc += " (BRINDE/GRÁTIS)";
                         valorTexto = "R$ 0,00";
-                        // Para fins de cálculo de "Valor do Brinde" para mostrar quanto ganhou,
-                        // teríamos que ter passado o valor original. Mas aqui é o recibo final.
                     } else if (item.isTroca) {
                         // É uma troca
                         valorTexto = "- R$ " + Math.abs(valorNumerico).toFixed(2);
@@ -199,6 +231,14 @@ Cláusula 10: O comprador declara ter conferido o aparelho (câmeras, face ID, �
                 document.getElementById('recibo-sub').innerText = 'R$ ' + subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
                 document.getElementById('recibo-desc').innerText = '- R$ ' + descontos.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
                 document.getElementById('recibo-total').innerText = 'TOTAL: R$ ' + parseFloat(dados.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                
+                // Ajuste de cor na impressão
+                if (window.matchMedia) {
+                    var mediaQueryList = window.matchMedia('print');
+                    mediaQueryList.addListener(function(mql) {
+                        if (mql.matches) document.getElementById('recibo-total').style.color = '#000';
+                    });
+                }
             } else {
                 alert("Nenhuma venda encontrada.");
             }
