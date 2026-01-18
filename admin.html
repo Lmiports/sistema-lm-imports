@@ -28,8 +28,9 @@
         .header-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
         .action-group { display: flex; gap: 10px; }
-        .btn-print { background: var(--accent); color: #000; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; }
-        .btn-print:hover { opacity: 0.9; }
+        /* Botão de Relatório Bonito */
+        .btn-print { background: var(--accent); color: #000; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; box-shadow: 0 0 10px rgba(0,224,255,0.2); }
+        .btn-print:hover { opacity: 0.9; transform: scale(1.02); }
 
         .filter-group { display: flex; background: var(--card); padding: 5px; border-radius: 8px; border: 1px solid var(--border); }
         .filter-btn { background: transparent; border: none; color: #94a3b8; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; font-size: 12px; }
@@ -67,31 +68,32 @@
         #print-area { display: none; } /* Esconde na tela normal */
 
         @media print {
-            body * { visibility: hidden; } /* Esconde tudo */
+            @page { margin: 0; size: A4; } /* TIRA MARGENS PADRÃO (URL E DATA SOMEM) */
+            body * { visibility: hidden; } /* Esconde o Dashboard Escuro */
             .sidebar { display: none; }
             
             #print-area, #print-area * { visibility: visible; } /* Mostra só o relatório */
             #print-area { 
-                position: absolute; left: 0; top: 0; width: 100%; 
-                background: #fff; color: #000; padding: 20px; box-sizing: border-box;
+                position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+                background: #fff; color: #000; padding: 1.5cm; box-sizing: border-box;
             }
 
             /* Estilo do Relatório Impresso */
             .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 20px; }
-            .print-header h1 { margin: 0; font-size: 24px; text-transform: uppercase; }
+            .print-header h1 { margin: 0; font-size: 24px; text-transform: uppercase; color: #000; }
             .print-meta { display: flex; justify-content: space-between; font-size: 12px; margin-top: 10px; }
             
-            .print-section { margin-bottom: 20px; }
-            .print-section h3 { background: #eee; padding: 5px; font-size: 14px; text-transform: uppercase; border-left: 5px solid #000; }
+            .print-section { margin-bottom: 30px; }
+            .print-section h3 { background: #eee; padding: 5px 10px; font-size: 14px; text-transform: uppercase; border-left: 5px solid #000; color: #000; margin-bottom: 10px; }
             
-            .print-row { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px dashed #ccc; padding-bottom: 2px; }
+            .print-row { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; }
             .print-row span { font-weight: bold; }
             
             .print-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
-            .print-table th { border-bottom: 1px solid #000; text-align: left; }
-            .print-table td { border-bottom: 1px solid #eee; padding: 4px 0; }
+            .print-table th { border-bottom: 2px solid #000; text-align: left; color: #000; padding: 5px; }
+            .print-table td { border-bottom: 1px solid #eee; padding: 5px; color: #000; }
             
-            .print-footer { margin-top: 50px; text-align: center; font-size: 10px; border-top: 1px solid #000; padding-top: 10px; }
+            .print-footer { position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 10px; padding: 10px; border-top: 1px solid #000; background: #fff; }
         }
 
         @media (max-width: 768px) {
@@ -123,7 +125,7 @@
                     <button class="filter-btn active" onclick="mudarFiltro('mensal', this)">Mês</button>
                     <button class="filter-btn" onclick="mudarFiltro('todos', this)">Geral</button>
                 </div>
-                <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> Relatório</button>
+                <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> Imprimir Relatório</button>
             </div>
         </div>
 
@@ -153,26 +155,27 @@
             <h4 style="margin:0 0 15px 0;">Últimas Vendas Realizadas</h4>
             <table>
                 <thead><tr><th>Data</th><th>Cliente</th><th>Pedido</th><th>Itens</th><th>Total</th></tr></thead>
-                <tbody id="tabela-vendas"><tr><td colspan="5">Carregando...</td></tr></tbody>
+                <tbody id="tabela-vendas"><tr><td colspan="5" style="text-align:center; color:#888;">Carregando dados...</td></tr></tbody>
             </table>
         </div>
     </main>
 
     <div id="print-area">
         <div class="print-header">
-            <h1>LM IMPORTS - RELATÓRIO GERENCIAL</h1>
+            <h1>LM IMPORTS - RELATÓRIO DE FECHAMENTO</h1>
             <div class="print-meta">
-                <span>Data de Emissão: <b id="print-date"></b></span>
-                <span>Gestão Inteligente Vértice</span>
+                <span>Emitido em: <b id="print-date"></b></span>
+                <span>Sistema Vértice BI</span>
             </div>
         </div>
 
         <div class="print-section">
             <h3>Resumo Financeiro (Período Selecionado)</h3>
-            <div class="print-row"><div>Faturamento Bruto (Vendas):</div><span id="print-faturamento">R$ 0,00</span></div>
-            <div class="print-row"><div>Entrada em Trocas (Ativos):</div><span id="print-trocas">R$ 0,00</span></div>
+            <div class="print-row"><div>Faturamento Bruto (Entrada Caixa):</div><span id="print-faturamento">R$ 0,00</span></div>
+            <div class="print-row"><div>Entrada em Trocas (Aparelhos):</div><span id="print-trocas">R$ 0,00</span></div>
             <div class="print-row"><div>Descontos Concedidos:</div><span id="print-descontos">R$ 0,00</span></div>
-            <div class="print-row" style="margin-top:10px; font-size:14px; border:none;"><div>RESULTADO LÍQUIDO:</div><span id="print-liquido">R$ 0,00</span></div>
+            <br>
+            <div class="print-row" style="font-size:16px; border:none;"><div>TOTAL GERAL MOVIMENTADO:</div><span id="print-total-mov">R$ 0,00</span></div>
         </div>
 
         <div class="print-section">
@@ -183,16 +186,19 @@
         </div>
 
         <div class="print-section">
-            <h3>Extrato de Vendas</h3>
+            <h3>Extrato Detalhado de Vendas</h3>
             <table class="print-table">
-                <thead><tr><th>Data</th><th>Cliente</th><th>Itens</th><th>Valor</th></tr></thead>
+                <thead><tr><th>Data</th><th>Cliente</th><th>Itens / Detalhes</th><th>Valor</th></tr></thead>
                 <tbody id="print-tabela-body"></tbody>
             </table>
         </div>
 
         <div class="print-footer">
-            Relatório gerado automaticamente pelo Sistema Vértice.<br>
-            Conferência Interna - Não válido como documento fiscal.
+            <div style="display:flex; justify-content:space-between; margin-bottom:40px; margin-top:40px;">
+                <div style="border-top:1px solid #000; width:40%; text-align:center; padding-top:5px;">Assinatura Gerente</div>
+                <div style="border-top:1px solid #000; width:40%; text-align:center; padding-top:5px;">Conferência Caixa</div>
+            </div>
+            Relatório gerado automaticamente pelo Sistema Vértice • Gestão Inteligente
         </div>
     </div>
 
@@ -206,13 +212,14 @@
             carregarDados(); 
         };
 
+        // --- FUNÇÃO CORRETORA DE VALORES (A SALVADORA) ---
         function limparMoeda(valor) {
             if (typeof valor === 'number') return valor;
             if (!valor) return 0;
             // Remove R$, espaços e converte corretamente 1.000,00 para 1000.00
             let limpo = valor.toString().replace(/[R$\s]/g, '');
-            if(limpo.includes(',') && limpo.includes('.')) { limpo = limpo.replace(/\./g, '').replace(',', '.'); } // Caso 1.000,00
-            else if(limpo.includes(',')) { limpo = limpo.replace(',', '.'); } // Caso 100,00
+            if(limpo.includes(',') && limpo.includes('.')) { limpo = limpo.replace(/\./g, '').replace(',', '.'); } 
+            else if(limpo.includes(',')) { limpo = limpo.replace(',', '.'); } 
             return parseFloat(limpo) || 0;
         }
 
@@ -228,7 +235,7 @@
                 aplicarFiltroData();
             } catch (error) {
                 console.error("Erro ao carregar dados:", error);
-                document.getElementById('tabela-vendas').innerHTML = `<tr><td colspan="5">Erro ao carregar. Verifique o console.</td></tr>`;
+                document.getElementById('tabela-vendas').innerHTML = `<tr><td colspan="5">Erro ao carregar dados. Verifique o console.</td></tr>`;
             }
         }
 
@@ -284,27 +291,25 @@
                 if (v.itens) v.itens.forEach(item => { if (item.isBrinde) qtdBrindes++; });
             });
 
+            // Estimativa de trocas baseado no estoque (já que venda não salva valor da troca separado ainda)
             let valorEntradaTroca = 0;
             estoqueData.forEach(p => {
-                if(p.modelo && p.modelo.includes("TROCA")) {
-                    // Simplificação: Assume trocas recentes baseadas no ID ou dataEntrada se houver
-                    // Para o dashboard visual, vamos usar o valor acumulado
-                    valorEntradaTroca += limparMoeda(p.custo);
-                }
+                if(p.modelo && p.modelo.includes("TROCA")) valorEntradaTroca += limparMoeda(p.custo);
             });
 
             // Atualiza Dashboard
             document.getElementById('kpi-faturamento').innerText = formatMoeda(faturamento);
             document.getElementById('kpi-descontos').innerText = formatMoeda(totalDescontos);
             document.getElementById('kpi-brindes').innerText = qtdBrindes;
-            document.getElementById('kpi-trocas').innerText = formatMoeda(valorEntradaTroca); // Valor total histórico para referência
+            document.getElementById('kpi-trocas').innerText = formatMoeda(valorEntradaTroca); // Valor total histórico
             document.getElementById('kpi-qtd-trocas').innerText = `${qtdTrocas} itens (período)`;
 
             // Atualiza Relatório de Impressão
             document.getElementById('print-faturamento').innerText = formatMoeda(faturamento);
             document.getElementById('print-descontos').innerText = formatMoeda(totalDescontos);
-            document.getElementById('print-trocas').innerText = "(Verificar Estoque Físico)"; // Trocas são complexas de filtrar por data sem campo específico
-            document.getElementById('print-liquido').innerText = formatMoeda(faturamento); // Líquido = Entrada Caixa
+            document.getElementById('print-trocas').innerText = formatMoeda(valorEntradaTroca); 
+            document.getElementById('print-total-mov').innerText = formatMoeda(faturamento + valorEntradaTroca); // Soma caixa + ativos
+            
             document.getElementById('print-qtd-vendas').innerText = dados.length;
             document.getElementById('print-ticket').innerText = dados.length > 0 ? formatMoeda(faturamento / dados.length) : "R$ 0,00";
             document.getElementById('print-qtd-brindes').innerText = qtdBrindes;
@@ -312,6 +317,7 @@
 
         function renderizarGraficos(dados) {
             try {
+                // Gráfico Linha
                 const vendasPorDia = {};
                 dados.forEach(v => {
                     const dia = new Date(v.data).toLocaleDateString('pt-BR').slice(0,5);
@@ -327,6 +333,7 @@
                     options: { responsive: true, maintainAspectRatio: false, plugins:{legend:{display:false}}, scales:{x:{grid:{color:'#334155'}},y:{grid:{color:'#334155'}}} }
                 });
 
+                // Gráfico Rosca
                 let cats = { 'Celular':0, 'Acessório':0, 'Roupa':0, 'Perfume':0, 'Outros':0 };
                 dados.forEach(v => {
                     if(v.itens) {
@@ -364,7 +371,7 @@
                 // Tabela Dashboard
                 tbody.innerHTML += `<tr><td>${new Date(v.data).toLocaleDateString('pt-BR')}</td><td style="font-weight:bold; color:#fff;">${v.cliente}</td><td style="color:#94a3b8;">#${v.numeroPedido || '---'}</td><td style="color:#94a3b8;">${itensResumo}</td><td style="color:#10b981; font-weight:bold;">${formatMoeda(limparMoeda(v.total))}</td></tr>`;
                 
-                // Tabela Impressão
+                // Tabela Impressão (Mais detalhes)
                 printBody.innerHTML += `<tr><td>${new Date(v.data).toLocaleDateString('pt-BR')}</td><td>${v.cliente}</td><td>${itensStr}</td><td>${formatMoeda(limparMoeda(v.total))}</td></tr>`;
             });
         }
