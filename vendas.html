@@ -6,153 +6,78 @@
     <title>PDV - Vendas e Trocas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    
     <style>
         :root {
-            --bg: #020617;
-            --card: #0f172a;
-            --accent: #00e0ff;
-            --text: #f8fafc;
-            --border: rgba(255, 255, 255, 0.1);
-            --success: #22c55e;
-            --danger: #ef4444;
-            --warning: #eab308;
+            --bg: #020617; --card: #0f172a; --accent: #00e0ff; --text: #f8fafc;
+            --border: rgba(255, 255, 255, 0.1); --success: #22c55e; --danger: #ef4444; --warning: #eab308;
         }
 
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0;
-            padding: 20px;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-        }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; height: 100vh; display: flex; flex-direction: column; box-sizing: border-box; }
 
         /* HEADER */
-        .header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
-        }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
         .header h2 { margin: 0; color: var(--accent); letter-spacing: 2px; }
         .btn-voltar { color: #fff; text-decoration: none; font-size: 20px; }
 
-        /* LAYOUT PRINCIPAL */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-            flex: 1;
-            overflow: hidden;
-        }
+        /* GRID PRINCIPAL */
+        .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; flex: 1; overflow: hidden; }
 
         /* ÁREA DE PRODUTOS */
         .products-section { display: flex; flex-direction: column; gap: 15px; overflow-y: hidden; }
-
         .search-box { display: flex; gap: 10px; }
-        .search-box input, .search-box select {
-            width: 100%; padding: 12px; background: var(--card); border: 1px solid var(--border);
-            color: #fff; border-radius: 8px; outline: none;
-        }
-
-        .products-list {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 15px; overflow-y: auto; padding-right: 5px;
-        }
-
-        .product-card {
-            background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-            padding: 15px; cursor: pointer; transition: 0.2s; position: relative;
-            display: flex; flex-direction: column; justify-content: space-between;
-        }
+        .search-box input, .search-box select { width: 100%; padding: 12px; background: var(--card); border: 1px solid var(--border); color: #fff; border-radius: 8px; outline: none; }
+        
+        .products-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; overflow-y: auto; padding-right: 5px; }
+        
+        .product-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 15px; cursor: pointer; transition: 0.2s; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
         .product-card:hover { border-color: var(--accent); transform: translateY(-3px); }
         
-        .prod-cat-tag {
-            font-size: 10px; text-transform: uppercase; background: rgba(0, 224, 255, 0.1); 
-            color: var(--accent); padding: 4px 8px; border-radius: 4px; width: fit-content; margin-bottom: 5px; font-weight: bold;
-        }
-
+        .prod-cat-tag { font-size: 10px; text-transform: uppercase; background: rgba(0, 224, 255, 0.1); color: var(--accent); padding: 4px 8px; border-radius: 4px; width: fit-content; margin-bottom: 5px; font-weight: bold; }
         .prod-name { font-weight: bold; margin-bottom: 5px; font-size: 14px; }
         .prod-detail { font-size: 11px; color: #94a3b8; margin-bottom: 5px; }
         .prod-price { color: var(--success); font-weight: bold; font-size: 16px; margin-top: auto; }
-        .prod-stock { 
-            font-size: 10px; position: absolute; top: 10px; right: 10px; 
-            background: #334155; padding: 2px 6px; border-radius: 4px; 
-        }
 
         /* CARRINHO */
-        .cart-section {
-            background: var(--card); border-radius: 15px; border: 1px solid var(--border);
-            padding: 20px; display: flex; flex-direction: column;
-        }
-
+        .cart-section { background: var(--card); border-radius: 15px; border: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
+        
         .client-area { margin-bottom: 15px; }
         .client-row { display: flex; gap: 5px; }
-        
         .client-input-wrapper { width: 100%; position: relative; }
-        .client-row input[list] {
-            width: 100%; padding: 10px; background: #1e293b; border: 1px solid var(--border);
-            color: #fff; border-radius: 5px; box-sizing: border-box;
-        }
+        .client-row input[list] { width: 100%; padding: 10px; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 5px; box-sizing: border-box; }
+        .btn-add-client { background: var(--success); color: #000; border: none; width: 40px; border-radius: 5px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
 
-        .btn-add-client {
-            background: var(--success); color: #000; border: none; width: 40px; border-radius: 5px;
-            cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;
-        }
-
-        .cart-items {
-            flex: 1; overflow-y: auto; margin-bottom: 15px; 
-            border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 0;
-        }
-
-        .cart-item {
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin-bottom: 8px;
-        }
+        .cart-items { flex: 1; overflow-y: auto; margin-bottom: 15px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 0; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin-bottom: 8px; }
         .item-info div { font-size: 13px; font-weight: bold; }
         .item-info small { font-size: 10px; color: #94a3b8; display: block; }
         .btn-remove { color: var(--danger); cursor: pointer; padding: 5px; }
 
-        /* TROCA */
-        .trade-in-box {
-            background: rgba(234, 179, 8, 0.1); border: 1px solid var(--warning);
-            padding: 10px; border-radius: 8px; margin-bottom: 15px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
+        /* TROCA & TOTAIS */
+        .trade-in-box { background: rgba(234, 179, 8, 0.1); border: 1px solid var(--warning); padding: 10px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
         .trade-in-text { font-size: 12px; color: var(--warning); }
-
-        /* TOTAIS E BOTÕES */
         .totals { margin-bottom: 15px; font-size: 14px; }
         .row { display: flex; justify-content: space-between; margin-bottom: 5px; }
         .total-final { font-size: 24px; font-weight: 900; color: var(--success); border-top: 1px solid var(--border); padding-top: 10px; }
 
+        /* BOTÕES */
         .btn-finalizar { background: var(--success); color: #000; padding: 15px; width: 100%; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
         .btn-troca { background: transparent; border: 1px solid var(--warning); color: var(--warning); padding: 10px; width: 100%; border-radius: 8px; margin-bottom: 10px; cursor: pointer; }
         .btn-recibo { background: #eab308; color: #000; padding: 15px; width: 100%; border: none; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; }
 
         /* MODAIS */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000;
-        }
-        .modal { 
-            background: var(--card); padding: 25px; border-radius: 15px; 
-            width: 400px; max-width: 90%; max-height: 90vh; overflow-y: auto;
-            border: 1px solid var(--border); 
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal { background: var(--card); padding: 25px; border-radius: 15px; width: 400px; max-width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
         .modal input, .modal select { width: 100%; padding: 10px; margin: 5px 0; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 5px; box-sizing: border-box; }
         .modal h3 { margin-top: 0; color: var(--accent); }
         .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        
         .btn-cancel { flex: 1; padding: 10px; background: #334155; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
         .btn-confirm { flex: 1; padding: 10px; background: var(--success); color: #000; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
 
-        @media (max-width: 768px) {
-            .main-grid { grid-template-columns: 1fr; overflow-y: auto; }
-            .cart-section { margin-top: 20px; }
-            body { height: auto; }
-        }
+        @media (max-width: 768px) { .main-grid { grid-template-columns: 1fr; overflow-y: auto; } .cart-section { margin-top: 20px; } body { height: auto; } }
     </style>
 </head>
 <body>
@@ -170,15 +95,16 @@
                 <input type="text" id="busca" placeholder="Buscar produto..." onkeyup="filtrarProdutos()">
                 <select id="filtro-cat" onchange="filtrarProdutos()" style="width: 150px;">
                     <option value="">Todas</option>
-                    <option value="Roupa">👕 Roupas</option>
-                    <option value="Celular">📱 Celulares</option>
-                    <option value="Perfume">🌸 Perfumes</option>
-                    <option value="Acessorio">🎧 Acessórios</option>
+                    <option value="celular">📱 Celulares</option>
+                    <option value="roupa">👕 Roupas</option>
+                    <option value="perfume">🌸 Perfumes</option>
+                    <option value="acessorio">🎧 Acessórios</option>
                 </select>
             </div>
 
             <div class="products-list" id="lista-produtos">
-                </div>
+                <div style="padding:20px; text-align:center; color:#888;">Carregando Estoque da Nuvem...</div>
+            </div>
         </div>
 
         <div class="cart-section">
@@ -186,11 +112,11 @@
                 <label style="font-size: 12px; color: #94a3b8;">Cliente (Busca por Nome, CPF ou Telefone):</label>
                 <div class="client-row">
                     <div class="client-input-wrapper">
-                        <input list="lista-clientes" id="cliente-input" placeholder="Digite para buscar..." autocomplete="off">
-                        <datalist id="lista-clientes">
+                        <input list="lista-clientes-db" id="cliente-input" placeholder="Digite para buscar..." autocomplete="off">
+                        <datalist id="lista-clientes-db">
                             </datalist>
                     </div>
-                    <button class="btn-add-client" onclick="abrirModalCliente()" title="Novo Cliente Completo">+</button>
+                    <button class="btn-add-client" onclick="abrirModalCliente()" title="Novo Cliente">+</button>
                 </div>
             </div>
 
@@ -222,16 +148,15 @@
         <div class="modal" style="border-color: var(--warning);">
             <h3 style="color: var(--warning);">Entrada de Troca</h3>
             
-            <label style="font-size: 11px; color: #999;">Modelo (Sugeridos do Estoque):</label>
-            <input list="lista-modelos-estoque" id="troca-modelo" placeholder="Digite ou selecione o modelo...">
-            <datalist id="lista-modelos-estoque">
-                </datalist>
+            <label style="font-size: 11px; color: #999;">Modelo (Sugeridos do seu Estoque):</label>
+            <input list="dl-modelos-estoque" id="troca-modelo" placeholder="Digite ou selecione...">
+            <datalist id="dl-modelos-estoque"></datalist>
 
             <div class="modal-grid">
                 <div>
                     <label style="font-size: 11px; color: #999;">Memória:</label>
                     <select id="troca-gb">
-                        <option value="">Selecione GB...</option>
+                        <option value="">Selecione...</option>
                         <option value="64GB">64GB</option>
                         <option value="128GB">128GB</option>
                         <option value="256GB">256GB</option>
@@ -240,12 +165,10 @@
                         <option value="Outro">Outro</option>
                     </select>
                 </div>
-
                 <div>
-                    <label style="font-size: 11px; color: #999;">Cor (Sugeridas do Estoque):</label>
-                    <input list="lista-cores-estoque" id="troca-cor" placeholder="Digite ou selecione...">
-                    <datalist id="lista-cores-estoque">
-                        </datalist>
+                    <label style="font-size: 11px; color: #999;">Cor (Sugeridas):</label>
+                    <input list="dl-cores-estoque" id="troca-cor" placeholder="Selecione...">
+                    <datalist id="dl-cores-estoque"></datalist>
                 </div>
             </div>
             
@@ -254,11 +177,11 @@
             
             <div class="modal-grid">
                 <div>
-                    <label style="font-size: 11px; color: #999;">Valor Avaliado (R$):</label>
+                    <label style="font-size: 11px; color: #999;">Valor (R$):</label>
                     <input type="number" id="troca-valor" placeholder="0,00">
                 </div>
                 <div>
-                    <label style="font-size: 11px; color: #999;">Saúde Bateria (%):</label>
+                    <label style="font-size: 11px; color: #999;">Bateria (%):</label>
                     <input type="number" id="troca-bateria" placeholder="100">
                 </div>
             </div>
@@ -281,9 +204,9 @@
             </div>
             <input type="email" id="novo-email" placeholder="Email">
 
-            <label style="font-size: 12px; color: #888; margin-top: 10px; display: block;">Endereço (Busca Automática)</label>
+            <label style="font-size: 12px; color: #888; margin-top: 10px; display: block;">Endereço</label>
             <div class="modal-grid">
-                <input type="text" id="novo-cep" placeholder="CEP (Só números)" onblur="buscarCep()">
+                <input type="text" id="novo-cep" placeholder="CEP" onblur="buscarCep()">
                 <input type="text" id="novo-numero" placeholder="Número">
             </div>
             <input type="text" id="novo-endereco" placeholder="Rua / Avenida">
@@ -300,354 +223,334 @@
     </div>
 
     <script>
-        // BANCOS DE DADOS
-        let db_produtos = JSON.parse(localStorage.getItem('db_estoque')) || [];
-        let db_clientes = JSON.parse(localStorage.getItem('db_clientes')) || [];
-        let db_vendas = JSON.parse(localStorage.getItem('db_vendas')) || [];
-        let db_caixa = JSON.parse(localStorage.getItem('db_caixa')) || [];
-        let db_fornecedores = JSON.parse(localStorage.getItem('db_fornecedores')) || [];
-
+        // VARIAVEIS GLOBAIS
+        let dbEstoque = [];
+        let dbClientes = [];
         let carrinho = [];
         let trocas = [];
+        let totalVendaGlobal = 0;
 
+        // 1. CONECTAR AO FIREBASE AO ABRIR
         window.onload = function() {
-            carregarProdutos();
-            carregarClientes();
+            // A. Carregar Estoque Disponível
+            db.collection("estoque").where("status", "==", "disponível").onSnapshot(snap => {
+                dbEstoque = [];
+                snap.forEach(doc => {
+                    dbEstoque.push({ id: doc.id, ...doc.data() });
+                });
+                renderizarProdutos();
+                popularSugestoesTroca(); // Popula as listas de Cores e Modelos
+            });
+
+            // B. Carregar Clientes
+            db.collection("clientes").orderBy("nome").onSnapshot(snap => {
+                dbClientes = [];
+                snap.forEach(doc => {
+                    dbClientes.push({ id: doc.id, ...doc.data() });
+                });
+                renderizarDatalistClientes();
+            });
+
             carregarOpcoesPagamento();
-            carregarDadosEstoqueParaTroca(); // NOVA FUNÇÃO PARA POPULAR MODELOS E CORES
         };
 
-        function carregarOpcoesPagamento() {
-            const select = document.getElementById('forma-pagamento');
-            select.innerHTML = `
-                <optgroup label="À Vista">
-                    <option value="Pix">Pix</option>
-                    <option value="Dinheiro">Dinheiro</option>
-                    <option value="Débito">Débito</option>
-                </optgroup>
-                <optgroup label="Crédito Parcelado">
-            `;
-            for (let i = 1; i <= 24; i++) {
-                const option = document.createElement('option');
-                option.value = `Crédito ${i}x`;
-                option.innerText = `Crédito ${i}x`;
-                select.appendChild(option);
-            }
-        }
-
-        function buscarCep() {
-            const cep = document.getElementById('novo-cep').value.replace(/\D/g, '');
-            if (cep.length === 8) {
-                document.getElementById('novo-endereco').value = "Buscando...";
-                fetch(`https://viacep.com.br/ws/${cep}/json/`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.erro) {
-                            document.getElementById('novo-endereco').value = data.logradouro;
-                            document.getElementById('novo-bairro').value = data.bairro;
-                            document.getElementById('novo-cidade').value = `${data.localidade} - ${data.uf}`;
-                            document.getElementById('novo-numero').focus();
-                        } else {
-                            alert("CEP não encontrado.");
-                            document.getElementById('novo-endereco').value = "";
-                        }
-                    })
-                    .catch(() => alert("Erro ao buscar CEP."));
-            }
-        }
-
-        // --- MODAIS ---
-        function abrirModalCliente() { document.getElementById('modal-cliente').style.display = 'flex'; }
-        function fecharModalCliente() { document.getElementById('modal-cliente').style.display = 'none'; }
-
-        function salvarNovoCliente() {
-            const nome = document.getElementById('novo-nome').value;
-            if (!nome) { alert("Nome é obrigatório!"); return; }
-
-            const novoCliente = {
-                id: Date.now(),
-                nome: nome,
-                contato: document.getElementById('novo-zap').value,
-                cpf: document.getElementById('novo-cpf').value,
-                email: document.getElementById('novo-email').value,
-                cep: document.getElementById('novo-cep').value,
-                endereco: document.getElementById('novo-endereco').value,
-                numero: document.getElementById('novo-numero').value,
-                bairro: document.getElementById('novo-bairro').value,
-                cidade: document.getElementById('novo-cidade').value,
-                historico: []
-            };
-
-            db_clientes.push(novoCliente);
-            localStorage.setItem('db_clientes', JSON.stringify(db_clientes));
+        // 2. RENDERIZAR PRODUTOS (DO FIREBASE)
+        function renderizarProdutos() {
+            const div = document.getElementById('lista-produtos');
+            div.innerHTML = "";
             
-            carregarClientes();
-            document.getElementById('cliente-input').value = nome; 
-            
-            document.querySelectorAll('#modal-cliente input').forEach(input => input.value = '');
-            fecharModalCliente();
-            alert("Cliente cadastrado com sucesso!");
-        }
-
-        // --- PRODUTOS ---
-        function carregarProdutos() {
-            const lista = document.getElementById('lista-produtos');
-            lista.innerHTML = '';
-            
-            // SE O ESTOQUE ESTIVER VAZIO
-            if (db_produtos.length === 0) {
-                lista.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 20px;">Estoque vazio ou erro ao carregar. Verifique o menu Estoque.</div>';
+            if (dbEstoque.length === 0) {
+                div.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 20px;">Nenhum produto disponível no estoque.</div>';
                 return;
             }
 
-            db_produtos.forEach(prod => {
-                if (prod && prod.qtd > 0) {
-                    const div = document.createElement('div');
-                    div.className = 'product-card';
-                    div.onclick = () => adicionarAoCarrinho(prod.id);
-                    
-                    let iconCat = '📦';
-                    if(prod.categoria === 'Celular') iconCat = '📱';
-                    if(prod.categoria === 'Acessorio') iconCat = '🎧';
-                    if(prod.categoria === 'Perfume') iconCat = '🌸';
-                    if(prod.categoria === 'Roupa') iconCat = '👕';
+            dbEstoque.forEach(p => {
+                const el = document.createElement('div');
+                el.className = 'product-card';
+                el.onclick = () => adicionarAoCarrinho(p);
 
-                    div.innerHTML = `
-                        <span class="prod-cat-tag">${iconCat} ${prod.categoria || 'Outros'}</span>
-                        <span class="prod-stock">${prod.qtd} un</span>
-                        <span class="prod-name">${prod.modelo}</span>
-                        <span class="prod-detail">${prod.cor} | ${prod.gb || ''}</span>
-                        <span class="prod-price">R$ ${parseFloat(prod.pvenda).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
-                        <div style="display:none;">${prod.categoria} ${prod.modelo} ${prod.cor}</div>
-                    `;
-                    lista.appendChild(div);
-                }
+                let cat = p.categoria || 'outros';
+                let icon = '📦';
+                if(cat.includes('celular')) icon = '📱';
+                if(cat.includes('roupa')) icon = '👕';
+                if(cat.includes('perfume')) icon = '🌸';
+                if(cat.includes('acessorio')) icon = '🎧';
+
+                let nome = p.modelo || p.nomeP || 'Produto sem nome';
+                let detalhe = p.cor ? `${p.cor} ${p.gb || ''}` : '';
+
+                el.innerHTML = `
+                    <span class="prod-cat-tag">${icon} ${cat.toUpperCase()}</span>
+                    <span class="prod-name">${nome}</span>
+                    <span class="prod-detail">${detalhe}</span>
+                    <span class="prod-price">R$ ${parseFloat(p.venda || 0).toFixed(2)}</span>
+                    <div style="display:none;">${cat} ${nome} ${p.cor}</div> `;
+                div.appendChild(el);
             });
         }
 
+        // 3. FILTRO DE BUSCA (LOCALMENTE)
         function filtrarProdutos() {
             const termo = document.getElementById('busca').value.toLowerCase();
-            const cat = document.getElementById('filtro-cat').value; 
+            const catFiltro = document.getElementById('filtro-cat').value;
             
             const cards = document.querySelectorAll('.product-card');
-
             cards.forEach(card => {
-                const textoCard = card.innerText.toLowerCase(); 
-                const catTag = card.querySelector('.prod-cat-tag') ? card.querySelector('.prod-cat-tag').innerText.toLowerCase() : "";
+                const texto = card.innerText.toLowerCase();
+                // A classe prod-cat-tag contem a categoria escrita
+                const tagCat = card.querySelector('.prod-cat-tag').innerText.toLowerCase();
                 
-                const matchNome = textoCard.includes(termo);
-                const matchCat = cat === "" || catTag.includes(cat.toLowerCase());
+                const matchNome = texto.includes(termo);
+                const matchCat = catFiltro === "" || tagCat.includes(catFiltro);
 
                 card.style.display = (matchNome && matchCat) ? 'flex' : 'none';
             });
         }
 
-        // --- CLIENTES ---
-        function carregarClientes() {
-            const datalist = document.getElementById('lista-clientes');
-            datalist.innerHTML = ''; 
-            
-            if (db_clientes.length > 0) {
-                db_clientes.forEach(cli => {
-                    const opt = document.createElement('option');
-                    // O value é o que o cliente seleciona
-                    opt.value = cli.nome;
-                    // O innerText ajuda na busca
-                    let info = [];
-                    if(cli.cpf) info.push(cli.cpf);
-                    if(cli.contato) info.push(cli.contato);
-                    if(info.length > 0) opt.innerText = info.join(" - ");
-                    
-                    datalist.appendChild(opt);
-                });
-            }
+        // 4. CLIENTES E DATALIST
+        function renderizarDatalistClientes() {
+            const dl = document.getElementById('lista-clientes-db');
+            dl.innerHTML = "";
+            dbClientes.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.nome;
+                let extra = [];
+                if(c.cpf) extra.push(c.cpf);
+                if(c.whats) extra.push(c.whats);
+                opt.innerText = extra.length > 0 ? extra.join(' - ') : '';
+                dl.appendChild(opt);
+            });
         }
 
-        function adicionarAoCarrinho(id) {
-            const produto = db_produtos.find(p => p.id === id);
+        // 5. CARRINHO
+        function adicionarAoCarrinho(produto) {
             carrinho.push(produto);
-            atualizarCarrinho();
+            atualizarTotais();
         }
-
         function removerDoCarrinho(index) {
             carrinho.splice(index, 1);
-            atualizarCarrinho();
+            atualizarTotais();
         }
 
-        // --- LÓGICA DE TROCA ---
-        
-        // ESSA FUNÇÃO BUSCA CORES E MODELOS DIRETO DO SEU ESTOQUE
-        function carregarDadosEstoqueParaTroca() {
-            const listaModelos = document.getElementById('lista-modelos-estoque');
-            const listaCores = document.getElementById('lista-cores-estoque');
-            
-            listaModelos.innerHTML = '';
-            listaCores.innerHTML = '';
+        // 6. TROCAS (SUGESTÕES E MODAL)
+        function popularSugestoesTroca() {
+            // Pega modelos e cores únicos do estoque atual para sugerir
+            const modelos = [...new Set(dbEstoque.map(p => p.modelo).filter(Boolean))];
+            const cores = [...new Set(dbEstoque.map(p => p.cor).filter(Boolean))];
 
-            // Extrai modelos únicos e cores únicas do banco de dados
-            const modelosUnicos = [...new Set(db_produtos.map(p => p.modelo).filter(Boolean))];
-            const coresUnicas = [...new Set(db_produtos.map(p => p.cor).filter(Boolean))];
+            const dlMod = document.getElementById('dl-modelos-estoque');
+            const dlCor = document.getElementById('dl-cores-estoque');
+            dlMod.innerHTML = ""; dlCor.innerHTML = "";
 
-            modelosUnicos.forEach(mod => {
-                const opt = document.createElement('option');
-                opt.value = mod;
-                listaModelos.appendChild(opt);
-            });
-
-            coresUnicas.forEach(cor => {
-                const opt = document.createElement('option');
-                opt.value = cor;
-                listaCores.appendChild(opt);
-            });
+            modelos.sort().forEach(m => dlMod.innerHTML += `<option value="${m}">`);
+            cores.sort().forEach(c => dlCor.innerHTML += `<option value="${c}">`);
         }
 
         function abrirModalTroca() { document.getElementById('modal-troca').style.display = 'flex'; }
         function fecharModalTroca() { document.getElementById('modal-troca').style.display = 'none'; }
 
         function confirmarTroca() {
-            const modelo = document.getElementById('troca-modelo').value;
-            const valor = parseFloat(document.getElementById('troca-valor').value);
-            const bateria = document.getElementById('troca-bateria').value;
-            const imei = document.getElementById('troca-imei').value;
-            const cor = document.getElementById('troca-cor').value;
-            const gb = document.getElementById('troca-gb').value;
+            const troca = {
+                modelo: document.getElementById('troca-modelo').value,
+                gb: document.getElementById('troca-gb').value,
+                cor: document.getElementById('troca-cor').value,
+                imei: document.getElementById('troca-imei').value,
+                valor: parseFloat(document.getElementById('troca-valor').value) || 0,
+                bateria: document.getElementById('troca-bateria').value
+            };
 
-            if (modelo && valor && imei && cor && gb) {
-                if(imei.length !== 15) {
-                    alert("O IMEI deve ter exatamente 15 dígitos.");
-                    return;
-                }
+            if(!troca.modelo || !troca.valor || !troca.imei) return alert("Preencha Modelo, IMEI e Valor!");
+            if(troca.imei.length !== 15) return alert("IMEI deve ter 15 dígitos.");
 
-                trocas.push({ modelo, valor, bateria, imei, cor, gb });
-                fecharModalTroca();
-                atualizarCarrinho();
-                
-                // Limpa campos
-                document.getElementById('troca-modelo').value = '';
-                document.getElementById('troca-valor').value = '';
-                document.getElementById('troca-bateria').value = '';
-                document.getElementById('troca-imei').value = '';
-                document.getElementById('troca-cor').value = '';
-                document.getElementById('troca-gb').value = '';
-            } else { alert("Preencha todos os campos da troca!"); }
+            trocas.push(troca);
+            fecharModalTroca();
+            atualizarTotais();
+            
+            // Limpa
+            document.querySelectorAll('#modal-troca input').forEach(i => i.value = '');
         }
 
         function removerTroca(index) {
             trocas.splice(index, 1);
-            atualizarCarrinho();
+            atualizarTotais();
         }
 
-        function atualizarCarrinho() {
-            const divCarrinho = document.getElementById('carrinho-lista');
-            const divTrocas = document.getElementById('lista-trocas');
-            
-            divCarrinho.innerHTML = '';
-            let subtotal = 0;
-            carrinho.forEach((item, index) => {
-                subtotal += parseFloat(item.pvenda);
-                divCarrinho.innerHTML += `
+        function atualizarTotais() {
+            const divC = document.getElementById('carrinho-lista');
+            const divT = document.getElementById('lista-trocas');
+            divC.innerHTML = ""; divT.innerHTML = "";
+
+            let sub = 0;
+            carrinho.forEach((item, i) => {
+                sub += parseFloat(item.venda || 0);
+                divC.innerHTML += `
                     <div class="cart-item">
-                        <div class="item-info"><div>${item.modelo}</div><small>R$ ${item.pvenda}</small></div>
-                        <i class="fas fa-trash btn-remove" onclick="removerDoCarrinho(${index})"></i>
+                        <div class="item-info"><div>${item.modelo || item.nomeP}</div><small>R$ ${parseFloat(item.venda).toFixed(2)}</small></div>
+                        <i class="fas fa-trash btn-remove" onclick="removerDoCarrinho(${i})"></i>
                     </div>`;
             });
 
-            divTrocas.innerHTML = '';
-            let totalTroca = 0;
-            trocas.forEach((item, index) => {
-                totalTroca += item.valor;
-                divTrocas.innerHTML += `
+            let desc = 0;
+            trocas.forEach((item, i) => {
+                desc += item.valor;
+                divT.innerHTML += `
                     <div class="trade-in-box">
-                        <div class="trade-in-text">
-                            <strong>ENTRADA:</strong> ${item.modelo} <br>
-                            <small>${item.cor} | ${item.gb} | Bat: ${item.bateria}% | IMEI: ${item.imei}</small><br>
-                            <small>Valor: R$ ${item.valor}</small>
-                        </div>
-                        <i class="fas fa-times btn-remove" onclick="removerTroca(${index})"></i>
+                        <div class="trade-in-text"><strong>ENTRADA:</strong> ${item.modelo}<br><small>IMEI: ${item.imei} | R$ ${item.valor}</small></div>
+                        <i class="fas fa-times btn-remove" onclick="removerTroca(${i})"></i>
                     </div>`;
             });
 
-            const totalFinal = subtotal - totalTroca;
-            window.totalVendaGlobal = totalFinal; 
-            document.getElementById('valor-subtotal').innerText = subtotal.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
-            document.getElementById('valor-desconto').innerText = '- ' + totalTroca.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
-            document.getElementById('valor-total').innerText = totalFinal.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+            totalVendaGlobal = sub - desc;
+            document.getElementById('valor-subtotal').innerText = `R$ ${sub.toFixed(2)}`;
+            document.getElementById('valor-desconto').innerText = `- R$ ${desc.toFixed(2)}`;
+            document.getElementById('valor-total').innerText = `R$ ${totalVendaGlobal.toFixed(2)}`;
         }
 
-        function gerarRecibo() {
-            const clienteNome = document.getElementById('cliente-input').value;
+        // 7. FINALIZAR VENDA (LÓGICA COMPLEXA DE BANCO)
+        async function finalizarVenda() {
+            const nomeCliente = document.getElementById('cliente-input').value;
             const pagto = document.getElementById('forma-pagamento').value;
-            if (carrinho.length === 0) { alert("Carrinho vazio!"); return; }
-            if (!clienteNome) { alert("Selecione um cliente!"); return; }
 
-            let itensRecibo = carrinho.map(i => ({ nome: i.modelo, desc: i.cor, preco: i.pvenda }));
+            if(carrinho.length === 0) return alert("Carrinho vazio!");
+            if(!nomeCliente) return alert("Selecione um cliente!");
+
+            if(!confirm(`Confirmar venda de R$ ${totalVendaGlobal.toFixed(2)} para ${nomeCliente}?`)) return;
+
+            try {
+                const batch = db.batch(); // Operação em lote (atômica)
+                
+                // 1. Marcar produtos como VENDIDOS
+                carrinho.forEach(item => {
+                    const ref = db.collection("estoque").doc(item.id);
+                    batch.update(ref, { status: "vendido", dataVenda: Date.now(), clienteVenda: nomeCliente });
+                });
+
+                // 2. Dar entrada nas TROCAS
+                trocas.forEach(t => {
+                    const ref = db.collection("estoque").doc(); // Novo ID
+                    batch.set(ref, {
+                        categoria: 'celular',
+                        modelo: `${t.modelo} (TROCA ${nomeCliente})`,
+                        marca: 'Apple',
+                        cor: t.cor,
+                        gb: t.gb,
+                        imei1: t.imei,
+                        bateria: t.bateria,
+                        custo: t.valor,
+                        venda: 0, // A definir depois
+                        status: 'disponível',
+                        fornecedor: `Cliente: ${nomeCliente}`,
+                        dataEntrada: Date.now(),
+                        obs: 'Entrada via troca no PDV'
+                    });
+                });
+
+                // 3. Registrar a VENDA
+                const vendaRef = db.collection("vendas").doc();
+                batch.set(vendaRef, {
+                    cliente: nomeCliente,
+                    data: Date.now(),
+                    itens: carrinho.map(c => c.modelo || c.nomeP),
+                    trocas: trocas.map(t => t.modelo),
+                    total: totalVendaGlobal,
+                    pagamento: pagto
+                });
+
+                await batch.commit();
+                alert("Venda realizada com sucesso!");
+                window.location.reload();
+
+            } catch(e) {
+                alert("Erro ao processar venda: " + e.message);
+            }
+        }
+
+        // 8. GERAR RECIBO (Mantemos localStorage pois é página temporária)
+        function gerarRecibo() {
+            const nomeCliente = document.getElementById('cliente-input').value;
+            if(!nomeCliente) return alert("Informe o cliente!");
+            if(carrinho.length === 0) return alert("Carrinho vazio!");
+
+            // Tenta achar dados completos do cliente na lista baixada
+            const clienteFull = dbClientes.find(c => c.nome === nomeCliente) || { nome: nomeCliente };
+
+            let itensRecibo = carrinho.map(i => ({ 
+                nome: i.modelo || i.nomeP, 
+                desc: i.cor || '', 
+                preco: i.venda 
+            }));
+            
             trocas.forEach(t => {
-                itensRecibo.push({ 
-                    nome: "TROCA: " + t.modelo, 
-                    desc: `${t.cor} ${t.gb} - IMEI: ${t.imei}`, 
-                    preco: -t.valor 
+                itensRecibo.push({
+                    nome: "TROCA: " + t.modelo,
+                    desc: `IMEI: ${t.imei} | ${t.gb}`,
+                    preco: -t.valor
                 });
             });
 
-            const clienteFull = db_clientes.find(c => c.nome === clienteNome) || { nome: clienteNome };
-
-            const dadosVenda = {
-                cliente: clienteNome,
-                cpf: clienteFull.cpf || "",
-                tel: clienteFull.contato || "",
-                endereco: clienteFull.endereco ? `${clienteFull.endereco}, ${clienteFull.numero} - ${clienteFull.bairro}` : "",
+            const dados = {
+                cliente: clienteFull.nome,
+                cpf: clienteFull.cpf || '',
+                tel: clienteFull.whats || '',
+                endereco: clienteFull.logradouro ? `${clienteFull.logradouro}, ${clienteFull.numero} - ${clienteFull.bairro}` : '',
                 itens: itensRecibo,
-                total: window.totalVendaGlobal,
-                pagamento: pagto,
+                total: totalVendaGlobal,
+                pagamento: document.getElementById('forma-pagamento').value,
                 data: new Date().toLocaleDateString('pt-BR')
             };
 
-            localStorage.setItem('dadosRecibo', JSON.stringify(dadosVenda));
+            localStorage.setItem('dadosRecibo', JSON.stringify(dados));
             window.location.href = 'orcamento.html';
         }
 
-        function finalizarVenda() {
-            const clienteNome = document.getElementById('cliente-input').value;
-            if (carrinho.length === 0) { alert("Carrinho vazio!"); return; }
-            if (!clienteNome) { alert("Selecione um cliente!"); return; }
-
-            carrinho.forEach(item => {
-                const prod = db_produtos.find(p => p.id === item.id);
-                if (prod) prod.qtd--;
-            });
-
-            trocas.forEach(troca => {
-                db_produtos.push({
-                    id: Date.now() + Math.random(),
-                    modelo: `${troca.modelo} (TROCA: ${clienteNome})`,
-                    cor: troca.cor, 
-                    gb: troca.gb, 
-                    categoria: "Celular",
-                    pcusto: troca.valor, pvenda: 0, qtd: 1,
-                    dataEntrada: new Date().toLocaleDateString('pt-BR'),
-                    obs: `IMEI: ${troca.imei} | Bat: ${troca.bateria}% | Origem: Troca`
+        // 9. CADASTRO DE CLIENTE (CONECTADO AO FIREBASE)
+        function abrirModalCliente() { document.getElementById('modal-cliente').style.display = 'flex'; }
+        function fecharModalCliente() { document.getElementById('modal-cliente').style.display = 'none'; }
+        
+        function buscarCep() {
+            let cep = document.getElementById('novo-cep').value.replace(/\D/g, '');
+            if(cep.length === 8) {
+                fetch(`https://viacep.com.br/ws/${cep}/json/`).then(r=>r.json()).then(d=>{
+                    if(!d.erro){
+                        document.getElementById('novo-endereco').value = d.logradouro;
+                        document.getElementById('novo-bairro').value = d.bairro;
+                        document.getElementById('novo-cidade').value = `${d.localidade}-${d.uf}`;
+                        document.getElementById('novo-numero').focus();
+                    }
                 });
-            });
-            
-             if (trocas.length > 0) {
-                const fornecedorExiste = db_fornecedores.find(f => f.nome === clienteNome);
-                if (!fornecedorExiste) {
-                    db_fornecedores.push({ id: Date.now(), nome: clienteNome, contato: "Cliente da Loja", tipo: "Cliente / Troca" });
-                    localStorage.setItem('db_fornecedores', JSON.stringify(db_fornecedores));
-                }
             }
+        }
 
-            db_vendas.push({
-                id: Date.now(), data: new Date().toLocaleDateString('pt-BR'),
-                cliente: clienteNome, total: window.totalVendaGlobal,
-                itens: carrinho.map(i=>i.modelo).join(', '), trocas: trocas.map(t=>t.modelo).join(', '),
-                pagamento: document.getElementById('forma-pagamento').value
-            });
+        async function salvarNovoCliente() {
+            const nome = document.getElementById('novo-nome').value;
+            if(!nome) return alert("Nome obrigatório");
 
-            localStorage.setItem('db_estoque', JSON.stringify(db_produtos));
-            localStorage.setItem('db_vendas', JSON.stringify(db_vendas));
-            alert("VENDA FINALIZADA!");
-            window.location.reload();
+            const novo = {
+                nome: nome,
+                cpf: document.getElementById('novo-cpf').value,
+                whats: document.getElementById('novo-zap').value,
+                email: document.getElementById('novo-email').value,
+                cep: document.getElementById('novo-cep').value,
+                logradouro: document.getElementById('novo-endereco').value,
+                numero: document.getElementById('novo-numero').value,
+                bairro: document.getElementById('novo-bairro').value,
+                cidade: document.getElementById('novo-cidade').value
+            };
+
+            try {
+                await db.collection("clientes").add(novo);
+                alert("Cliente cadastrado!");
+                document.getElementById('cliente-input').value = nome; // Já seleciona
+                fecharModalCliente();
+            } catch(e) {
+                alert("Erro ao salvar: " + e.message);
+            }
+        }
+
+        function carregarOpcoesPagamento() {
+            const s = document.getElementById('forma-pagamento');
+            s.innerHTML = `<optgroup label="À Vista"><option>Pix</option><option>Dinheiro</option><option>Débito</option></optgroup><optgroup label="Crédito">`;
+            for(let i=1; i<=18; i++) s.innerHTML += `<option>Crédito ${i}x</option>`;
         }
     </script>
 </body>
