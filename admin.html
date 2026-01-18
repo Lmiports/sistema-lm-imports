@@ -1,216 +1,382 @@
-<!DOCTYPE html><html lang="pt-br"><head>    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>VÉRTICE - ADMINISTRAÇÃO PRO</title>    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>    <script src="js/firebase-config.js"></script>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VÉRTICE | Dashboard Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+
     <style>
-        :root { --bg: #020617; --card: #0f172a; --accent: #3b82f6; --border: #1e293b; --text: #f8fafc; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; }
+        :root {
+            --bg: #020617; --card: #0f172a; --accent: #00e0ff; --text: #f8fafc;
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b; 
+            --purple: #8b5cf6; --pink: #ec4899; --gold: #d97706; --border: #1e293b;
+        }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        
-        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .login-box { background: var(--card); padding: 40px; border: 1px solid var(--accent); border-radius: 12px; text-align: center; width: 300px; box-shadow: 0 0 30px rgba(59, 130, 246, 0.2); }
-        .login-input { width: 100%; padding: 15px; background: #000; border: 1px solid #333; color: #fff; font-size: 18px; text-align: center; margin-bottom: 20px; border-radius: 8px; box-sizing: border-box; }
-        .login-btn { width: 100%; padding: 15px; background: var(--accent); color: #fff; border: none; font-weight: bold; border-radius: 8px; cursor: pointer; text-transform: uppercase; width: 100%; }
 
         .sidebar { width: 250px; background: #000; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
-        .logo { color: var(--accent); text-align: center; font-weight: 900; font-size: 22px; margin-bottom: 40px; letter-spacing: 3px; }
-        .nav-item { padding: 15px; color: #64748b; text-decoration: none; border-radius: 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; font-weight: 600; }
-        .nav-item:hover, .nav-item.active { background: var(--accent); color: #fff; }
+        .logo { color: var(--accent); text-align: center; font-weight: bold; font-size: 24px; margin-bottom: 40px; letter-spacing: 2px; }
+        .nav-item { padding: 15px; color: #94a3b8; text-decoration: none; border-radius: 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
+        .nav-item:hover, .nav-item.active { background: var(--accent); color: #fff; box-shadow: 0 0 15px rgba(0, 224, 255, 0.3); }
 
-        .content { flex: 1; padding: 30px; overflow-y: auto; display: none; }
+        .content { flex: 1; padding: 20px; overflow-y: auto; }
+        
+        .header-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .header-title h2 { margin: 0; }
+        
+        /* FILTROS DE TEMPO */
+        .filter-group { display: flex; background: var(--card); padding: 5px; border-radius: 8px; border: 1px solid var(--border); }
+        .filter-btn { background: transparent; border: none; color: #94a3b8; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; font-size: 12px; }
+        .filter-btn.active { background: var(--accent); color: #000; }
 
-        /* TABS DE CATEGORIA */
-        .filter-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-        .f-tab { padding: 8px 16px; background: #1e293b; border: 1px solid var(--border); border-radius: 20px; font-size: 11px; cursor: pointer; color: #94a3b8; white-space: nowrap; text-transform: uppercase; font-weight: bold; }
-        .f-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+        /* SEÇÃO DE ESTOQUE (VALUATION) */
+        .section-title { font-size: 14px; color: #94a3b8; margin: 20px 0 10px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+        
+        .stock-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stock-card { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); padding: 15px; border-radius: 10px; display: flex; flex-direction: column; }
+        .stock-card small { color: #94a3b8; font-size: 10px; text-transform: uppercase; margin-top: 5px; }
+        .stock-card strong { font-size: 16px; color: #fff; margin-top: 2px; }
+        .stock-card .icon { font-size: 18px; margin-bottom: 5px; }
 
-        .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-bottom: 30px; }
-        .kpi-card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); position: relative; }
-        .kpi-title { font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: bold; }
-        .kpi-value { font-size: 20px; font-weight: 900; margin-top: 10px; color: #fff; }
+        /* KPI CARDS (VENDAS) */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .kpi-card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+        .kpi-card::after { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); }
+        .kpi-card.green::after { background: var(--success); }
+        .kpi-card.red::after { background: var(--danger); }
+        .kpi-card.yellow::after { background: var(--warning); }
+        .kpi-card.purple::after { background: var(--purple); }
+        
+        .kpi-title { font-size: 12px; color: #94a3b8; text-transform: uppercase; }
+        .kpi-value { font-size: 24px; font-weight: bold; margin: 10px 0; }
+        .kpi-sub { font-size: 11px; opacity: 0.7; }
 
-        .dashboard-row { display: grid; grid-template-columns: 2fr 1.2fr; gap: 20px; margin-bottom: 20px; }
-        .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; }
-        .filter-bar { background: #1e293b; padding: 10px; border-radius: 8px; display: flex; gap: 10px; align-items: center; margin-bottom: 15px; }
-        .date-input { background: #000; border: 1px solid var(--border); color: #fff; padding: 8px; border-radius: 6px; font-size: 12px; }
+        /* GRÁFICOS */
+        .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .chart-box { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); height: 300px; }
 
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; color: #64748b; font-size: 10px; text-transform: uppercase; border-bottom: 1px solid var(--border); padding: 12px 8px; }
-        td { padding: 12px 8px; border-bottom: 1px solid var(--border); font-size: 13px; color: #cbd5e1; }
-        .badge-troca { background: rgba(245, 158, 11, 0.2); color: var(--warning); padding: 2px 6px; border-radius: 4px; font-size: 9px; border: 1px solid var(--warning); text-transform: uppercase; }
+        /* TABELA */
+        .table-box { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; color: #94a3b8; padding: 10px; border-bottom: 1px solid var(--border); }
+        td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
         @media (max-width: 768px) {
             body { flex-direction: column; overflow: auto; height: auto; }
             .sidebar { display: none; }
-            .content { padding: 15px; display: block; }
-            .kpi-grid { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; }
-            .kpi-card { min-width: 150px; }
-            .dashboard-row { grid-template-columns: 1fr; }
-            .panel { overflow-x: auto; }
+            .charts-grid { grid-template-columns: 1fr; }
+            .stock-grid { grid-template-columns: 1fr 1fr; } /* 2 colunas no mobile para estoque */
         }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <div class="login-box">
-            <h2 style="color:var(--accent); letter-spacing: 2px;">VÉRTICE ADMIN</h2>
-            <input type="password" id="admin-pass" class="login-input" placeholder="Senha Mestra">
-            <button class="login-btn" onclick="verificarSenha()">ENTRAR</button>
-            <p id="msg-error" style="color:var(--danger); font-size:12px; margin-top:10px; display:none;">Senha incorreta!</p>
-        </div>
-    </div>
-
     <aside class="sidebar">
         <div class="logo">VÉRTICE</div>
         <nav>
-            <a href="index.html" class="nav-item"><i class="fas fa-home"></i> Início</a>
-            <a href="admin.html" class="nav-item active"><i class="fas fa-chart-pie"></i> Painel Financeiro</a>
+            <a href="admin.html" class="nav-item active"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="vendas.html" class="nav-item"><i class="fas fa-cash-register"></i> PDV</a>
+            <a href="estoque.html" class="nav-item"><i class="fas fa-box"></i> Estoque</a>
+            <a href="clientes.html" class="nav-item"><i class="fas fa-users"></i> Clientes</a>
         </nav>
     </aside>
 
-    <main class="content" id="app-content">
-        <header style="margin-bottom:20px;">
-            <h1 style="font-size:24px; font-weight:900; margin:0; color:var(--accent);">ANÁLISE FINANCEIRA</h1>
-        </header>
-
-        <div class="filter-tabs">
-            <div class="f-tab active" onclick="filtrarKPIs('todos', this)">Todos</div>
-            <div class="f-tab" onclick="filtrarKPIs('celular', this)">Celulares</div>
-            <div class="f-tab" onclick="filtrarKPIs('roupa', this)">Roupas</div>
-            <div class="f-tab" onclick="filtrarKPIs('perfume', this)">Perfumes</div>
-            <div class="f-tab" onclick="filtrarKPIs('acessorio', this)">Acessórios</div>
+    <main class="content">
+        <div class="header-title">
+            <h2>Dashboard Executivo</h2>
+            
+            <div class="filter-group">
+                <button class="filter-btn" onclick="mudarFiltro('semanal', this)">7 Dias</button>
+                <button class="filter-btn active" onclick="mudarFiltro('mensal', this)">Mês Atual</button>
+                <button class="filter-btn" onclick="mudarFiltro('anual', this)">Ano Atual</button>
+                <button class="filter-btn" onclick="mudarFiltro('todos', this)">Tudo</button>
+            </div>
         </div>
 
+        <div class="section-title"><i class="fas fa-cubes"></i> Valuation de Estoque (Disponível)</div>
+        <div class="stock-grid">
+            <div class="stock-card" style="border-bottom: 2px solid var(--accent);">
+                <i class="fas fa-mobile-alt icon" style="color: var(--accent);"></i>
+                <small>Celulares</small>
+                <strong id="val-celular">R$ 0,00</strong>
+            </div>
+            <div class="stock-card" style="border-bottom: 2px solid var(--purple);">
+                <i class="fas fa-headphones icon" style="color: var(--purple);"></i>
+                <small>Acessórios</small>
+                <strong id="val-acessorio">R$ 0,00</strong>
+            </div>
+            <div class="stock-card" style="border-bottom: 2px solid var(--pink);">
+                <i class="fas fa-tshirt icon" style="color: var(--pink);"></i>
+                <small>Roupas</small>
+                <strong id="val-roupa">R$ 0,00</strong>
+            </div>
+            <div class="stock-card" style="border-bottom: 2px solid var(--gold);">
+                <i class="fas fa-spray-can icon" style="color: var(--gold);"></i>
+                <small>Perfumes</small>
+                <strong id="val-perfume">R$ 0,00</strong>
+            </div>
+            <div class="stock-card" style="border-bottom: 2px solid var(--success);">
+                <i class="fas fa-wallet icon" style="color: var(--success);"></i>
+                <small>Total Geral</small>
+                <strong id="val-total">R$ 0,00</strong>
+            </div>
+        </div>
+
+        <div class="section-title"><i class="fas fa-chart-line"></i> Performance de Vendas (Período Selecionado)</div>
         <div class="kpi-grid">
-            <div class="kpi-card"><div class="kpi-title">Estoque Qtd</div><div class="kpi-value" id="kpi-qtd">0</div></div>
-            <div class="kpi-card" style="border-left: 4px solid var(--danger);"><div class="kpi-title" style="color:var(--danger)">Custo</div><div class="kpi-value" id="kpi-custo" style="color:var(--danger)">R$ 0,00</div></div>
-            <div class="kpi-card" style="border-left: 4px solid var(--accent);"><div class="kpi-title" style="color:var(--accent)">Venda</div><div class="kpi-value" id="kpi-venda" style="color:var(--accent)">R$ 0,00</div></div>
-            <div class="kpi-card" style="border-left: 4px solid var(--success);"><div class="kpi-title" style="color:var(--success)">Lucro</div><div class="kpi-value" id="kpi-lucro" style="color:var(--success)">R$ 0,00</div></div>
-            <div class="kpi-card" style="border-left: 4px solid var(--warning);"><div class="kpi-title" style="color:var(--warning)">Margem</div><div class="kpi-value" id="kpi-margem" style="color:var(--warning)">0%</div></div>
-        </div>
-
-        <div class="dashboard-row">
-            <div class="panel">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <h3 style="margin:0; font-size:15px; color:var(--success); font-weight:900;">HISTÓRICO DE VENDAS</h3>
-                    <h3 id="total-periodo" style="margin:0; font-size:18px; color:var(--success)">R$ 0,00</h3>
-                </div>
-                <div class="filter-bar">
-                    <input type="date" id="dataInicio" class="date-input">
-                    <input type="date" id="dataFim" class="date-input">
-                    <button onclick="carregarVendas()" style="background:var(--accent); border:none; color:#fff; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:11px;">FILTRAR</button>
-                </div>
-                <div style="flex:1; overflow-y:auto; max-height:400px;">
-                    <table>
-                        <thead><tr><th>Data</th><th>Cliente</th><th style="text-align:right;">Total</th></tr></thead>
-                        <tbody id="lista-vendas"></tbody>
-                    </table>
-                </div>
+            <div class="kpi-card green">
+                <div class="kpi-title">Faturamento Líquido (Caixa)</div>
+                <div class="kpi-value" id="kpi-faturamento">R$ 0,00</div>
+                <div class="kpi-sub">Dinheiro, Pix e Cartão</div>
+            </div>
+            
+            <div class="kpi-card yellow">
+                <div class="kpi-title">Entrada em Trocas</div>
+                <div class="kpi-value" id="kpi-trocas">R$ 0,00</div>
+                <div class="kpi-sub" id="kpi-qtd-trocas">0 aparelhos</div>
             </div>
 
-            <div style="display:flex; flex-direction:column; gap:20px;">
-                <div class="panel">
-                    <h3 style="margin:0 0 10px 0; font-size:11px; color:#94a3b8; font-weight:900;">MIX DE CATEGORIAS</h3>
-                    <div style="height:180px;"><canvas id="graficoEstoque"></canvas></div>
-                </div>
-                <div class="panel" style="flex:1;">
-                    <h3 style="margin:0 0 10px 0; font-size:11px; color:var(--warning); font-weight:900;">ÚLTIMAS TROCAS</h3>
-                    <div style="overflow-y:auto; max-height:300px;">
-                        <table style="min-width: unset;"><tbody id="lista-trocas"></tbody></table>
-                    </div>
-                </div>
+            <div class="kpi-card red">
+                <div class="kpi-title">Descontos Aplicados</div>
+                <div class="kpi-value" id="kpi-descontos">R$ 0,00</div>
+                <div class="kpi-sub">Negociações</div>
+            </div>
+
+            <div class="kpi-card purple">
+                <div class="kpi-title">Brindes Concedidos</div>
+                <div class="kpi-value" id="kpi-brindes">0</div>
+                <div class="kpi-sub">Itens bonificados</div>
             </div>
         </div>
+
+        <div class="charts-grid">
+            <div class="chart-box">
+                <h4 style="margin: 0 0 10px 0;">Evolução de Vendas</h4>
+                <canvas id="graficoLinha"></canvas>
+            </div>
+            <div class="chart-box">
+                <h4 style="margin: 0 0 10px 0;">Mix de Produtos</h4>
+                <canvas id="graficoRosca"></canvas>
+            </div>
+        </div>
+
+        <div class="table-box">
+            <h4 style="margin: 0 0 15px 0;">Últimas Vendas</h4>
+            <table>
+                <thead>
+                    <tr><th>Data</th><th>Cliente</th><th>Pedido</th><th>Itens</th><th>Total</th></tr>
+                </thead>
+                <tbody id="tabela-vendas"><tr><td colspan="5">Carregando...</td></tr></tbody>
+            </table>
+        </div>
+
     </main>
 
     <script>
-        let estoqueGlobal = [];
-        let chartInstance = null;
+        let vendasData = [];
+        let estoqueData = [];
+        let filtroAtual = 'mensal';
+        let chartLinhaInstance = null;
+        let chartRoscaInstance = null;
 
-        function cleanNum(v) { 
-            if(typeof v === 'number') return v;
-            return parseFloat(String(v || 0).replace(/[R$\s.]/g, '').replace(',', '.')) || 0; 
+        window.onload = function() {
+            carregarDados();
+        };
+
+        async function carregarDados() {
+            const snapVendas = await db.collection("vendas").orderBy("data", "desc").get();
+            vendasData = [];
+            snapVendas.forEach(doc => vendasData.push({ id: doc.id, ...doc.data() }));
+
+            const snapEstoque = await db.collection("estoque").get();
+            estoqueData = [];
+            snapEstoque.forEach(doc => estoqueData.push({ id: doc.id, ...doc.data() }));
+
+            calcularValuationEstoque(); 
+            aplicarFiltroData(); 
         }
 
-        async function verificarSenha() {
-            if(document.getElementById('admin-pass').value === "1234") {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('app-content').style.display = 'block';
-                iniciar();
-            } else { document.getElementById('msg-error').style.display = 'block'; }
-        }
+        function calcularValuationEstoque() {
+            let val = { celular: 0, acessorio: 0, roupa: 0, perfume: 0, total: 0 };
 
-        function iniciar() {
-            const hoje = new Date();
-            document.getElementById('dataInicio').valueAsDate = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-            document.getElementById('dataFim').valueAsDate = hoje;
-            carregarDadosEstoque();
-            carregarVendas();
-            carregarTrocas();
-        }
+            estoqueData.forEach(p => {
+                if (p.status === 'disponível') {
+                    let valor = parseFloat(p.venda || 0);
+                    let cat = (p.categoria || 'outros').toLowerCase();
 
-        function carregarDadosEstoque() {
-            db.collection("estoque").onSnapshot(snap => {
-                estoqueGlobal = [];
-                snap.forEach(doc => { if(doc.data().status !== 'vendido') estoqueGlobal.push(doc.data()); });
-                filtrarKPIs('todos', document.querySelector('.f-tab.active'));
-                atualizarGrafico();
-            });
-        }
-
-        function filtrarKPIs(categoria, el) {
-            if(el) {
-                document.querySelectorAll('.f-tab').forEach(t => t.classList.remove('active'));
-                el.classList.add('active');
-            }
-            let filtrados = categoria === 'todos' ? estoqueGlobal : estoqueGlobal.filter(p => (p.categoria || '').toLowerCase().includes(categoria));
-            
-            let qtd=0, custo=0, venda=0;
-            filtrados.forEach(p => { qtd++; custo += cleanNum(p.custo); venda += cleanNum(p.venda); });
-
-            document.getElementById('kpi-qtd').innerText = qtd;
-            document.getElementById('kpi-custo').innerText = custo.toLocaleString('pt-br',{style:'currency',currency:'BRL'});
-            document.getElementById('kpi-venda').innerText = venda.toLocaleString('pt-br',{style:'currency',currency:'BRL'});
-            document.getElementById('kpi-lucro').innerText = (venda-custo).toLocaleString('pt-br',{style:'currency',currency:'BRL'});
-            document.getElementById('kpi-margem').innerText = venda > 0 ? ((venda-custo)/venda*100).toFixed(1)+'%' : '0%';
-        }
-
-        async function carregarVendas() {
-            const ini = new Date(document.getElementById('dataInicio').value + "T00:00:00").getTime();
-            const fim = new Date(document.getElementById('dataFim').value + "T23:59:59").getTime();
-            const snap = await db.collection("vendas").orderBy("data","desc").get();
-            let html = "", total = 0;
-            snap.forEach(doc => {
-                const v = doc.data();
-                if(v.data >= ini && v.data <= fim) {
-                    let val = cleanNum(v.total); total += val;
-                    html += `<tr><td>${new Date(v.data).toLocaleDateString('pt-BR')}</td><td><strong>${v.clienteNome}</strong></td><td style="text-align:right; font-weight:bold; color:${val<0?'var(--warning)':'var(--success)'}">${val.toLocaleString('pt-br',{style:'currency',currency:'BRL'})}</td></tr>`;
+                    if (cat.includes('celular')) val.celular += valor;
+                    else if (cat.includes('acessorio')) val.acessorio += valor;
+                    else if (cat.includes('roupa')) val.roupa += valor;
+                    else if (cat.includes('perfume')) val.perfume += valor;
+                    
+                    val.total += valor;
                 }
             });
-            document.getElementById('lista-vendas').innerHTML = html;
-            document.getElementById('total-periodo').innerText = total.toLocaleString('pt-br',{style:'currency',currency:'BRL'});
+
+            document.getElementById('val-celular').innerText = formatMoeda(val.celular);
+            document.getElementById('val-acessorio').innerText = formatMoeda(val.acessorio);
+            document.getElementById('val-roupa').innerText = formatMoeda(val.roupa);
+            document.getElementById('val-perfume').innerText = formatMoeda(val.perfume);
+            document.getElementById('val-total').innerText = formatMoeda(val.total);
         }
 
-        function carregarTrocas() {
-            db.collection("estoque").orderBy("dataEntrada", "desc").limit(10).onSnapshot(snap => {
-                let html = "";
-                snap.forEach(doc => {
-                    const t = doc.data();
-                    if(t.observacao && t.observacao.toLowerCase().includes("troca")) {
-                        html += `<tr><td><div style="font-weight:bold;">${t.modelo}</div><div style="font-size:10px; opacity:0.6;">${t.cor || ''}</div></td><td style="text-align:center;"><span class="badge-troca">TROCA</span></td><td style="text-align:right; font-weight:bold; color:var(--warning);">R$ ${cleanNum(t.custo).toFixed(2)}</td></tr>`;
-                    }
+        function mudarFiltro(tipo, btn) {
+            filtroAtual = tipo;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            aplicarFiltroData();
+        }
+
+        function aplicarFiltroData() {
+            const agora = new Date();
+            const vendasFiltradas = vendasData.filter(v => {
+                const dataVenda = new Date(v.data);
+                
+                if (filtroAtual === 'todos') return true;
+                
+                if (filtroAtual === 'semanal') {
+                    const diffTime = Math.abs(agora - dataVenda);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    return diffDays <= 7;
+                }
+                
+                if (filtroAtual === 'mensal') {
+                    return dataVenda.getMonth() === agora.getMonth() && dataVenda.getFullYear() === agora.getFullYear();
+                }
+                
+                if (filtroAtual === 'anual') {
+                    return dataVenda.getFullYear() === agora.getFullYear();
+                }
+            });
+
+            calcularKPIs(vendasFiltradas);
+            renderizarGraficos(vendasFiltradas);
+            renderizarTabela(vendasFiltradas);
+        }
+
+        function calcularKPIs(dados) {
+            let faturamento = 0;
+            let totalDescontos = 0;
+            let qtdBrindes = 0;
+            let qtdTrocas = 0;
+
+            dados.forEach(v => {
+                faturamento += parseFloat(v.total || 0);
+                totalDescontos += parseFloat(v.desconto || 0);
+
+                if (v.trocas && Array.isArray(v.trocas)) {
+                    qtdTrocas += v.trocas.length;
+                }
+
+                if (v.itens) {
+                    v.itens.forEach(item => {
+                        if (item.isBrinde) qtdBrindes++;
+                    });
+                }
+            });
+
+            let valorEntradaTroca = 0;
+            estoqueData.forEach(p => {
+                if(p.modelo && p.modelo.includes("TROCA")) {
+                    const dataEntrada = new Date(p.dataEntrada); 
+                    let passar = false;
+                    const agora = new Date();
+                    
+                    if (filtroAtual === 'todos') passar = true;
+                    else if (filtroAtual === 'mensal' && dataEntrada.getMonth() === agora.getMonth()) passar = true;
+                    else if (filtroAtual === 'anual' && dataEntrada.getFullYear() === agora.getFullYear()) passar = true;
+                    
+                    if(passar) valorEntradaTroca += parseFloat(p.custo || 0);
+                }
+            });
+
+            if(isNaN(valorEntradaTroca)) valorEntradaTroca = 0;
+
+            document.getElementById('kpi-faturamento').innerText = formatMoeda(faturamento);
+            document.getElementById('kpi-descontos').innerText = formatMoeda(totalDescontos);
+            document.getElementById('kpi-brindes').innerText = qtdBrindes;
+            
+            document.getElementById('kpi-trocas').innerText = formatMoeda(valorEntradaTroca);
+            document.getElementById('kpi-qtd-trocas').innerText = `${qtdTrocas} itens`;
+        }
+
+        function renderizarGraficos(dados) {
+            // Linha (Vendas por Dia)
+            const vendasPorDia = {};
+            dados.forEach(v => {
+                const dia = new Date(v.data).toLocaleDateString('pt-BR').slice(0,5);
+                vendasPorDia[dia] = (vendasPorDia[dia] || 0) + v.total;
+            });
+
+            const labels = Object.keys(vendasPorDia).reverse();
+            const values = Object.values(vendasPorDia).reverse();
+
+            const ctxL = document.getElementById('graficoLinha').getContext('2d');
+            if(chartLinhaInstance) chartLinhaInstance.destroy();
+            chartLinhaInstance = new Chart(ctxL, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{ label: 'Vendas R$', data: values, borderColor: '#00e0ff', backgroundColor: 'rgba(0,224,255,0.1)', fill: true }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins:{legend:{display:false}}, scales:{x:{grid:{color:'#334155'}},y:{grid:{color:'#334155'}}} }
+            });
+
+            // Rosca (Categorias com PERFUMES)
+            let cats = { 'Celular':0, 'Acessório':0, 'Roupa':0, 'Perfume':0, 'Outros':0 };
+            dados.forEach(v => {
+                v.itens.forEach(i => {
+                    let n = (i.modelo||i).toLowerCase();
+                    if(n.includes('iphone') || n.includes('celular') || n.includes('samsung')) cats['Celular']++;
+                    else if(n.includes('capa')||n.includes('película')||n.includes('fonte')) cats['Acessório']++;
+                    else if(n.includes('camisa')||n.includes('calça')||n.includes('t-shirt')) cats['Roupa']++;
+                    else if(n.includes('perfume')||n.includes('eau')||n.includes('parfum')||n.includes('edt')) cats['Perfume']++;
+                    else cats['Outros']++;
                 });
-                document.getElementById('lista-trocas').innerHTML = html;
+            });
+
+            const ctxR = document.getElementById('graficoRosca').getContext('2d');
+            if(chartRoscaInstance) chartRoscaInstance.destroy();
+            chartRoscaInstance = new Chart(ctxR, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(cats),
+                    datasets: [{ 
+                        data: Object.values(cats), 
+                        backgroundColor: ['#00e0ff', '#8b5cf6', '#ec4899', '#d97706', '#334155'], 
+                        borderWidth: 0 
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins:{legend:{position:'right', labels:{color:'#fff'}}} }
             });
         }
 
-        function atualizarGrafico() {
-            const ctx = document.getElementById('graficoEstoque').getContext('2d');
-            let dados = {}; 
-            estoqueGlobal.forEach(p => { let c = p.categoria || 'Outros'; dados[c] = (dados[c] || 0) + cleanNum(p.venda); });
-            if(chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: { labels: Object.keys(dados), datasets: [{ data: Object.values(dados), backgroundColor: ['#3b82f6','#8b5cf6','#ec4899','#f59e0b','#64748b'], borderWidth: 0 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#fff', boxWidth: 10, font: { size: 10 } } } } }
+        function renderizarTabela(dados) {
+            const tbody = document.getElementById('tabela-vendas');
+            tbody.innerHTML = "";
+            const ultimas = dados.slice(0, 10);
+            
+            ultimas.forEach(v => {
+                let itensStr = v.itens.map(i => i.modelo || i).join(", ");
+                if(itensStr.length > 30) itensStr = itensStr.substring(0,30)+"...";
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${new Date(v.data).toLocaleDateString('pt-BR')}</td>
+                        <td style="font-weight:bold; color:#fff;">${v.cliente}</td>
+                        <td style="color:#94a3b8;">#${v.numeroPedido || '---'}</td>
+                        <td style="color:#94a3b8;">${itensStr}</td>
+                        <td style="color:#10b981; font-weight:bold;">${formatMoeda(v.total)}</td>
+                    </tr>
+                `;
             });
         }
+
+        function formatMoeda(val) { return val.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); }
     </script>
-</body></html>
+</body>
+</html>
