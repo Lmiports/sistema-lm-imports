@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VÉRTICE | BI & Relatórios</title>
+    <title>VÉRTICE | BI & Gestão</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
@@ -18,12 +20,13 @@
         }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
 
-        /* SIDEBAR & NAV */
+        /* SIDEBAR */
         .sidebar { width: 250px; background: #000; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
         .logo { color: var(--accent); text-align: center; font-weight: bold; font-size: 24px; margin-bottom: 40px; letter-spacing: 2px; }
-        .nav-item { padding: 15px; color: #94a3b8; text-decoration: none; border-radius: 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
-        .nav-item:hover, .nav-item.active { background: var(--accent); color: #fff; box-shadow: 0 0 15px rgba(0, 224, 255, 0.3); }
+        .nav-item { padding: 15px; color: #94a3b8; text-decoration: none; border-radius: 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; transition: 0.3s; cursor: pointer; }
+        .nav-item:hover, .nav-item.active { background: var(--accent); color: #000; box-shadow: 0 0 15px rgba(0, 224, 255, 0.3); font-weight: bold; }
 
+        /* CONTEÚDO PRINCIPAL */
         .content { flex: 1; padding: 20px; overflow-y: auto; }
         .header-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
@@ -37,7 +40,7 @@
 
         .section-title { font-size: 14px; color: #94a3b8; margin: 20px 0 10px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
         
-        /* GRIDS */
+        /* GRIDS & CARDS */
         .stock-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stock-card { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); padding: 15px; border-radius: 10px; display: flex; flex-direction: column; }
         .stock-card small { color: #94a3b8; font-size: 10px; text-transform: uppercase; margin-top: 5px; }
@@ -63,43 +66,36 @@
         th { text-align: left; color: #94a3b8; padding: 10px; border-bottom: 1px solid var(--border); }
         td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-        /* --- RELATÓRIO DE IMPRESSÃO (ESCONDIDO NA TELA) --- */
+        /* MODAL DE CADASTRO */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; display: none; }
+        .modal { background: #0f172a; padding: 25px; border-radius: 15px; width: 350px; border: 1px solid #1e293b; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        .modal input, .modal select { width: 100%; padding: 10px; margin-bottom: 10px; background: #1e293b; border: 1px solid #334155; color: #fff; border-radius: 5px; box-sizing: border-box; }
+
+        /* IMPRESSÃO (RELATÓRIO A4) */
         #print-area { display: none; }
 
         @media print {
             @page { margin: 0; size: A4; }
+            body * { visibility: hidden; } /* Esconde dashboard */
+            .sidebar { display: none; }
             
-            /* ESCONDE TUDO DO DASHBOARD */
-            .sidebar, .content { display: none !important; }
-            
-            /* MOSTRA SÓ O RELATÓRIO */
+            #print-area, #print-area * { visibility: visible; } /* Mostra relatório */
             #print-area { 
-                display: block !important; 
-                position: absolute; 
-                left: 0; 
-                top: 0; 
-                width: 100%; 
-                background: #fff; 
-                color: #000; 
-                padding: 1.5cm; 
-                box-sizing: border-box;
+                position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+                background: #fff; color: #000; padding: 1.5cm; box-sizing: border-box;
                 font-family: Arial, sans-serif;
             }
 
             .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 20px; }
             .print-header h1 { margin: 0; font-size: 24px; text-transform: uppercase; color: #000; }
             .print-meta { display: flex; justify-content: space-between; font-size: 12px; margin-top: 10px; }
-            
             .print-section { margin-bottom: 30px; }
             .print-section h3 { background: #eee; padding: 5px 10px; font-size: 14px; text-transform: uppercase; border-left: 5px solid #000; color: #000; margin-bottom: 10px; }
-            
             .print-row { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; }
             .print-row span { font-weight: bold; }
-            
             .print-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
             .print-table th { border-bottom: 2px solid #000; text-align: left; color: #000; padding: 5px; }
             .print-table td { border-bottom: 1px solid #eee; padding: 5px; color: #000; }
-            
             .print-footer { position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 10px; padding: 10px; border-top: 1px solid #000; background: #fff; }
         }
 
@@ -120,6 +116,11 @@
             <a href="vendas.html" class="nav-item"><i class="fas fa-cash-register"></i> PDV</a>
             <a href="estoque.html" class="nav-item"><i class="fas fa-box"></i> Estoque</a>
             <a href="clientes.html" class="nav-item"><i class="fas fa-users"></i> Clientes</a>
+            <a href="fornecedores.html" class="nav-item"><i class="fas fa-truck"></i> Fornecedores</a>
+            
+            <a onclick="abrirModalEquipe()" class="nav-item"><i class="fas fa-user-plus"></i> Equipe</a>
+            
+            <a href="index.html" class="nav-item" style="margin-top: auto; color: var(--danger);"><i class="fas fa-sign-out-alt"></i> Sair</a>
         </nav>
     </aside>
 
@@ -132,7 +133,7 @@
                     <button class="filter-btn active" onclick="mudarFiltro('mensal', this)">Mês</button>
                     <button class="filter-btn" onclick="mudarFiltro('todos', this)">Geral</button>
                 </div>
-                <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> Imprimir Relatório</button>
+                <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> Relatório</button>
             </div>
         </div>
 
@@ -201,7 +202,50 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="modal-equipe">
+        <div class="modal">
+            <h3 style="margin-top: 0; color: #00e0ff; text-align: center;">Nova Credencial</h3>
+            
+            <label style="font-size: 12px; color: #94a3b8;">Nome de Usuário (Login)</label>
+            <input type="text" id="novo-user-login" placeholder="Ex: vendedor1">
+            
+            <label style="font-size: 12px; color: #94a3b8;">Senha de Acesso</label>
+            <input type="text" id="novo-user-senha" placeholder="Ex: 0000">
+            
+            <label style="font-size: 12px; color: #94a3b8;">Nível de Acesso</label>
+            <select id="novo-user-cargo">
+                <option value="vendedor">Vendedor (Apenas PDV)</option>
+                <option value="admin">Gerente/Sócio (Acesso Total)</option>
+            </select>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="document.getElementById('modal-equipe').style.display='none'" style="flex: 1; padding: 10px; background: #334155; color: #fff; border: none; border-radius: 5px; cursor: pointer;">Cancelar</button>
+                <button onclick="salvarNovoUsuario()" style="flex: 1; padding: 10px; background: #00e0ff; color: #000; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">Salvar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // --- SEGURANÇA E HIERARQUIA ---
+        (function verificarAcesso() {
+            // 1. Verifica Licença (Kill Switch)
+            db.collection("config_sistema").doc("licenca").get().then(doc => {
+                if (doc.exists && doc.data().status === "bloqueada") {
+                    document.body.innerHTML = '<div style="height:100vh;display:flex;justify-content:center;align-items:center;background:#000;color:red;flex-direction:column;"><h1>ACESSO SUSPENSO</h1><p>Entre em contato com o suporte.</p></div>';
+                    throw new Error("Licença Bloqueada");
+                }
+            });
+
+            // 2. Verifica Cargo (Se não for Admin, chuta pro PDV)
+            const cargo = localStorage.getItem('cargoUsuario');
+            if (!cargo || cargo !== 'admin') {
+                // Pequeno delay para garantir carregamento seguro, mas bloqueia interação
+                alert("ACESSO NEGADO: Área restrita à gerência.");
+                window.location.href = 'vendas.html';
+                throw new Error("Acesso Negado");
+            }
+        })();
+
         let vendasData = [], estoqueData = [], filtroAtual = 'mensal';
         let chartLinhaInstance = null, chartRoscaInstance = null;
 
@@ -210,11 +254,10 @@
             carregarDados(); 
         };
 
-        // --- CORREÇÃO DE VALORES (EVITA NaN) ---
+        // --- MATEMÁTICA E DADOS ---
         function limparMoeda(valor) {
             if (typeof valor === 'number') return valor;
             if (!valor) return 0;
-            // Limpa R$, espaços e ajusta vírgula/ponto
             let limpo = valor.toString().replace(/[R$\s]/g, '').trim();
             if (limpo.indexOf(',') > -1 && limpo.indexOf('.') > -1) { limpo = limpo.replace(/\./g, '').replace(',', '.'); }
             else if (limpo.indexOf(',') > -1) { limpo = limpo.replace(',', '.'); }
@@ -225,13 +268,14 @@
             try {
                 const snapVendas = await db.collection("vendas").orderBy("data", "desc").get();
                 vendasData = []; snapVendas.forEach(doc => vendasData.push({ id: doc.id, ...doc.data() }));
+                
                 const snapEstoque = await db.collection("estoque").get();
                 estoqueData = []; snapEstoque.forEach(doc => estoqueData.push({ id: doc.id, ...doc.data() }));
-                
+
                 calcularValuationEstoque(); 
                 aplicarFiltroData();
             } catch (error) {
-                console.error("Erro ao carregar dados:", error);
+                console.error("Erro dados:", error);
             }
         }
 
@@ -292,14 +336,14 @@
                 if(p.modelo && p.modelo.includes("TROCA")) valorEntradaTroca += limparMoeda(p.custo);
             });
 
-            // Atualiza Dashboard
+            // Dashboard
             document.getElementById('kpi-faturamento').innerText = formatMoeda(faturamento);
             document.getElementById('kpi-descontos').innerText = formatMoeda(totalDescontos);
             document.getElementById('kpi-brindes').innerText = qtdBrindes;
             document.getElementById('kpi-trocas').innerText = formatMoeda(valorEntradaTroca); 
             document.getElementById('kpi-qtd-trocas').innerText = `${qtdTrocas} itens`;
 
-            // Atualiza Relatório
+            // Relatório
             document.getElementById('print-faturamento').innerText = formatMoeda(faturamento);
             document.getElementById('print-descontos').innerText = formatMoeda(totalDescontos);
             document.getElementById('print-trocas').innerText = formatMoeda(valorEntradaTroca);
@@ -311,7 +355,6 @@
 
         function renderizarGraficos(dados) {
             try {
-                // Gráfico Linha
                 const vendasPorDia = {};
                 dados.forEach(v => {
                     const dia = new Date(v.data).toLocaleDateString('pt-BR').slice(0,5);
@@ -327,18 +370,15 @@
                     options: { responsive: true, maintainAspectRatio: false, plugins:{legend:{display:false}}, scales:{x:{grid:{color:'#334155'}},y:{grid:{color:'#334155'}}} }
                 });
 
-                // Gráfico Rosca
                 let cats = { 'Celular':0, 'Acessório':0, 'Roupa':0, 'Perfume':0, 'Outros':0 };
                 dados.forEach(v => {
                     if(v.itens) {
                         v.itens.forEach(i => {
-                            // PROTEÇÃO AQUI: Garante que i seja objeto ou string
-                            let nomeItem = (i.modelo || i || '').toString().toLowerCase();
-                            
-                            if(nomeItem.includes('iphone') || nomeItem.includes('celular') || nomeItem.includes('samsung')) cats['Celular']++;
-                            else if(nomeItem.includes('capa')||nomeItem.includes('película')||nomeItem.includes('fonte')) cats['Acessório']++;
-                            else if(nomeItem.includes('camisa')||nomeItem.includes('calça')) cats['Roupa']++;
-                            else if(nomeItem.includes('perfume')) cats['Perfume']++;
+                            let itemNome = (i.modelo || i || '').toString().toLowerCase();
+                            if(itemNome.includes('iphone') || itemNome.includes('celular')) cats['Celular']++;
+                            else if(itemNome.includes('capa')||itemNome.includes('película')) cats['Acessório']++;
+                            else if(itemNome.includes('camisa')||itemNome.includes('calça')) cats['Roupa']++;
+                            else if(itemNome.includes('perfume')) cats['Perfume']++;
                             else cats['Outros']++;
                         });
                     }
@@ -357,8 +397,7 @@
         function renderizarTabela(dados) {
             const tbody = document.getElementById('tabela-vendas');
             const printBody = document.getElementById('print-tabela-body');
-            tbody.innerHTML = "";
-            printBody.innerHTML = "";
+            tbody.innerHTML = ""; printBody.innerHTML = "";
 
             dados.slice(0, 15).forEach(v => {
                 let itensStr = v.itens ? v.itens.map(i => i.modelo || i).join(", ") : "-";
@@ -370,6 +409,29 @@
             });
         }
         function formatMoeda(val) { return val.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); }
+
+        // --- GESTÃO DE EQUIPE ---
+        function abrirModalEquipe() { document.getElementById('modal-equipe').style.display = 'flex'; }
+        
+        async function salvarNovoUsuario() {
+            const user = document.getElementById('novo-user-login').value;
+            const pass = document.getElementById('novo-user-senha').value;
+            const cargo = document.getElementById('novo-user-cargo').value;
+
+            if (!user || !pass) return Swal.fire("Erro", "Preencha usuário e senha!", "warning");
+
+            try {
+                // ATENÇÃO: Salvando na coleção "Usuários" (Maiúscula e com acento)
+                await db.collection("Usuários").add({ usuario: user, senha: pass, cargo: cargo });
+                Swal.fire("Sucesso!", `Usuário "${user}" cadastrado com nível ${cargo}.`, "success");
+                document.getElementById('novo-user-login').value = "";
+                document.getElementById('novo-user-senha').value = "";
+                document.getElementById('modal-equipe').style.display = 'none';
+            } catch (error) {
+                console.error(error);
+                Swal.fire("Erro", "Falha ao conectar ao banco.", "error");
+            }
+        }
     </script>
 </body>
 </html>
