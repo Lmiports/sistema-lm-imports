@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VÉRTICE | BI & Relatórios</title>
+    <title>VÉRTICE | Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
@@ -14,44 +14,43 @@
     <style>
         :root {
             --bg: #020617; --card: #0f172a; 
-            --accent: #00e0ff; /* AZUL NEON PADRÃO */
+            --accent: #00e0ff; /* AZUL NEON */
             --text: #f8fafc;
             --success: #10b981; --danger: #ef4444; --warning: #f59e0b; 
             --purple: #8b5cf6; --pink: #ec4899; --gold: #d97706; --border: #1e293b;
         }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
 
-        /* SIDEBAR (CORRIGIDA PARA O PADRÃO) */
+        /* SIDEBAR (MENU COMPLETO) */
         .sidebar { width: 250px; background: #000; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
         .logo { color: var(--accent); text-align: center; font-weight: bold; font-size: 24px; margin-bottom: 40px; letter-spacing: 2px; }
         
         .nav-item { padding: 15px; color: #94a3b8; text-decoration: none; border-radius: 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; transition: 0.3s; cursor: pointer; }
         
-        /* AQUI ESTAVA A DIFERENÇA: Fundo Neon com Texto PRETO */
+        /* HOVER: Fundo Neon + Texto Preto (Contraste) */
         .nav-item:hover, .nav-item.active { 
             background: var(--accent); 
-            color: #000; /* Texto preto para contraste no neon */
+            color: #000; 
             font-weight: bold;
             box-shadow: 0 0 15px rgba(0, 224, 255, 0.4); 
         }
 
-        /* CONTEÚDO */
+        /* CONTEÚDO PRINCIPAL */
         .content { flex: 1; padding: 20px; overflow-y: auto; }
         .header-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
+        /* BOTÕES DE AÇÃO */
         .action-group { display: flex; gap: 10px; }
         .btn-print { background: var(--accent); color: #000; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; box-shadow: 0 0 10px rgba(0,224,255,0.2); }
         .btn-print:hover { opacity: 0.9; transform: scale(1.02); }
 
         .filter-group { display: flex; background: var(--card); padding: 5px; border-radius: 8px; border: 1px solid var(--border); }
         .filter-btn { background: transparent; border: none; color: #94a3b8; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; font-size: 12px; }
-        
-        /* BOTÃO DE FILTRO ATIVO TAMBÉM SEGUE O PADRÃO */
         .filter-btn.active { background: var(--accent); color: #000; }
 
         .section-title { font-size: 14px; color: #94a3b8; margin: 20px 0 10px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
         
-        /* GRIDS */
+        /* KPI GRIDS */
         .stock-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stock-card { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); padding: 15px; border-radius: 10px; display: flex; flex-direction: column; }
         .stock-card small { color: #94a3b8; font-size: 10px; text-transform: uppercase; margin-top: 5px; }
@@ -77,16 +76,13 @@
         th { text-align: left; color: #94a3b8; padding: 10px; border-bottom: 1px solid var(--border); }
         td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-        /* --- RELATÓRIO DE IMPRESSÃO (ESCONDIDO NA TELA) --- */
+        /* IMPRESSÃO (Escondido) */
         #print-area { display: none; }
 
         @media print {
             @page { margin: 0; size: A4; }
             .sidebar, .content { display: none !important; }
-            #print-area { 
-                display: block !important; position: absolute; left: 0; top: 0; width: 100%; 
-                background: #fff; color: #000; padding: 1.5cm; box-sizing: border-box; font-family: Arial, sans-serif;
-            }
+            #print-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; background: #fff; color: #000; padding: 1.5cm; box-sizing: border-box; font-family: Arial, sans-serif; }
             .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 20px; }
             .print-header h1 { margin: 0; font-size: 24px; text-transform: uppercase; color: #000; }
             .print-meta { display: flex; justify-content: space-between; font-size: 12px; margin-top: 10px; }
@@ -113,12 +109,29 @@
     <aside class="sidebar">
         <div class="logo">VÉRTICE</div>
         <nav>
-            <a href="admin.html" class="nav-item active"><i class="fas fa-chart-pie"></i> Dashboard</a>
-            <a href="vendas.html" class="nav-item"><i class="fas fa-cash-register"></i> PDV</a>
+            <a href="admin.html" class="nav-item active">
+                <i class="fas fa-chart-pie"></i> Dashboard
+            </a>
             
-            <a href="equipes.html" class="nav-item"><i class="fas fa-users"></i> Equipe</a>
+            <a href="vendas.html" class="nav-item">
+                <i class="fas fa-cash-register"></i> PDV (Caixa)
+            </a>
             
-            <a href="index.html" class="nav-item" style="margin-top: auto; color: var(--danger);"><i class="fas fa-sign-out-alt"></i> Sair</a>
+            <a href="estoque.html" class="nav-item">
+                <i class="fas fa-boxes"></i> Estoque
+            </a>
+            
+            <a href="clientes.html" class="nav-item">
+                <i class="fas fa-users"></i> Clientes
+            </a>
+            
+            <a href="equipes.html" class="nav-item">
+                <i class="fas fa-user-shield"></i> Equipe
+            </a>
+            
+            <a href="index.html" class="nav-item" style="margin-top: auto; color: var(--danger);">
+                <i class="fas fa-sign-out-alt"></i> Sair
+            </a>
         </nav>
     </aside>
 
