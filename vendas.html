@@ -3,321 +3,504 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VÉRTICE | PDV</title>
+    <title>PDV - Vendas e Trocas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
-
+    
     <style>
-        :root {
-            --bg: #020617; --card: #0f172a; --accent: #00e0ff; --text: #f8fafc;
-            --success: #10b981; --danger: #ef4444; --border: #1e293b;
-        }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-
-        /* SIDEBAR (Igual ao Admin) */
-        .sidebar { width: 250px; background: #000; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
-        .logo { color: var(--accent); text-align: center; font-weight: bold; font-size: 24px; margin-bottom: 40px; letter-spacing: 2px; }
-        .nav-item { padding: 15px; color: #94a3b8; text-decoration: none; border-radius: 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; transition: 0.3s; cursor: pointer; }
-        .nav-item:hover, .nav-item.active { background: var(--accent); color: #000; box-shadow: 0 0 15px rgba(0, 224, 255, 0.3); font-weight: bold; }
-        .nav-item.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; } /* Para bloquear links do vendedor */
-
-        /* CONTEÚDO */
-        .main-content { flex: 1; display: flex; overflow: hidden; }
+        :root { --bg: #020617; --card: #0f172a; --accent: #00e0ff; --text: #f8fafc; --border: rgba(255, 255, 255, 0.1); --success: #22c55e; --danger: #ef4444; --warning: #eab308; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; height: 100vh; display: flex; flex-direction: column; box-sizing: border-box; }
         
-        /* ÁREA DE PRODUTOS */
-        .products-area { flex: 2; padding: 20px; overflow-y: auto; border-right: 1px solid var(--border); }
-        .search-bar { width: 100%; padding: 15px; background: var(--card); border: 1px solid var(--border); color: #fff; border-radius: 10px; margin-bottom: 20px; font-size: 16px; outline: none; }
-        .search-bar:focus { border-color: var(--accent); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+        .header h2 { margin: 0; color: var(--accent); letter-spacing: 2px; }
+        .version-tag { font-size: 10px; color: #64748b; margin-left: 10px; }
+        .btn-voltar { color: #fff; text-decoration: none; font-size: 20px; }
 
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        .product-card { background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 10px; cursor: pointer; transition: 0.2s; position: relative; }
+        .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; flex: 1; overflow: hidden; }
+        .products-section { display: flex; flex-direction: column; gap: 15px; overflow-y: hidden; }
+        .search-box { display: flex; gap: 10px; }
+        .search-box input, .search-box select { width: 100%; padding: 12px; background: var(--card); border: 1px solid var(--border); color: #fff; border-radius: 8px; outline: none; }
+        .products-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; overflow-y: auto; padding-right: 5px; }
+        
+        .product-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 15px; cursor: pointer; transition: 0.2s; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
         .product-card:hover { border-color: var(--accent); transform: translateY(-3px); }
-        .p-model { font-weight: bold; margin-bottom: 5px; display: block; }
-        .p-price { color: var(--success); font-weight: bold; font-size: 1.1em; }
-        .p-detail { font-size: 12px; color: #94a3b8; }
-
-        /* CARRINHO */
-        .cart-area { flex: 1; background: #050b14; padding: 20px; display: flex; flex-direction: column; box-shadow: -5px 0 15px rgba(0,0,0,0.5); }
-        .cart-title { font-size: 20px; font-weight: bold; margin-bottom: 20px; color: var(--accent); display: flex; justify-content: space-between; }
-        .cart-list { flex: 1; overflow-y: auto; margin-bottom: 20px; border-top: 1px solid #334155; }
-        .cart-item { padding: 10px 0; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
-        .remove-btn { color: var(--danger); cursor: pointer; }
         
-        .total-box { background: var(--card); padding: 15px; border-radius: 10px; margin-bottom: 15px; }
-        .total-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
-        .final-price { font-size: 28px; font-weight: bold; color: var(--success); text-align: right; margin-top: 10px; }
+        .product-card.reserved { opacity: 0.6; border-color: var(--warning); cursor: not-allowed; filter: grayscale(0.5); }
+        .reserved-tag { position: absolute; top: 10px; right: 10px; background: var(--warning); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
 
-        .btn-checkout { width: 100%; padding: 15px; background: var(--accent); color: #000; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; text-transform: uppercase; }
-        .btn-checkout:hover { background: #fff; }
-        .btn-actions { display: flex; gap: 10px; margin-bottom: 10px; }
-        .btn-small { flex: 1; padding: 10px; background: #334155; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
-        .btn-small:hover { background: #475569; }
+        .prod-cat-tag { font-size: 10px; text-transform: uppercase; background: rgba(0, 224, 255, 0.1); color: var(--accent); padding: 4px 8px; border-radius: 4px; width: fit-content; margin-bottom: 5px; font-weight: bold; }
+        .prod-name { font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        .prod-detail { font-size: 11px; color: #94a3b8; margin-bottom: 5px; }
+        .prod-price { color: var(--success); font-weight: bold; font-size: 16px; margin-top: auto; }
 
+        .cart-section { background: var(--card); border-radius: 15px; border: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
+        .client-area { margin-bottom: 15px; }
+        .client-row { display: flex; gap: 5px; }
+        .client-input-wrapper { width: 100%; position: relative; }
+        .client-row input[list] { width: 100%; padding: 10px; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 5px; box-sizing: border-box; }
+        .btn-add-client { background: var(--success); color: #000; border: none; width: 40px; border-radius: 5px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+        
+        .cart-items { flex: 1; overflow-y: auto; margin-bottom: 15px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 0; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin-bottom: 8px; }
+        .cart-item.brinde { border: 1px solid var(--accent); background: rgba(0, 224, 255, 0.1); }
+        .item-actions { display: flex; gap: 10px; align-items: center; }
+        .btn-icon { cursor: pointer; padding: 5px; font-size: 14px; transition: 0.2s; }
+        .btn-remove { color: var(--danger); }
+        .btn-gift { color: #94a3b8; }
+        .btn-gift.active { color: var(--accent); text-shadow: 0 0 5px var(--accent); }
+
+        .trade-in-box { background: rgba(234, 179, 8, 0.1); border: 1px solid var(--warning); padding: 10px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .trade-in-text { font-size: 12px; color: var(--warning); }
+        
+        .totals { margin-bottom: 15px; font-size: 14px; }
+        .row { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: center;}
+        .total-final { font-size: 24px; font-weight: 900; color: var(--success); border-top: 1px solid var(--border); padding-top: 10px; }
+        .input-desconto { width: 100px !important; padding: 5px !important; text-align: right; background: #0f172a; border: 1px solid #334155; color: var(--danger); font-weight: bold; }
+        
+        .parcela-info { text-align: right; color: var(--accent); font-size: 12px; font-weight: bold; margin-top: -5px; margin-bottom: 15px; display: none; text-shadow: 0 0 5px rgba(0, 224, 255, 0.5); border-bottom: 1px dashed var(--accent); padding-bottom: 5px; }
+
+        .btn-finalizar { background: var(--success); color: #000; padding: 15px; width: 100%; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .btn-troca { background: transparent; border: 1px solid var(--warning); color: var(--warning); padding: 10px; width: 100%; border-radius: 8px; margin-bottom: 10px; cursor: pointer; }
+        .btn-recibo { background: #eab308; color: #000; padding: 15px; width: 100%; border: none; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        .btn-limpar { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px; width: 100%; border-radius: 5px; margin-bottom: 10px; cursor: pointer; font-size: 11px; }
+        .btn-simular { background: #334155; color: #fff; border: 1px solid var(--border); width: 100%; padding: 8px; border-radius: 5px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-simular:hover { background: #475569; }
+
+        .sim-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        .sim-table th { text-align: left; color: var(--accent); padding: 5px; border-bottom: 1px solid var(--border); }
+        .sim-table td { padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .sim-row:hover { background: rgba(255,255,255,0.05); cursor: pointer; }
+        .sim-total { color: var(--success); font-weight: bold; }
+
+        .taxas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 300px; overflow-y: auto; padding-right: 5px; }
+        .taxa-item { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 4px; }
+        .taxa-item label { width: 40px; font-size: 12px; color: #94a3b8; }
+        .taxa-item input { background: transparent; border: none; border-bottom: 1px solid var(--border); color: #fff; width: 100%; text-align: right; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal { background: var(--card); padding: 25px; border-radius: 15px; width: 400px; max-width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
+        .modal input, .modal select { width: 100%; padding: 10px; margin: 5px 0; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 5px; box-sizing: border-box; }
+        .modal h3 { margin-top: 0; color: var(--accent); }
+        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-cancel { flex: 1; padding: 10px; background: #334155; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-confirm { flex: 1; padding: 10px; background: var(--success); color: #000; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+
+        /* ESTILO DO BOTÃO BI */
+        .btn-dashboard-link { display: none; text-decoration: none; background: var(--accent); color: #000; padding: 5px 15px; border-radius: 5px; font-weight: bold; font-size: 12px; align-items: center; gap: 5px; box-shadow: 0 0 10px rgba(0,224,255,0.3); }
+        .btn-dashboard-link:hover { background: #fff; transform: scale(1.05); }
+
+        @media (max-width: 768px) { .main-grid { grid-template-columns: 1fr; overflow-y: auto; } .cart-section { margin-top: 20px; } body { height: auto; } }
     </style>
 </head>
 <body>
 
-    <aside class="sidebar">
-        <div class="logo">VÉRTICE</div>
-        <nav>
-            <a href="admin.html" class="nav-item" id="link-admin"><i class="fas fa-chart-pie"></i> Dashboard</a>
+    <div class="header">
+        <div style="display:flex; gap:15px; align-items:center;">
+            <a href="index.html" class="btn-voltar" title="Sair"><i class="fas fa-sign-out-alt"></i></a>
             
-            <a href="#" class="nav-item active"><i class="fas fa-cash-register"></i> PDV (Caixa)</a>
-            <a href="#" class="nav-item disabled"><i class="fas fa-box"></i> Estoque</a>
-            <a href="#" class="nav-item disabled"><i class="fas fa-users"></i> Clientes</a>
-            
-            <div style="margin-top: auto; padding: 10px; background: #1e293b; border-radius: 8px; margin-bottom: 10px;">
-                <div style="font-size: 11px; color: #94a3b8;">Logado como:</div>
-                <div style="font-weight: bold; color: #fff;" id="user-display">...</div>
-            </div>
-            <a href="index.html" class="nav-item" style="color: var(--danger);"><i class="fas fa-sign-out-alt"></i> Sair</a>
-        </nav>
-    </aside>
+            <a href="admin.html" id="btn-bi-admin" class="btn-dashboard-link">
+                <i class="fas fa-chart-pie"></i> PAINEL BI
+            </a>
+        </div>
+        
+        <h2>PDV | VENDAS <span class="version-tag">v11.0</span></h2>
+        <div></div>
+    </div>
 
-    <div class="main-content">
-        <div class="products-area">
-            <input type="text" id="busca" class="search-bar" placeholder="🔍 Buscar por Modelo, Marca ou IMEI..." onkeyup="filtrarProdutos()">
-            
-            <div class="products-grid" id="grid-produtos">
-                <p style="color: #aaa;">Carregando sistema...</p>
+    <div class="main-grid">
+        <div class="products-section">
+            <div class="search-box">
+                <input type="text" id="busca" placeholder="Buscar produto..." onkeyup="filtrarProdutos()">
+                <select id="filtro-cat" onchange="filtrarProdutos()" style="width: 150px;">
+                    <option value="">Todas</option>
+                    <option value="celular">📱 Celulares</option>
+                    <option value="roupa">👕 Roupas</option>
+                    <option value="perfume">🌸 Perfumes</option>
+                    <option value="acessorio">🎧 Acessórios</option>
+                </select>
+            </div>
+            <div class="products-list" id="lista-produtos">
+                <div style="padding:20px; text-align:center; color:#888;">Carregando Estoque...</div>
             </div>
         </div>
 
-        <div class="cart-area">
-            <div class="cart-title">
-                Carrinho <span style="font-size: 14px; background: var(--accent); color: #000; padding: 2px 8px; border-radius: 10px;" id="count-itens">0</span>
-            </div>
-            
-            <div class="cart-list" id="lista-carrinho">
-                <div style="text-align: center; margin-top: 50px; color: #64748b;">
-                    <i class="fas fa-shopping-basket" style="font-size: 30px; margin-bottom: 10px;"></i><br>Caixa Livre
+        <div class="cart-section">
+            <div class="client-area">
+                <label style="font-size: 12px; color: #94a3b8;">Cliente:</label>
+                <div class="client-row">
+                    <div class="client-input-wrapper">
+                        <input list="lista-clientes-db" id="cliente-input" placeholder="Busca inteligente..." autocomplete="off" onchange="salvarRascunho()">
+                        <datalist id="lista-clientes-db"></datalist>
+                    </div>
+                    <button class="btn-add-client" onclick="abrirModalCliente()">+</button>
                 </div>
             </div>
 
-            <div class="total-box">
-                <div class="total-row"><span>Subtotal</span> <span id="lbl-sub">R$ 0,00</span></div>
-                <div class="total-row"><span>Desconto</span> <span id="lbl-desc" style="color: var(--danger);">R$ 0,00</span></div>
-                <div class="final-price" id="lbl-total">R$ 0,00</div>
+            <div class="cart-items" id="carrinho-lista">
+                <div style="text-align: center; color: #64748b; margin-top: 20px;">Carrinho vazio</div>
             </div>
 
-            <div class="btn-actions">
-                <button class="btn-small" onclick="limparCarrinho()"><i class="fas fa-trash"></i> Limpar</button>
-                <button class="btn-small" onclick="aplicarDesconto()"><i class="fas fa-percent"></i> Desconto</button>
+            <button class="btn-limpar" onclick="cancelarVendaTotal()"><i class="fas fa-trash-alt"></i> CANCELAR / DESTRAVAR ITENS</button>
+
+            <div id="lista-trocas"></div>
+
+            <div class="totals">
+                <div class="row"><span>Subtotal:</span><span id="valor-subtotal">R$ 0,00</span></div>
+                
+                <div class="row" style="color: var(--danger);">
+                    <span>Desconto (R$):</span>
+                    <input type="number" class="input-desconto" id="valor-desconto-manual" value="" placeholder="0,00" oninput="atualizarTotais()">
+                </div>
+                
+                <div class="row" style="color: var(--accent); display:none;" id="row-taxas">
+                    <span>Taxa Maquininha:</span>
+                    <span id="valor-taxas">+ R$ 0,00</span>
+                </div>
+
+                <div class="row" style="color: var(--warning);"><span>Troca/Abatimento:</span><span id="valor-abatimento">- R$ 0,00</span></div>
+                <div class="row total-final"><span>TOTAL:</span><span id="valor-total">R$ 0,00</span></div>
+                
+                <div id="detalhe-parcelas" class="parcela-info"></div>
             </div>
-            <button class="btn-checkout" onclick="finalizarVenda()">Finalizar Venda</button>
+
+            <button class="btn-simular" onclick="abrirSimulador()"><i class="fas fa-calculator"></i> Simular Parcelas / Juros</button>
+
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 12px;">Pagamento:</label>
+                <select id="forma-pagamento" style="width: 100%; padding: 8px; background: #1e293b; color: #fff; border: 1px solid var(--border); border-radius: 5px;" onchange="salvarRascunho()">
+                </select>
+            </div>
+
+            <button class="btn-troca" onclick="abrirModalTroca()"><i class="fas fa-exchange-alt"></i> Entrada de Troca</button>
+            <button class="btn-finalizar" onclick="finalizarVenda()"><i class="fas fa-check"></i> FINALIZAR VENDA</button>
+            <button class="btn-recibo" onclick="gerarRecibo()"><i class="fas fa-file-contract"></i> RECIBO & CONTRATO</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-simulador">
+        <div class="modal">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Simulação de Cartão</h3>
+                <button onclick="abrirConfigTaxas()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:18px;" title="Configurar Taxas"><i class="fas fa-cog"></i></button>
+            </div>
+            <p style="font-size:12px; color:#94a3b8;">Clique na opção desejada para aplicar a taxa.</p>
+            <table class="sim-table">
+                <thead><tr><th>Parc.</th><th>Valor Parc.</th><th>Total Final</th></tr></thead>
+                <tbody id="lista-simulacao"></tbody>
+            </table>
+            <button onclick="document.getElementById('modal-simulador').style.display='none'" class="btn-cancel" style="margin-top:15px; width:100%;">Fechar</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-config-taxas">
+        <div class="modal">
+            <h3>Configurar Taxas (%)</h3>
+            <p style="font-size:11px; color:#94a3b8;">Edite a % de juros da sua maquininha.</p>
+            <div class="taxas-grid" id="grid-inputs-taxas"></div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="document.getElementById('modal-config-taxas').style.display='none'" class="btn-cancel">Cancelar</button>
+                <button onclick="salvarConfigTaxas()" class="btn-confirm">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-troca">
+        <div class="modal" style="border-color: var(--warning);">
+            <h3 style="color: var(--warning);">Entrada de Troca</h3>
+            <label style="font-size: 11px; color: #999;">Modelo:</label><input list="dl-modelos-list" id="troca-modelo" placeholder="Selecione..."><datalist id="dl-modelos-list"></datalist>
+            <div class="modal-grid"><div><label style="font-size: 11px; color: #999;">GB:</label><select id="troca-gb"><option value="">-</option><option value="64GB">64GB</option><option value="128GB">128GB</option><option value="256GB">256GB</option><option value="512GB">512GB</option></select></div><div><label style="font-size: 11px; color: #999;">Cor:</label><input list="dl-cores-list" id="troca-cor" placeholder="Cor"><datalist id="dl-cores-list"></datalist></div></div>
+            <label style="font-size: 11px; color: #999;">IMEI:</label><input type="text" id="troca-imei" placeholder="15 dígitos" maxlength="15">
+            <div class="modal-grid"><div><label style="font-size: 11px; color: #999;">Valor (R$):</label><input type="number" id="troca-valor"></div><div><label style="font-size: 11px; color: #999;">Bateria (%):</label><input type="number" id="troca-bateria"></div></div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button onclick="fecharModalTroca()" class="btn-cancel">Cancelar</button>
+                <button onclick="confirmarTroca()" class="btn-confirm" style="background: var(--warning);">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-cliente">
+        <div class="modal">
+            <h3>Novo Cliente</h3>
+            <input type="text" id="novo-nome" placeholder="Nome Completo">
+            <div class="modal-grid"><input type="text" id="novo-zap" placeholder="Zap"><input type="text" id="novo-cpf" placeholder="CPF"></div>
+            <input type="email" id="novo-email" placeholder="Email">
+            <div class="modal-grid"><input type="text" id="novo-cep" placeholder="CEP" onblur="buscarCep()"><input type="text" id="novo-numero" placeholder="Nº"></div>
+            <input type="text" id="novo-endereco" placeholder="Endereço">
+            <div class="modal-grid"><input type="text" id="novo-bairro" placeholder="Bairro"><input type="text" id="novo-cidade" placeholder="Cidade"></div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="fecharModalCliente()" class="btn-cancel">Cancelar</button>
+                <button onclick="salvarNovoCliente()" class="btn-confirm">Salvar</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- CONFIGURAÇÃO ---
-        let carrinho = [];
-        let produtosEstoque = [];
-        let totalVenda = 0;
-        let descontoVenda = 0;
+        let dbEstoque = [], dbClientes = [], carrinho = [], trocas = [];
+        let totalVendaGlobal = 0;
+        let valorTaxaAplicada = 0; 
+        let taxasAtuais = {};
+        let parcelasSelecionadas = 0; 
 
-        // INICIALIZAÇÃO
-        window.onload = async function() {
-            // 1. Verifica Login
-            const user = localStorage.getItem('usuarioLogado');
+        window.onload = function() {
+            // VERIFICA SE É ADMIN PARA MOSTRAR BOTÃO
             const cargo = localStorage.getItem('cargoUsuario');
-            
-            if(!user) { window.location.href = 'index.html'; return; }
-            document.getElementById('user-display').innerText = user.toUpperCase();
-
-            // 2. Segurança de Menu
-            if(cargo !== 'admin') {
-                // Se for vendedor, esconde/bloqueia o botão do Dashboard
-                const linkAdmin = document.getElementById('link-admin');
-                linkAdmin.style.opacity = '0.3';
-                linkAdmin.style.pointerEvents = 'none'; // Não deixa clicar
-                linkAdmin.innerHTML += ' <i class="fas fa-lock" style="font-size:10px;"></i>';
+            if (cargo === 'admin') {
+                document.getElementById('btn-bi-admin').style.display = 'inline-flex';
             }
 
-            // 3. Carrega Produtos
-            await carregarEstoque();
+            carregarOpcoesPagamento();
+            restaurarRascunho();
+            carregarTaxasDoBanco();
+            
+            // CARREGA ESTOQUE (Suporta Maiúsculo e Minúsculo)
+            const carregarEstoque = (colecao) => {
+                db.collection(colecao).onSnapshot(snap => { 
+                    dbEstoque = []; 
+                    snap.forEach(doc => {
+                        const data = doc.data();
+                        if (data.status && data.status.toLowerCase() !== "vendido") {
+                            dbEstoque.push({ id: doc.id, ...data });
+                        } else if (!data.status) {
+                            dbEstoque.push({ id: doc.id, ...data, status: 'disponível' });
+                        }
+                    }); 
+                    renderizarProdutos(); 
+                }, err => {
+                    console.log(`Tentando carregar ${colecao}... falhou ou vazia.`);
+                });
+            };
+
+            // Tenta carregar as duas coleções para garantir
+            carregarEstoque("estoque");
+            carregarEstoque("Estoque");
+
+            db.collection("clientes").orderBy("nome").onSnapshot(snap => { dbClientes = []; snap.forEach(doc => dbClientes.push({ id: doc.id, ...doc.data() })); renderizarDatalistClientes(); });
+            carregarListasAuxiliares();
         };
 
-        async function carregarEstoque() {
-            const grid = document.getElementById('grid-produtos');
+        function carregarTaxasDoBanco() {
+            db.collection("config_taxas").doc("geral").onSnapshot(doc => {
+                if (doc.exists) taxasAtuais = doc.data();
+                else taxasAtuais = {1:4.5, 2:5.5, 3:6.5, 4:7.5, 5:8.5, 6:9.5, 7:10.5, 8:11.5, 9:12.5, 10:13.5, 11:14.5, 12:15.5, 18:20, 24:25};
+            });
+        }
+
+        // --- SISTEMA DE SIMULAÇÃO ---
+        function abrirSimulador() {
+            let sub = 0; carrinho.forEach(i => sub += i.isBrinde ? 0 : parseFloat(i.venda||0));
+            let descTroca = 0; trocas.forEach(i => descTroca += i.valor);
+            let descManual = parseFloat(document.getElementById('valor-desconto-manual').value) || 0;
+            const valorBase = sub - descTroca - descManual;
+
+            if (valorBase <= 0) return alert("Adicione itens ao carrinho primeiro.");
+
+            const tbody = document.getElementById('lista-simulacao');
+            tbody.innerHTML = "";
+
+            for (let i = 1; i <= 24; i++) {
+                let taxa = parseFloat(taxasAtuais[i]) || (4 + (i*1.2));
+                const valorComJuros = valorBase * (1 + (taxa / 100));
+                const valorParcela = valorComJuros / i;
+                const diferencaJuros = valorComJuros - valorBase;
+
+                const tr = document.createElement('tr');
+                tr.className = "sim-row";
+                tr.onclick = () => aplicarParcelamento(i, diferencaJuros);
+                tr.innerHTML = `<td><strong>${i}x</strong> <small>(${taxa.toFixed(2)}%)</small></td><td>R$ ${valorParcela.toFixed(2)}</td><td class="sim-total">R$ ${valorComJuros.toFixed(2)}</td>`;
+                tbody.appendChild(tr);
+            }
+            document.getElementById('modal-simulador').style.display = 'flex';
+        }
+
+        function aplicarParcelamento(parcelas, valorJuros) {
+            valorTaxaAplicada = valorJuros;
+            parcelasSelecionadas = parcelas; 
+            document.getElementById('forma-pagamento').value = `Crédito ${parcelas}x`;
+            document.getElementById('modal-simulador').style.display = 'none';
+            atualizarTotais();
+            salvarRascunho();
+        }
+
+        function abrirConfigTaxas() {
+            const container = document.getElementById('grid-inputs-taxas');
+            container.innerHTML = "";
+            for(let i=1; i<=24; i++) {
+                let val = taxasAtuais[i] !== undefined ? taxasAtuais[i] : (4 + (i * 1.2));
+                container.innerHTML += `<div class="taxa-item"><label>${i}x</label><input type="number" id="taxa-input-${i}" value="${parseFloat(val).toFixed(2)}" step="0.01"> %</div>`;
+            }
+            document.getElementById('modal-config-taxas').style.display = 'flex';
+        }
+
+        async function salvarConfigTaxas() {
+            let novasTaxas = {};
+            for(let i=1; i<=24; i++) novasTaxas[i] = parseFloat(document.getElementById(`taxa-input-${i}`).value) || 0;
+            try { await db.collection("config_taxas").doc("geral").set(novasTaxas); alert("Salvo!"); document.getElementById('modal-config-taxas').style.display = 'none'; abrirSimulador(); } 
+            catch(e) { alert("Erro: " + e.message); }
+        }
+
+        function atualizarTotais() {
+            const dc=document.getElementById('carrinho-lista'); const dt=document.getElementById('lista-trocas');
+            dc.innerHTML=""; dt.innerHTML="";
+            let sub=0;
+            carrinho.forEach((item,i)=>{
+                const val = item.isBrinde?0:parseFloat(item.venda||0); sub+=val;
+                const cls = item.isBrinde?'brinde':''; const ico=item.isBrinde?'active':''; const txt=item.isBrinde?'<span style="color:#00e0ff;">GRÁTIS</span>':`R$ ${parseFloat(item.venda).toFixed(2)}`;
+                dc.innerHTML+=`<div class="cart-item ${cls}"><div class="item-info"><div>${item.modelo||item.nomeP}</div><small>${txt}</small></div><div class="item-actions"><i class="btn-icon btn-gift fas fa-gift ${ico}" onclick="toggleBrinde(${i})"></i><i class="btn-icon btn-remove fas fa-trash" onclick="removerDoCarrinho(${i})"></i></div></div>`;
+            });
+            let descTroca=0; trocas.forEach((t,i)=>{ descTroca+=t.valor; dt.innerHTML+=`<div class="trade-in-box"><div class="trade-in-text"><strong>ENTRADA:</strong> ${t.modelo}<br><small>${t.imei} | R$ ${t.valor}</small></div><i class="fas fa-times btn-remove" onclick="removerTroca(${i})"></i></div>`; });
             
-            try {
-                // Tenta carregar 'estoque' (minúsculo)
-                const snapshot = await db.collection("estoque").where("status", "==", "disponível").get();
+            let descMan = parseFloat(document.getElementById('valor-desconto-manual').value)||0;
+            const pgto = document.getElementById('forma-pagamento').value;
+            if(!pgto.includes("Crédito")) { 
+                valorTaxaAplicada = 0; 
+                parcelasSelecionadas = 0; 
+            }
+
+            if(valorTaxaAplicada > 0) {
+                document.getElementById('row-taxas').style.display = 'flex';
+                document.getElementById('valor-taxas').innerText = `+ R$ ${valorTaxaAplicada.toFixed(2)}`;
+            } else {
+                document.getElementById('row-taxas').style.display = 'none';
+            }
+
+            totalVendaGlobal = sub - descTroca - descMan + valorTaxaAplicada;
+
+            document.getElementById('valor-subtotal').innerText=`R$ ${sub.toFixed(2)}`;
+            document.getElementById('valor-abatimento').innerText=`- R$ ${descTroca.toFixed(2)}`;
+            document.getElementById('valor-total').innerText=`R$ ${totalVendaGlobal.toFixed(2)}`;
+
+            const divDetalhe = document.getElementById('detalhe-parcelas');
+            if (parcelasSelecionadas > 0 && totalVendaGlobal > 0) {
+                const valorParcela = totalVendaGlobal / parcelasSelecionadas;
+                const txt = `VALOR SIMULADO DE ${formatMoeda(totalVendaGlobal)} EM ${parcelasSelecionadas}X (${formatMoeda(valorParcela)})`;
+                divDetalhe.style.display = 'block';
+                divDetalhe.innerText = txt;
+            } else {
+                divDetalhe.style.display = 'none';
+            }
+
+            salvarRascunho();
+        }
+
+        // --- RENDERIZAR PRODUTOS ---
+        function renderizarProdutos(){
+            const d=document.getElementById('lista-produtos'); 
+            d.innerHTML=""; 
+            if(dbEstoque.length===0) return d.innerHTML='<div style="color:#888;text-align:center;padding:20px;">Estoque vazio</div>';
+            
+            dbEstoque.forEach(p=>{
+                const el=document.createElement('div');
+                const isReserved = p.status === 'em_negociacao';
                 
-                if(snapshot.empty) {
-                    // Se não achar nada, tenta 'Estoque' (Maiúsculo) por garantia
-                    const snapshotB = await db.collection("Estoque").where("status", "==", "disponível").get();
-                    if(!snapshotB.empty) processarDados(snapshotB);
-                    else grid.innerHTML = '<p>Nenhum produto disponível.</p>';
-                } else {
-                    processarDados(snapshot);
+                el.className = isReserved ? 'product-card reserved' : 'product-card';
+                
+                if(!isReserved) {
+                    el.onclick=()=>adicionarAoCarrinho(p);
                 }
 
-            } catch (e) {
-                console.error(e);
-                grid.innerHTML = `<p style="color: #ef4444;">Erro de conexão: ${e.message}</p>`;
-            }
+                let cat=(p.categoria||'').toLowerCase();
+                let icon=cat.includes('celular')?'📱':cat.includes('roupa')?'👕':cat.includes('perfume')?'🌸':'📦';
+                
+                let reservedBadge = isReserved ? '<span class="reserved-tag">EM USO</span>' : '';
+
+                el.innerHTML=`
+                    ${reservedBadge}
+                    <span class="prod-cat-tag">${icon} ${cat.toUpperCase()}</span>
+                    <span class="prod-name">${p.modelo||p.nomeP||'Item'}</span>
+                    <span class="prod-detail">${p.cor||''} ${p.gb||''}</span>
+                    <span class="prod-price">R$ ${parseFloat(p.venda||0).toFixed(2)}</span>
+                    <div style="display:none;">${cat} ${p.modelo}</div>`;
+                d.appendChild(el);
+            });
         }
 
-        function processarDados(snap) {
-            produtosEstoque = [];
-            snap.forEach(doc => produtosEstoque.push({ id: doc.id, ...doc.data() }));
-            renderizar(produtosEstoque);
-        }
-
-        function renderizar(lista) {
-            const grid = document.getElementById('grid-produtos');
-            grid.innerHTML = "";
+        function formatMoeda(v) { return v.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); }
+        function salvarRascunho() { const estado = { carrinho, trocas, cliente: document.getElementById('cliente-input').value, desconto: document.getElementById('valor-desconto-manual').value, pagamento: document.getElementById('forma-pagamento').value, taxa: valorTaxaAplicada, parcelas: parcelasSelecionadas }; localStorage.setItem('pdv_rascunho', JSON.stringify(estado)); }
+        function restaurarRascunho() { const s = localStorage.getItem('pdv_rascunho'); if(s) { const e = JSON.parse(s); carrinho=e.carrinho||[]; trocas=e.trocas||[]; valorTaxaAplicada=e.taxa||0; parcelasSelecionadas=e.parcelas||0; document.getElementById('cliente-input').value=e.cliente||""; document.getElementById('valor-desconto-manual').value=e.desconto||""; setTimeout(()=>document.getElementById('forma-pagamento').value=e.pagamento||"Pix",500); atualizarTotais(); } }
+        function limparRascunho(){ localStorage.removeItem('pdv_rascunho'); carrinho=[]; trocas=[]; valorTaxaAplicada=0; parcelasSelecionadas=0; document.getElementById('cliente-input').value=""; document.getElementById('valor-desconto-manual').value=""; atualizarTotais(); }
+        function carregarListasAuxiliares(){ db.collection("lista_modelos_cel").orderBy("nome").onSnapshot(snap=>{document.getElementById('dl-modelos-list').innerHTML="";snap.forEach(d=>document.getElementById('dl-modelos-list').innerHTML+=`<option value="${d.data().nome}">`)}); db.collection("lista_cores_cel").orderBy("nome").onSnapshot(snap=>{document.getElementById('dl-cores-list').innerHTML="";snap.forEach(d=>document.getElementById('dl-cores-list').innerHTML+=`<option value="${d.data().nome}">`)}); }
+        function filtrarProdutos(){ const t=document.getElementById('busca').value.toLowerCase(); const c=document.getElementById('filtro-cat').value; document.querySelectorAll('.product-card').forEach(el=>{const txt=el.innerText.toLowerCase();const cat=el.querySelector('.prod-cat-tag').innerText.toLowerCase(); el.style.display=(txt.includes(t)&&(c===""||cat.includes(c)))?'flex':'none'}); }
+        function renderizarDatalistClientes(){ const dl=document.getElementById('lista-clientes-db'); dl.innerHTML=""; dbClientes.forEach(c=>dl.innerHTML+=`<option value="${c.nome}">${c.cpf||c.whats||''}</option>`); }
+        async function adicionarAoCarrinho(p){ try{await db.collection("estoque").doc(p.id).update({status:"em_negociacao"});carrinho.push({...p,isBrinde:false});atualizarTotais();salvarRascunho();}catch(e){alert("Erro: Item já pego!");} }
+        async function removerDoCarrinho(i){ try{await db.collection("estoque").doc(carrinho[i].id).update({status:"disponível"});}catch(e){} carrinho.splice(i,1); atualizarTotais(); salvarRascunho(); }
+        async function cancelarVendaTotal(){ if(!confirm("Cancelar venda e liberar itens?"))return; for(const i of carrinho){try{await db.collection("estoque").doc(i.id).update({status:"disponível"});}catch(e){}} limparRascunho(); }
+        function toggleBrinde(i){ carrinho[i].isBrinde=!carrinho[i].isBrinde; atualizarTotais(); salvarRascunho(); }
+        function confirmarTroca(){ const t={modelo:document.getElementById('troca-modelo').value,gb:document.getElementById('troca-gb').value,cor:document.getElementById('troca-cor').value,imei:document.getElementById('troca-imei').value,valor:parseFloat(document.getElementById('troca-valor').value)||0,bateria:document.getElementById('troca-bateria').value}; if(!t.modelo||!t.valor||t.imei.length!==15)return alert("Erro dados"); trocas.push(t); fecharModalTroca(); atualizarTotais(); salvarRascunho(); document.querySelectorAll('#modal-troca input').forEach(i=>i.value=''); }
+        function removerTroca(i){ trocas.splice(i,1); atualizarTotais(); salvarRascunho(); }
+        
+        async function finalizarVenda() { 
+            const cli=document.getElementById('cliente-input').value; 
+            const pg=document.getElementById('forma-pagamento').value; 
+            if(carrinho.length===0)return alert("Vazio!"); 
+            if(!cli)return alert("Cliente?"); 
+            if(!confirm(`Fechar venda de R$ ${totalVendaGlobal.toFixed(2)}?`))return; 
             
-            lista.forEach(p => {
-                // Correção monetária
-                let preco = 0;
-                if(p.venda) {
-                    let v = p.venda.toString().replace('R$', '').trim();
-                    if(v.includes(',')) v = v.replace('.', '').replace(',', '.');
-                    preco = parseFloat(v);
-                }
+            try { 
+                const b=db.batch(); 
+                
+                carrinho.forEach(i=>{ b.update(db.collection("estoque").doc(i.id),{status:"vendido",dataVenda:Date.now(),clienteVenda:cli,foiBrinde:i.isBrinde}); }); 
+                
+                trocas.forEach(t=>{ const r=db.collection("estoque").doc(); b.set(r,{categoria:'celular',modelo:`${t.modelo} (TROCA ${cli})`,nomeP:`${t.modelo} (TROCA)`,marca:'Apple',cor:t.cor,gb:t.gb,imei1:t.imei,bateria:t.bateria,custo:t.valor,venda:0,status:'disponível',fornecedor:`Cliente: ${cli}`,dataEntrada:Date.now()}); }); 
+                
+                const snap=await db.collection("vendas").get(); 
+                const num=String(snap.size+1).padStart(4,'0'); 
+                b.set(db.collection("vendas").doc(),{ numeroPedido: num, cliente: cli, data: new Date().toISOString(), itens: carrinho.map(c=>({modelo:c.modelo||c.nomeP,isBrinde:c.isBrinde})), trocas: trocas.map(t=>t.modelo), desconto: parseFloat(document.getElementById('valor-desconto-manual').value)||0, taxaMaquininha: valorTaxaAplicada, total: totalVendaGlobal, pagamento: pg }); 
+                
+                await b.commit(); 
 
-                const card = document.createElement('div');
-                card.className = 'product-card';
-                card.onclick = () => addCarrinho(p, preco);
-                card.innerHTML = `
-                    <span class="p-model">${p.modelo || 'Sem Modelo'}</span>
-                    <span class="p-detail">${p.marca || ''} • ${p.cor || ''}</span>
-                    <div class="p-price">R$ ${preco.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        function filtrarProdutos() {
-            const termo = document.getElementById('busca').value.toLowerCase();
-            const filtrados = produtosEstoque.filter(p => 
-                (p.modelo && p.modelo.toLowerCase().includes(termo)) || 
-                (p.marca && p.marca.toLowerCase().includes(termo)) ||
-                (p.imei && p.imei.includes(termo))
-            );
-            renderizar(filtrados);
-        }
-
-        // --- CARRINHO ---
-        function addCarrinho(produto, preco) {
-            if(carrinho.find(x => x.id === produto.id)) return Swal.fire("Ops", "Item já no carrinho!", "warning");
-            
-            carrinho.push({ ...produto, precoReal: preco });
-            atualizarCarrinho();
-        }
-
-        function removerItem(idx) {
-            carrinho.splice(idx, 1);
-            atualizarCarrinho();
-        }
-
-        function atualizarCarrinho() {
-            const divLista = document.getElementById('lista-carrinho');
-            divLista.innerHTML = "";
-            let subtotal = 0;
-
-            carrinho.forEach((item, idx) => {
-                subtotal += item.precoReal;
-                divLista.innerHTML += `
-                    <div class="cart-item">
-                        <div>
-                            <strong>${item.modelo}</strong><br>
-                            <span style="font-size:11px; color:#aaa;">${item.imei || ''}</span>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <span>R$ ${item.precoReal.toLocaleString('pt-BR', {minimumFractionDigits:2})}</span>
-                            <i class="fas fa-trash remove-btn" onclick="removerItem(${idx})"></i>
-                        </div>
-                    </div>
-                `;
-            });
-
-            totalVenda = subtotal - descontoVenda;
-            if(totalVenda < 0) totalVenda = 0;
-
-            document.getElementById('lbl-sub').innerText = subtotal.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
-            document.getElementById('lbl-desc').innerText = "- " + descontoVenda.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
-            document.getElementById('lbl-total').innerText = totalVenda.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
-            document.getElementById('count-itens').innerText = carrinho.length;
-        }
-
-        function limparCarrinho() {
-            carrinho = [];
-            descontoVenda = 0;
-            atualizarCarrinho();
-        }
-
-        async function aplicarDesconto() {
-            const { value } = await Swal.fire({
-                title: 'Desconto (R$)',
-                input: 'number',
-                background: '#1e293b', color: '#fff'
-            });
-            if(value) {
-                descontoVenda = parseFloat(value);
-                atualizarCarrinho();
-            }
-        }
-
-        // --- FINALIZAR ---
-        async function finalizarVenda() {
-            if(carrinho.length === 0) return Swal.fire("Vazio", "Adicione produtos!", "warning");
-
-            const { value: dados } = await Swal.fire({
-                title: 'Finalizar',
-                html: `
-                    <input id="cli" class="swal2-input" placeholder="Nome Cliente">
-                    <select id="pag" class="swal2-input">
-                        <option>Pix</option><option>Dinheiro</option><option>Cartão</option>
-                    </select>`,
-                focusConfirm: false,
-                background: '#1e293b', color: '#fff',
-                preConfirm: () => {
-                    return { cli: document.getElementById('cli').value, pag: document.getElementById('pag').value }
-                }
-            });
-
-            if(!dados || !dados.cli) return;
-
-            // Salvar
-            try {
-                const venda = {
-                    data: new Date().toISOString(),
-                    cliente: dados.cli,
-                    pagamento: dados.pag,
-                    total: document.getElementById('lbl-total').innerText,
-                    desconto: descontoVenda,
-                    itens: carrinho.map(x => ({ modelo: x.modelo, preco: x.precoReal })),
-                    vendedor: localStorage.getItem('usuarioLogado')
-                };
-
-                await db.collection("vendas").add(venda);
-
-                // Baixa Estoque
-                const batch = db.batch();
-                carrinho.forEach(item => {
-                    batch.update(db.collection("estoque").doc(item.id), { status: 'vendido', dataVenda: new Date().toISOString() });
-                    // Tenta também coleção Maiúscula por segurança
-                    // batch.update(db.collection("Estoque").doc(item.id), ... ) -> Se soubermos o ID certo
+                db.collection("clientes").where("nome", "==", cli).get().then(qs => {
+                    qs.forEach(doc => {
+                        let hist = doc.data().historico || "";
+                        let resumoCompra = `[${new Date().toLocaleDateString('pt-BR')}] Pedido #${num} - Total: R$ ${totalVendaGlobal.toFixed(2)}\n`;
+                        carrinho.forEach(item => { resumoCompra += `   + ${item.modelo || item.nomeP}\n`; });
+                        
+                        db.collection("clientes").doc(doc.id).update({
+                            historico: resumoCompra + "\n" + hist
+                        });
+                    });
                 });
-                await batch.commit();
 
-                localStorage.setItem('dadosRecibo', JSON.stringify(venda));
-                window.open('orcamento.html', '_blank');
-                
-                limparCarrinho();
-                carregarEstoque(); // Recarrega para sumir os vendidos
-
-            } catch(e) {
-                Swal.fire("Erro", "Falha ao gravar venda", "error");
-            }
+                limparRascunho(); 
+                alert(`Pedido ${num} Finalizado!`); 
+                window.location.reload(); 
+            } catch(e){alert("Erro: "+e.message);} 
         }
+        
+        async function gerarRecibo() {
+            const cli=document.getElementById('cliente-input').value; if(!cli)return alert("Cliente?");
+            const snap=await db.collection("vendas").get(); const num=String(snap.size+1).padStart(4,'0');
+            const cFull=dbClientes.find(c=>c.nome===cli)||{nome:cli};
+            let itensR=carrinho.map(i=>({nome:i.modelo||i.nomeP,desc:i.cor||'',preco:i.venda,isBrinde:i.isBrinde}));
+            trocas.forEach(t=>itensR.push({nome:"TROCA: "+t.modelo,desc:t.imei,preco:-t.valor,isTroca:true}));
+            
+            let textoParcela = "";
+            if (parcelasSelecionadas > 0 && totalVendaGlobal > 0) {
+                const valorParcela = totalVendaGlobal / parcelasSelecionadas;
+                textoParcela = `(${parcelasSelecionadas}x de ${formatMoeda(valorParcela)})`;
+            }
+
+            const dados={
+                numeroPedido: num, cliente: cFull.nome, cpf: cFull.cpf||'', tel: cFull.whats||'', endereco: cFull.logradouro||'',
+                itens: itensR, descontoManual: parseFloat(document.getElementById('valor-desconto-manual').value)||0,
+                taxaMaquininha: valorTaxaAplicada,
+                total: totalVendaGlobal, 
+                pagamento: document.getElementById('forma-pagamento').value,
+                textoParcelas: textoParcela,
+                data: new Date().toLocaleDateString('pt-BR')
+            };
+            localStorage.setItem('dadosRecibo',JSON.stringify(dados)); window.open('orcamento.html','_blank');
+        }
+
+        function abrirModalTroca(){document.getElementById('modal-troca').style.display='flex';}
+        function fecharModalTroca(){document.getElementById('modal-troca').style.display='none';}
+        function abrirModalCliente(){document.getElementById('modal-cliente').style.display='flex';}
+        function fecharModalCliente(){document.getElementById('modal-cliente').style.display='none';}
+        function buscarCep(){ let cep=document.getElementById('novo-cep').value.replace(/\D/g,''); if(cep.length===8) fetch(`https://viacep.com.br/ws/${cep}/json/`).then(r=>r.json()).then(d=>{if(!d.erro){document.getElementById('novo-endereco').value=d.logradouro;document.getElementById('novo-bairro').value=d.bairro;document.getElementById('novo-cidade').value=`${d.localidade}-${d.uf}`;document.getElementById('novo-numero').focus();}}); }
+        async function salvarNovoCliente(){ let n=document.getElementById('novo-nome').value; if(!n)return alert("Nome?"); try{ await db.collection("clientes").add({nome:n, cpf:document.getElementById('novo-cpf').value, whats:document.getElementById('novo-zap').value, email:document.getElementById('novo-email').value, cep:document.getElementById('novo-cep').value, logradouro:document.getElementById('novo-endereco').value, numero:document.getElementById('novo-numero').value, bairro:document.getElementById('novo-bairro').value, cidade:document.getElementById('novo-cidade').value}); alert("Ok!"); document.getElementById('cliente-input').value=n; fecharModalCliente(); salvarRascunho(); }catch(e){alert("Erro");} }
+        function carregarOpcoesPagamento(){ let s=document.getElementById('forma-pagamento'); s.innerHTML=`<optgroup label="À Vista"><option>Pix</option><option>Dinheiro</option><option>Débito</option></optgroup><optgroup label="Crédito">`; for(let i=1;i<=24;i++)s.innerHTML+=`<option>Crédito ${i}x</option>`; }
     </script>
 </body>
 </html>
