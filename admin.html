@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VÉRTICE | BI & Gestão</title>
+    <title>Dashboard | VÉRTICE BI</title>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
@@ -14,423 +16,343 @@
 
     <style>
         :root {
-            --bg: #020617; --card: #0f172a; --accent: #00e0ff; --text: #f8fafc;
-            --success: #10b981; --danger: #ef4444; --warning: #f59e0b; 
-            --purple: #8b5cf6; --pink: #ec4899; --gold: #d97706; --border: #1e293b;
+            --bg: #020617;
+            --sidebar-bg: #000000;
+            --card-bg: #0f172a;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #00e0ff; /* AZUL NEON DA IDENTIDADE */
+            --accent-glow: rgba(0, 224, 255, 0.3);
+            --border: rgba(255, 255, 255, 0.1);
+            --success: #10b981;
         }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
 
-        /* SIDEBAR */
-        .sidebar { width: 250px; background: #000; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
-        .logo { color: var(--accent); text-align: center; font-weight: bold; font-size: 24px; margin-bottom: 40px; letter-spacing: 2px; }
-        .nav-item { padding: 15px; color: #94a3b8; text-decoration: none; border-radius: 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; transition: 0.3s; cursor: pointer; }
-        .nav-item:hover, .nav-item.active { background: var(--accent); color: #000; box-shadow: 0 0 15px rgba(0, 224, 255, 0.3); font-weight: bold; }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* BARRA LATERAL (MENU) */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+            transition: 0.3s;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 50px;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo span { color: var(--accent); text-shadow: 0 0 15px var(--accent-glow); }
+
+        .nav-menu { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+        
+        .nav-item {
+            text-decoration: none;
+            color: var(--text-muted);
+            padding: 15px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item i { width: 20px; text-align: center; transition: 0.3s; }
+
+        /* EFEITO NEON NO MENU */
+        .nav-item:hover, .nav-item.active {
+            background: var(--accent);
+            color: #000; /* Texto preto para contraste no neon */
+            box-shadow: 0 0 20px var(--accent-glow);
+            font-weight: 700;
+            transform: translateX(5px);
+        }
 
         /* CONTEÚDO PRINCIPAL */
-        .content { flex: 1; padding: 20px; overflow-y: auto; }
-        .header-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        
-        .action-group { display: flex; gap: 10px; }
-        .btn-print { background: var(--accent); color: #000; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; box-shadow: 0 0 10px rgba(0,224,255,0.2); }
-        .btn-print:hover { opacity: 0.9; transform: scale(1.02); }
-
-        .filter-group { display: flex; background: var(--card); padding: 5px; border-radius: 8px; border: 1px solid var(--border); }
-        .filter-btn { background: transparent; border: none; color: #94a3b8; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; font-size: 12px; }
-        .filter-btn.active { background: var(--accent); color: #000; }
-
-        .section-title { font-size: 14px; color: #94a3b8; margin: 20px 0 10px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
-        
-        /* GRIDS & CARDS */
-        .stock-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stock-card { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); padding: 15px; border-radius: 10px; display: flex; flex-direction: column; }
-        .stock-card small { color: #94a3b8; font-size: 10px; text-transform: uppercase; margin-top: 5px; }
-        .stock-card strong { font-size: 16px; color: #fff; margin-top: 2px; }
-
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
-        .kpi-card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); position: relative; overflow: hidden; }
-        .kpi-card::after { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); }
-        .kpi-card.green::after { background: var(--success); }
-        .kpi-card.red::after { background: var(--danger); }
-        .kpi-card.yellow::after { background: var(--warning); }
-        .kpi-card.purple::after { background: var(--purple); }
-        
-        .kpi-title { font-size: 12px; color: #94a3b8; text-transform: uppercase; }
-        .kpi-value { font-size: 24px; font-weight: bold; margin: 10px 0; }
-        .kpi-sub { font-size: 11px; opacity: 0.7; }
-
-        .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
-        .chart-box { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); height: 300px; }
-
-        .table-box { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 20px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { text-align: left; color: #94a3b8; padding: 10px; border-bottom: 1px solid var(--border); }
-        td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-        /* MODAL DE CADASTRO */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; display: none; }
-        .modal { background: #0f172a; padding: 25px; border-radius: 15px; width: 350px; border: 1px solid #1e293b; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
-        .modal input, .modal select { width: 100%; padding: 10px; margin-bottom: 10px; background: #1e293b; border: 1px solid #334155; color: #fff; border-radius: 5px; box-sizing: border-box; }
-
-        /* IMPRESSÃO (RELATÓRIO A4) */
-        #print-area { display: none; }
-
-        @media print {
-            @page { margin: 0; size: A4; }
-            body * { visibility: hidden; } /* Esconde dashboard */
-            .sidebar { display: none; }
-            
-            #print-area, #print-area * { visibility: visible; } /* Mostra relatório */
-            #print-area { 
-                position: absolute; left: 0; top: 0; width: 100%; height: 100%;
-                background: #fff; color: #000; padding: 1.5cm; box-sizing: border-box;
-                font-family: Arial, sans-serif;
-            }
-
-            .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 20px; }
-            .print-header h1 { margin: 0; font-size: 24px; text-transform: uppercase; color: #000; }
-            .print-meta { display: flex; justify-content: space-between; font-size: 12px; margin-top: 10px; }
-            .print-section { margin-bottom: 30px; }
-            .print-section h3 { background: #eee; padding: 5px 10px; font-size: 14px; text-transform: uppercase; border-left: 5px solid #000; color: #000; margin-bottom: 10px; }
-            .print-row { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; }
-            .print-row span { font-weight: bold; }
-            .print-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
-            .print-table th { border-bottom: 2px solid #000; text-align: left; color: #000; padding: 5px; }
-            .print-table td { border-bottom: 1px solid #eee; padding: 5px; color: #000; }
-            .print-footer { position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 10px; padding: 10px; border-top: 1px solid #000; background: #fff; }
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: radial-gradient(circle at top right, #1e293b 0%, transparent 40%);
         }
 
-        @media (max-width: 768px) {
-            body { flex-direction: column; overflow: auto; height: auto; }
-            .sidebar { display: none; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .welcome { font-size: 20px; font-weight: 600; }
+        .date-display { color: var(--text-muted); font-size: 14px; }
+
+        /* CARDS DE KPI */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+        .kpi-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+        
+        .kpi-title { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .kpi-value { font-size: 28px; font-weight: 800; color: #fff; }
+        .kpi-icon { position: absolute; right: 20px; top: 20px; font-size: 24px; color: var(--accent); opacity: 0.5; }
+
+        /* GRÁFICOS */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        .chart-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            height: 400px;
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        @media (max-width: 1024px) {
             .charts-grid { grid-template-columns: 1fr; }
-            .stock-grid { grid-template-columns: 1fr 1fr; }
+            .sidebar { width: 80px; padding: 15px; }
+            .logo span, .nav-item span { display: none; }
+            .nav-item { justify-content: center; padding: 15px; }
+            .nav-item:hover { transform: none; }
         }
     </style>
 </head>
 <body>
 
     <aside class="sidebar">
-        <div class="logo">VÉRTICE</div>
-        <nav>
-            <a href="admin.html" class="nav-item active"><i class="fas fa-chart-pie"></i> Dashboard</a>
-            <a href="vendas.html" class="nav-item"><i class="fas fa-cash-register"></i> PDV</a>
-            <a href="estoque.html" class="nav-item"><i class="fas fa-box"></i> Estoque</a>
-            <a href="clientes.html" class="nav-item"><i class="fas fa-users"></i> Clientes</a>
-            <a href="fornecedores.html" class="nav-item"><i class="fas fa-truck"></i> Fornecedores</a>
-            
-            <a onclick="abrirModalEquipe()" class="nav-item"><i class="fas fa-user-plus"></i> Equipe</a>
-            
-            <a href="index.html" class="nav-item" style="margin-top: auto; color: var(--danger);"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        <div class="logo">
+            <i class="fas fa-cube"></i>
+            <span>VÉRTICE</span>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active">
+                <i class="fas fa-chart-pie"></i>
+                <span>Visão Geral</span>
+            </a>
+
+            <a href="vendas.html" class="nav-item">
+                <i class="fas fa-cash-register"></i>
+                <span>PDV (Caixa)</span>
+            </a>
+
+            <a href="#" class="nav-item" style="opacity:0.5; cursor:not-allowed;" title="Em breve">
+                <i class="fas fa-box"></i>
+                <span>Estoque</span>
+            </a>
+
+            <a href="equipe.html" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>Gestão de Equipe</span>
+            </a>
+
+            <div style="flex:1"></div> <a href="#" onclick="logout()" class="nav-item" style="color: var(--danger);">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sair do Sistema</span>
+            </a>
         </nav>
     </aside>
 
-    <main class="content">
-        <div class="header-title">
-            <h2>Dashboard Executivo</h2>
-            <div class="action-group">
-                <div class="filter-group">
-                    <button class="filter-btn" onclick="mudarFiltro('semanal', this)">7 Dias</button>
-                    <button class="filter-btn active" onclick="mudarFiltro('mensal', this)">Mês</button>
-                    <button class="filter-btn" onclick="mudarFiltro('todos', this)">Geral</button>
-                </div>
-                <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> Relatório</button>
+    <main class="main-content">
+        <header class="header">
+            <div>
+                <div class="welcome">Olá, <span style="color:var(--accent);">Administrador</span></div>
+                <div class="date-display" id="data-hoje">Carregando data...</div>
             </div>
-        </div>
+            <div style="background: var(--card-bg); padding: 10px 20px; border-radius: 20px; border: 1px solid var(--border);">
+                <i class="fas fa-circle" style="color: var(--success); font-size: 10px; margin-right: 5px;"></i> Sistema Online
+            </div>
+        </header>
 
-        <div class="section-title"><i class="fas fa-cubes"></i> Valuation de Estoque (Disponível)</div>
-        <div class="stock-grid">
-            <div class="stock-card" style="border-bottom: 2px solid var(--accent);"><i class="fas fa-mobile-alt icon" style="color:var(--accent)"></i><small>Celulares</small><strong id="val-celular">R$ 0,00</strong></div>
-            <div class="stock-card" style="border-bottom: 2px solid var(--purple);"><i class="fas fa-headphones icon" style="color:var(--purple)"></i><small>Acessórios</small><strong id="val-acessorio">R$ 0,00</strong></div>
-            <div class="stock-card" style="border-bottom: 2px solid var(--pink);"><i class="fas fa-tshirt icon" style="color:var(--pink)"></i><small>Roupas</small><strong id="val-roupa">R$ 0,00</strong></div>
-            <div class="stock-card" style="border-bottom: 2px solid var(--gold);"><i class="fas fa-spray-can icon" style="color:var(--gold)"></i><small>Perfumes</small><strong id="val-perfume">R$ 0,00</strong></div>
-            <div class="stock-card" style="border-bottom: 2px solid var(--success);"><i class="fas fa-wallet icon" style="color:var(--success)"></i><small>Total Geral</small><strong id="val-total">R$ 0,00</strong></div>
-        </div>
-
-        <div class="section-title"><i class="fas fa-chart-line"></i> Performance de Vendas</div>
         <div class="kpi-grid">
-            <div class="kpi-card green"><div class="kpi-title">Faturamento Líquido</div><div class="kpi-value" id="kpi-faturamento">R$ 0,00</div><div class="kpi-sub">Dinheiro, Pix e Cartão</div></div>
-            <div class="kpi-card yellow"><div class="kpi-title">Entrada em Trocas</div><div class="kpi-value" id="kpi-trocas">R$ 0,00</div><div class="kpi-sub" id="kpi-qtd-trocas">0 aparelhos</div></div>
-            <div class="kpi-card red"><div class="kpi-title">Descontos Aplicados</div><div class="kpi-value" id="kpi-descontos">R$ 0,00</div><div class="kpi-sub">Negociações</div></div>
-            <div class="kpi-card purple"><div class="kpi-title">Brindes Concedidos</div><div class="kpi-value" id="kpi-brindes">0</div><div class="kpi-sub">Itens bonificados</div></div>
+            <div class="kpi-card">
+                <div class="kpi-title">Vendas Hoje</div>
+                <div class="kpi-value" id="kpi-vendas-hoje">R$ 0,00</div>
+                <i class="fas fa-shopping-cart kpi-icon"></i>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Faturamento Mês</div>
+                <div class="kpi-value" id="kpi-faturamento">R$ 0,00</div>
+                <i class="fas fa-wallet kpi-icon"></i>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Pedidos Hoje</div>
+                <div class="kpi-value" id="kpi-pedidos">0</div>
+                <i class="fas fa-receipt kpi-icon"></i>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Ticket Médio</div>
+                <div class="kpi-value" id="kpi-ticket">R$ 0,00</div>
+                <i class="fas fa-chart-line kpi-icon"></i>
+            </div>
         </div>
 
         <div class="charts-grid">
-            <div class="chart-box"><h4 style="margin:0 0 10px 0;">Evolução de Vendas</h4><canvas id="graficoLinha"></canvas></div>
-            <div class="chart-box"><h4 style="margin:0 0 10px 0;">Mix de Produtos</h4><canvas id="graficoRosca"></canvas></div>
-        </div>
-
-        <div class="table-box">
-            <h4 style="margin:0 0 15px 0;">Últimas Vendas Realizadas</h4>
-            <table>
-                <thead><tr><th>Data</th><th>Cliente</th><th>Pedido</th><th>Itens</th><th>Total</th></tr></thead>
-                <tbody id="tabela-vendas"><tr><td colspan="5" style="text-align:center; color:#888;">Carregando dados...</td></tr></tbody>
-            </table>
+            <div class="chart-container">
+                <canvas id="graficoVendas"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="graficoCategorias"></canvas>
+            </div>
         </div>
     </main>
 
-    <div id="print-area">
-        <div class="print-header">
-            <h1>LM IMPORTS - RELATÓRIO GERENCIAL</h1>
-            <div class="print-meta"><span>Emitido em: <b id="print-date"></b></span><span>Sistema Vértice BI</span></div>
-        </div>
-        <div class="print-section">
-            <h3>Resumo Financeiro</h3>
-            <div class="print-row"><div>Faturamento Bruto:</div><span id="print-faturamento">R$ 0,00</span></div>
-            <div class="print-row"><div>Entrada em Trocas:</div><span id="print-trocas">R$ 0,00</span></div>
-            <div class="print-row"><div>Descontos:</div><span id="print-descontos">R$ 0,00</span></div>
-            <div class="print-row" style="margin-top:10px; font-size:14px; border:none;"><div>TOTAL GERAL:</div><span id="print-total-mov">R$ 0,00</span></div>
-        </div>
-        <div class="print-section">
-            <h3>Indicadores</h3>
-            <div class="print-row"><div>Qtd Vendas:</div><span id="print-qtd-vendas">0</span></div>
-            <div class="print-row"><div>Ticket Médio:</div><span id="print-ticket">R$ 0,00</span></div>
-            <div class="print-row"><div>Brindes:</div><span id="print-qtd-brindes">0</span></div>
-        </div>
-        <div class="print-section">
-            <h3>Extrato de Vendas</h3>
-            <table class="print-table">
-                <thead><tr><th>Data</th><th>Cliente</th><th>Itens</th><th>Valor</th></tr></thead>
-                <tbody id="print-tabela-body"></tbody>
-            </table>
-        </div>
-        <div class="print-footer">
-            <div style="display:flex; justify-content:space-between; margin-bottom:40px; margin-top:40px;">
-                <div style="border-top:1px solid #000; width:40%; text-align:center;">Assinatura Gerente</div>
-                <div style="border-top:1px solid #000; width:40%; text-align:center;">Conferência Caixa</div>
-            </div>
-            Relatório gerado automaticamente pelo Sistema Vértice.
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="modal-equipe">
-        <div class="modal">
-            <h3 style="margin-top: 0; color: #00e0ff; text-align: center;">Nova Credencial</h3>
-            
-            <label style="font-size: 12px; color: #94a3b8;">Nome de Usuário (Login)</label>
-            <input type="text" id="novo-user-login" placeholder="Ex: vendedor1">
-            
-            <label style="font-size: 12px; color: #94a3b8;">Senha de Acesso</label>
-            <input type="text" id="novo-user-senha" placeholder="Ex: 0000">
-            
-            <label style="font-size: 12px; color: #94a3b8;">Nível de Acesso</label>
-            <select id="novo-user-cargo">
-                <option value="vendedor">Vendedor (Apenas PDV)</option>
-                <option value="admin">Gerente/Sócio (Acesso Total)</option>
-            </select>
-
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button onclick="document.getElementById('modal-equipe').style.display='none'" style="flex: 1; padding: 10px; background: #334155; color: #fff; border: none; border-radius: 5px; cursor: pointer;">Cancelar</button>
-                <button onclick="salvarNovoUsuario()" style="flex: 1; padding: 10px; background: #00e0ff; color: #000; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">Salvar</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // --- SEGURANÇA E HIERARQUIA ---
-        (function verificarAcesso() {
-            // 1. Verifica Licença (Kill Switch)
-            db.collection("config_sistema").doc("licenca").get().then(doc => {
-                if (doc.exists && doc.data().status === "bloqueada") {
-                    document.body.innerHTML = '<div style="height:100vh;display:flex;justify-content:center;align-items:center;background:#000;color:red;flex-direction:column;"><h1>ACESSO SUSPENSO</h1><p>Entre em contato com o suporte.</p></div>';
-                    throw new Error("Licença Bloqueada");
-                }
-            });
-
-            // 2. Verifica Cargo (Se não for Admin, chuta pro PDV)
+        // --- 1. SEGURANÇA ---
+        window.onload = function() {
+            // Verifica se é admin na coleção nova (equipe)
             const cargo = localStorage.getItem('cargoUsuario');
-            if (!cargo || cargo !== 'admin') {
-                // Pequeno delay para garantir carregamento seguro, mas bloqueia interação
-                alert("ACESSO NEGADO: Área restrita à gerência.");
-                window.location.href = 'vendas.html';
-                throw new Error("Acesso Negado");
+            
+            if (cargo !== 'admin') {
+                alert("Acesso negado! Área restrita para administradores.");
+                window.location.href = 'index.html';
+                return;
             }
-        })();
 
-        let vendasData = [], estoqueData = [], filtroAtual = 'mensal';
-        let chartLinhaInstance = null, chartRoscaInstance = null;
+            // Configura Data
+            const opcoes = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('data-hoje').innerText = new Date().toLocaleDateString('pt-BR', opcoes);
 
-        window.onload = function() { 
-            document.getElementById('print-date').innerText = new Date().toLocaleString('pt-BR');
-            carregarDados(); 
+            carregarDados();
         };
 
-        // --- MATEMÁTICA E DADOS ---
-        function limparMoeda(valor) {
-            if (typeof valor === 'number') return valor;
-            if (!valor) return 0;
-            let limpo = valor.toString().replace(/[R$\s]/g, '').trim();
-            if (limpo.indexOf(',') > -1 && limpo.indexOf('.') > -1) { limpo = limpo.replace(/\./g, '').replace(',', '.'); }
-            else if (limpo.indexOf(',') > -1) { limpo = limpo.replace(',', '.'); }
-            return parseFloat(limpo) || 0;
+        // --- 2. LOGOUT ---
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
         }
 
+        // --- 3. DADOS E GRÁFICOS ---
         async function carregarDados() {
+            // Aqui pegamos as vendas reais do Firebase
+            const hoje = new Date();
+            const inicioDia = new Date(hoje.setHours(0,0,0,0)).toISOString();
+            
             try {
-                const snapVendas = await db.collection("vendas").orderBy("data", "desc").get();
-                vendasData = []; snapVendas.forEach(doc => vendasData.push({ id: doc.id, ...doc.data() }));
+                const snapshot = await db.collection("vendas").where("data", ">=", inicioDia).get();
                 
-                const snapEstoque = await db.collection("estoque").get();
-                estoqueData = []; snapEstoque.forEach(doc => estoqueData.push({ id: doc.id, ...doc.data() }));
+                let totalHoje = 0;
+                let qtdPedidos = 0;
 
-                calcularValuationEstoque(); 
-                aplicarFiltroData();
+                snapshot.forEach(doc => {
+                    const v = doc.data();
+                    // Limpa o valor monetário para somar
+                    let valor = 0;
+                    if (typeof v.total === 'number') {
+                        valor = v.total;
+                    } else {
+                        valor = parseFloat(v.total.replace('R$', '').replace('.', '').replace(',', '.'));
+                    }
+                    totalHoje += valor;
+                    qtdPedidos++;
+                });
+
+                // Atualiza KPIs
+                document.getElementById('kpi-vendas-hoje').innerText = totalHoje.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+                document.getElementById('kpi-pedidos').innerText = qtdPedidos;
+                
+                if (qtdPedidos > 0) {
+                    const ticket = totalHoje / qtdPedidos;
+                    document.getElementById('kpi-ticket').innerText = ticket.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+                }
+
+                // Renderiza Gráficos (Exemplo estático para visual, depois conectamos histórico)
+                renderizarGraficos();
+
             } catch (error) {
-                console.error("Erro dados:", error);
+                console.error("Erro ao carregar dashboard:", error);
             }
         }
 
-        function calcularValuationEstoque() {
-            let val = { celular: 0, acessorio: 0, roupa: 0, perfume: 0, total: 0 };
-            estoqueData.forEach(p => {
-                if (p.status === 'disponível') {
-                    let valor = limparMoeda(p.venda);
-                    let cat = (p.categoria || 'outros').toLowerCase();
-                    if (cat.includes('celular')) val.celular += valor;
-                    else if (cat.includes('acessorio')) val.acessorio += valor;
-                    else if (cat.includes('roupa')) val.roupa += valor;
-                    else if (cat.includes('perfume')) val.perfume += valor;
-                    val.total += valor;
+        function renderizarGraficos() {
+            // Gráfico de Linha (Vendas Semanais - Exemplo)
+            const ctx1 = document.getElementById('graficoVendas').getContext('2d');
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+                    datasets: [{
+                        label: 'Vendas (R$)',
+                        data: [1200, 1900, 300, 500, 2000, 3000, 1500], // Dados fictícios para layout
+                        borderColor: '#00e0ff',
+                        backgroundColor: 'rgba(0, 224, 255, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#fff' } },
+                        title: { display: true, text: 'Performance Semanal', color: '#fff' }
+                    },
+                    scales: {
+                        y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                    }
                 }
             });
-            document.getElementById('val-celular').innerText = formatMoeda(val.celular);
-            document.getElementById('val-acessorio').innerText = formatMoeda(val.acessorio);
-            document.getElementById('val-roupa').innerText = formatMoeda(val.roupa);
-            document.getElementById('val-perfume').innerText = formatMoeda(val.perfume);
-            document.getElementById('val-total').innerText = formatMoeda(val.total);
-        }
 
-        function mudarFiltro(tipo, btn) {
-            filtroAtual = tipo;
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            aplicarFiltroData();
-        }
-
-        function aplicarFiltroData() {
-            const agora = new Date();
-            const vendasFiltradas = vendasData.filter(v => {
-                try {
-                    const dataVenda = new Date(v.data);
-                    if (filtroAtual === 'todos') return true;
-                    if (filtroAtual === 'semanal') return Math.ceil(Math.abs(agora - dataVenda) / (1000 * 60 * 60 * 24)) <= 7;
-                    if (filtroAtual === 'mensal') return dataVenda.getMonth() === agora.getMonth() && dataVenda.getFullYear() === agora.getFullYear();
-                    if (filtroAtual === 'anual') return dataVenda.getFullYear() === agora.getFullYear();
-                } catch(e) { return false; }
-            });
-            calcularKPIs(vendasFiltradas); 
-            renderizarGraficos(vendasFiltradas); 
-            renderizarTabela(vendasFiltradas);
-        }
-
-        function calcularKPIs(dados) {
-            let faturamento = 0, totalDescontos = 0, qtdBrindes = 0, qtdTrocas = 0;
-            dados.forEach(v => {
-                faturamento += limparMoeda(v.total);
-                totalDescontos += limparMoeda(v.desconto);
-                if (v.trocas && Array.isArray(v.trocas)) qtdTrocas += v.trocas.length;
-                if (v.itens) v.itens.forEach(item => { if (item.isBrinde) qtdBrindes++; });
-            });
-
-            let valorEntradaTroca = 0;
-            estoqueData.forEach(p => {
-                if(p.modelo && p.modelo.includes("TROCA")) valorEntradaTroca += limparMoeda(p.custo);
-            });
-
-            // Dashboard
-            document.getElementById('kpi-faturamento').innerText = formatMoeda(faturamento);
-            document.getElementById('kpi-descontos').innerText = formatMoeda(totalDescontos);
-            document.getElementById('kpi-brindes').innerText = qtdBrindes;
-            document.getElementById('kpi-trocas').innerText = formatMoeda(valorEntradaTroca); 
-            document.getElementById('kpi-qtd-trocas').innerText = `${qtdTrocas} itens`;
-
-            // Relatório
-            document.getElementById('print-faturamento').innerText = formatMoeda(faturamento);
-            document.getElementById('print-descontos').innerText = formatMoeda(totalDescontos);
-            document.getElementById('print-trocas').innerText = formatMoeda(valorEntradaTroca);
-            document.getElementById('print-total-mov').innerText = formatMoeda(faturamento + valorEntradaTroca);
-            document.getElementById('print-qtd-vendas').innerText = dados.length;
-            document.getElementById('print-ticket').innerText = dados.length > 0 ? formatMoeda(faturamento / dados.length) : "R$ 0,00";
-            document.getElementById('print-qtd-brindes').innerText = qtdBrindes;
-        }
-
-        function renderizarGraficos(dados) {
-            try {
-                const vendasPorDia = {};
-                dados.forEach(v => {
-                    const dia = new Date(v.data).toLocaleDateString('pt-BR').slice(0,5);
-                    vendasPorDia[dia] = (vendasPorDia[dia] || 0) + limparMoeda(v.total);
-                });
-                const labels = Object.keys(vendasPorDia).reverse();
-                const values = Object.values(vendasPorDia).reverse();
-
-                const ctxL = document.getElementById('graficoLinha').getContext('2d');
-                if(chartLinhaInstance) chartLinhaInstance.destroy();
-                chartLinhaInstance = new Chart(ctxL, {
-                    type: 'line', data: { labels: labels, datasets: [{ label: 'Vendas R$', data: values, borderColor: '#00e0ff', backgroundColor: 'rgba(0,224,255,0.1)', fill: true }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins:{legend:{display:false}}, scales:{x:{grid:{color:'#334155'}},y:{grid:{color:'#334155'}}} }
-                });
-
-                let cats = { 'Celular':0, 'Acessório':0, 'Roupa':0, 'Perfume':0, 'Outros':0 };
-                dados.forEach(v => {
-                    if(v.itens) {
-                        v.itens.forEach(i => {
-                            let itemNome = (i.modelo || i || '').toString().toLowerCase();
-                            if(itemNome.includes('iphone') || itemNome.includes('celular')) cats['Celular']++;
-                            else if(itemNome.includes('capa')||itemNome.includes('película')) cats['Acessório']++;
-                            else if(itemNome.includes('camisa')||itemNome.includes('calça')) cats['Roupa']++;
-                            else if(itemNome.includes('perfume')) cats['Perfume']++;
-                            else cats['Outros']++;
-                        });
+            // Gráfico de Rosca (Categorias - Exemplo)
+            const ctx2 = document.getElementById('graficoCategorias').getContext('2d');
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Celulares', 'Acessórios', 'Serviços'],
+                    datasets: [{
+                        data: [70, 20, 10],
+                        backgroundColor: ['#00e0ff', '#8b5cf6', '#10b981'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#fff' } },
+                        title: { display: true, text: 'Mix de Produtos', color: '#fff' }
                     }
-                });
-
-                const ctxR = document.getElementById('graficoRosca').getContext('2d');
-                if(chartRoscaInstance) chartRoscaInstance.destroy();
-                chartRoscaInstance = new Chart(ctxR, {
-                    type: 'doughnut',
-                    data: { labels: Object.keys(cats), datasets: [{ data: Object.values(cats), backgroundColor: ['#00e0ff', '#8b5cf6', '#ec4899', '#d97706', '#334155'], borderWidth: 0 }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins:{legend:{position:'right', labels:{color:'#fff'}}} }
-                });
-            } catch(e) { console.log("Erro gráfico", e); }
-        }
-
-        function renderizarTabela(dados) {
-            const tbody = document.getElementById('tabela-vendas');
-            const printBody = document.getElementById('print-tabela-body');
-            tbody.innerHTML = ""; printBody.innerHTML = "";
-
-            dados.slice(0, 15).forEach(v => {
-                let itensStr = v.itens ? v.itens.map(i => i.modelo || i).join(", ") : "-";
-                let itensResumo = itensStr.length > 30 ? itensStr.substring(0,30)+"..." : itensStr;
-                
-                tbody.innerHTML += `<tr><td>${new Date(v.data).toLocaleDateString('pt-BR')}</td><td style="font-weight:bold; color:#fff;">${v.cliente}</td><td style="color:#94a3b8;">#${v.numeroPedido || '---'}</td><td style="color:#94a3b8;">${itensResumo}</td><td style="color:#10b981; font-weight:bold;">${formatMoeda(limparMoeda(v.total))}</td></tr>`;
-                
-                printBody.innerHTML += `<tr><td>${new Date(v.data).toLocaleDateString('pt-BR')}</td><td>${v.cliente}</td><td>${itensStr}</td><td>${formatMoeda(limparMoeda(v.total))}</td></tr>`;
+                }
             });
-        }
-        function formatMoeda(val) { return val.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); }
-
-        // --- GESTÃO DE EQUIPE ---
-        function abrirModalEquipe() { document.getElementById('modal-equipe').style.display = 'flex'; }
-        
-        async function salvarNovoUsuario() {
-            const user = document.getElementById('novo-user-login').value;
-            const pass = document.getElementById('novo-user-senha').value;
-            const cargo = document.getElementById('novo-user-cargo').value;
-
-            if (!user || !pass) return Swal.fire("Erro", "Preencha usuário e senha!", "warning");
-
-            try {
-                // ATENÇÃO: Salvando na coleção "Usuários" (Maiúscula e com acento)
-                await db.collection("Usuários").add({ usuario: user, senha: pass, cargo: cargo });
-                Swal.fire("Sucesso!", `Usuário "${user}" cadastrado com nível ${cargo}.`, "success");
-                document.getElementById('novo-user-login').value = "";
-                document.getElementById('novo-user-senha').value = "";
-                document.getElementById('modal-equipe').style.display = 'none';
-            } catch (error) {
-                console.error(error);
-                Swal.fire("Erro", "Falha ao conectar ao banco.", "error");
-            }
         }
     </script>
 </body>
