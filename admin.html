@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VÉRTICE | Dashboard</title>
+    <title>VÉRTICE | BI & Relatórios</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
@@ -13,37 +13,99 @@
 
     <style>
         :root {
-            --bg: #020617; --card: #0f172a; --accent: #00e0ff; --text: #f8fafc;
-            --success: #10b981; --danger: #ef4444; --border: #1e293b;
+            --bg: #020617; --card: #0f172a; 
+            --accent: #00e0ff; /* AZUL NEON PADRÃO */
+            --text: #f8fafc;
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b; 
+            --purple: #8b5cf6; --pink: #ec4899; --gold: #d97706; --border: #1e293b;
         }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
 
-        /* SIDEBAR (PADRÃO VÉRTICE) */
+        /* SIDEBAR (CORRIGIDA PARA O PADRÃO) */
         .sidebar { width: 250px; background: #000; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
         .logo { color: var(--accent); text-align: center; font-weight: bold; font-size: 24px; margin-bottom: 40px; letter-spacing: 2px; }
+        
         .nav-item { padding: 15px; color: #94a3b8; text-decoration: none; border-radius: 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; transition: 0.3s; cursor: pointer; }
-        .nav-item:hover, .nav-item.active { background: var(--accent); color: #000; box-shadow: 0 0 15px rgba(0, 224, 255, 0.3); font-weight: bold; }
-
-        /* CONTEÚDO PRINCIPAL */
-        .main-content { flex: 1; padding: 30px; overflow-y: auto; }
         
-        /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .user-info { text-align: right; }
-        .user-name { font-weight: bold; color: var(--accent); font-size: 18px; }
+        /* AQUI ESTAVA A DIFERENÇA: Fundo Neon com Texto PRETO */
+        .nav-item:hover, .nav-item.active { 
+            background: var(--accent); 
+            color: #000; /* Texto preto para contraste no neon */
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(0, 224, 255, 0.4); 
+        }
 
-        /* CARDS KPI */
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .kpi-card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 10px; position: relative; }
-        .kpi-title { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-        .kpi-value { font-size: 24px; font-weight: bold; margin-top: 5px; color: #fff; }
-        .kpi-icon { position: absolute; right: 20px; top: 20px; font-size: 24px; color: var(--accent); opacity: 0.2; }
-
-        /* GRÁFICOS */
-        .charts-area { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; height: 400px; }
-        .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+        /* CONTEÚDO */
+        .content { flex: 1; padding: 20px; overflow-y: auto; }
+        .header-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
-        @media (max-width: 1000px) { .charts-area { grid-template-columns: 1fr; height: auto; } }
+        .action-group { display: flex; gap: 10px; }
+        .btn-print { background: var(--accent); color: #000; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; box-shadow: 0 0 10px rgba(0,224,255,0.2); }
+        .btn-print:hover { opacity: 0.9; transform: scale(1.02); }
+
+        .filter-group { display: flex; background: var(--card); padding: 5px; border-radius: 8px; border: 1px solid var(--border); }
+        .filter-btn { background: transparent; border: none; color: #94a3b8; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; font-size: 12px; }
+        
+        /* BOTÃO DE FILTRO ATIVO TAMBÉM SEGUE O PADRÃO */
+        .filter-btn.active { background: var(--accent); color: #000; }
+
+        .section-title { font-size: 14px; color: #94a3b8; margin: 20px 0 10px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+        
+        /* GRIDS */
+        .stock-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stock-card { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); padding: 15px; border-radius: 10px; display: flex; flex-direction: column; }
+        .stock-card small { color: #94a3b8; font-size: 10px; text-transform: uppercase; margin-top: 5px; }
+        .stock-card strong { font-size: 16px; color: #fff; margin-top: 2px; }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .kpi-card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+        .kpi-card::after { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); }
+        .kpi-card.green::after { background: var(--success); }
+        .kpi-card.red::after { background: var(--danger); }
+        .kpi-card.yellow::after { background: var(--warning); }
+        .kpi-card.purple::after { background: var(--purple); }
+        
+        .kpi-title { font-size: 12px; color: #94a3b8; text-transform: uppercase; }
+        .kpi-value { font-size: 24px; font-weight: bold; margin: 10px 0; }
+        .kpi-sub { font-size: 11px; opacity: 0.7; }
+
+        .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .chart-box { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); height: 300px; }
+
+        .table-box { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; color: #94a3b8; padding: 10px; border-bottom: 1px solid var(--border); }
+        td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        /* --- RELATÓRIO DE IMPRESSÃO (ESCONDIDO NA TELA) --- */
+        #print-area { display: none; }
+
+        @media print {
+            @page { margin: 0; size: A4; }
+            .sidebar, .content { display: none !important; }
+            #print-area { 
+                display: block !important; position: absolute; left: 0; top: 0; width: 100%; 
+                background: #fff; color: #000; padding: 1.5cm; box-sizing: border-box; font-family: Arial, sans-serif;
+            }
+            .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 20px; }
+            .print-header h1 { margin: 0; font-size: 24px; text-transform: uppercase; color: #000; }
+            .print-meta { display: flex; justify-content: space-between; font-size: 12px; margin-top: 10px; }
+            .print-section { margin-bottom: 30px; }
+            .print-section h3 { background: #eee; padding: 5px 10px; font-size: 14px; text-transform: uppercase; border-left: 5px solid #000; color: #000; margin-bottom: 10px; }
+            .print-row { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; }
+            .print-row span { font-weight: bold; }
+            .print-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
+            .print-table th { border-bottom: 2px solid #000; text-align: left; color: #000; padding: 5px; }
+            .print-table td { border-bottom: 1px solid #eee; padding: 5px; color: #000; }
+            .print-footer { position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 10px; padding: 10px; border-top: 1px solid #000; background: #fff; }
+        }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow: auto; height: auto; }
+            .sidebar { display: none; }
+            .charts-grid { grid-template-columns: 1fr; }
+            .stock-grid { grid-template-columns: 1fr 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -51,122 +113,255 @@
     <aside class="sidebar">
         <div class="logo">VÉRTICE</div>
         <nav>
-            <a href="#" class="nav-item active"><i class="fas fa-chart-pie"></i> Dashboard</a>
-            <a href="vendas.html" class="nav-item"><i class="fas fa-cash-register"></i> PDV (Caixa)</a>
-            <a href="#" class="nav-item" style="opacity:0.5;"><i class="fas fa-box"></i> Estoque</a>
+            <a href="admin.html" class="nav-item active"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="vendas.html" class="nav-item"><i class="fas fa-cash-register"></i> PDV</a>
             
-            <a href="equipe.html" class="nav-item"><i class="fas fa-users"></i> Equipe</a>
+            <a href="equipes.html" class="nav-item"><i class="fas fa-users"></i> Equipe</a>
             
-            <div style="margin-top: auto;">
-                <a href="index.html" class="nav-item" style="color: var(--danger);"><i class="fas fa-sign-out-alt"></i> Sair</a>
-            </div>
+            <a href="index.html" class="nav-item" style="margin-top: auto; color: var(--danger);"><i class="fas fa-sign-out-alt"></i> Sair</a>
         </nav>
     </aside>
 
-    <main class="main-content">
-        <div class="header">
-            <h2 style="margin:0;">Visão Geral</h2>
-            <div class="user-info">
-                <div style="font-size:12px; color:#aaa;">Bem-vindo</div>
-                <div class="user-name">ADMINISTRADOR</div>
+    <main class="content">
+        <div class="header-title">
+            <h2>Dashboard Executivo</h2>
+            <div class="action-group">
+                <div class="filter-group">
+                    <button class="filter-btn" onclick="mudarFiltro('semanal', this)">7 Dias</button>
+                    <button class="filter-btn active" onclick="mudarFiltro('mensal', this)">Mês</button>
+                    <button class="filter-btn" onclick="mudarFiltro('todos', this)">Geral</button>
+                </div>
+                <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> Imprimir Relatório</button>
             </div>
         </div>
 
+        <div class="section-title"><i class="fas fa-cubes"></i> Valuation de Estoque (Disponível)</div>
+        <div class="stock-grid">
+            <div class="stock-card" style="border-bottom: 2px solid var(--accent);"><i class="fas fa-mobile-alt icon" style="color:var(--accent)"></i><small>Celulares</small><strong id="val-celular">R$ 0,00</strong></div>
+            <div class="stock-card" style="border-bottom: 2px solid var(--purple);"><i class="fas fa-headphones icon" style="color:var(--purple)"></i><small>Acessórios</small><strong id="val-acessorio">R$ 0,00</strong></div>
+            <div class="stock-card" style="border-bottom: 2px solid var(--pink);"><i class="fas fa-tshirt icon" style="color:var(--pink)"></i><small>Roupas</small><strong id="val-roupa">R$ 0,00</strong></div>
+            <div class="stock-card" style="border-bottom: 2px solid var(--gold);"><i class="fas fa-spray-can icon" style="color:var(--gold)"></i><small>Perfumes</small><strong id="val-perfume">R$ 0,00</strong></div>
+            <div class="stock-card" style="border-bottom: 2px solid var(--success);"><i class="fas fa-wallet icon" style="color:var(--success)"></i><small>Total Geral</small><strong id="val-total">R$ 0,00</strong></div>
+        </div>
+
+        <div class="section-title"><i class="fas fa-chart-line"></i> Performance de Vendas</div>
         <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-title">Vendas Hoje</div>
-                <div class="kpi-value" id="kpi-vendas">R$ 0,00</div>
-                <i class="fas fa-shopping-cart kpi-icon"></i>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-title">Pedidos</div>
-                <div class="kpi-value" id="kpi-pedidos">0</div>
-                <i class="fas fa-receipt kpi-icon"></i>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-title">Ticket Médio</div>
-                <div class="kpi-value" id="kpi-ticket">R$ 0,00</div>
-                <i class="fas fa-chart-line kpi-icon"></i>
-            </div>
+            <div class="kpi-card green"><div class="kpi-title">Faturamento Líquido</div><div class="kpi-value" id="kpi-faturamento">R$ 0,00</div><div class="kpi-sub">Dinheiro, Pix e Cartão</div></div>
+            <div class="kpi-card yellow"><div class="kpi-title">Entrada em Trocas</div><div class="kpi-value" id="kpi-trocas">R$ 0,00</div><div class="kpi-sub" id="kpi-qtd-trocas">0 aparelhos</div></div>
+            <div class="kpi-card red"><div class="kpi-title">Descontos Aplicados</div><div class="kpi-value" id="kpi-descontos">R$ 0,00</div><div class="kpi-sub">Negociações</div></div>
+            <div class="kpi-card purple"><div class="kpi-title">Brindes Concedidos</div><div class="kpi-value" id="kpi-brindes">0</div><div class="kpi-sub">Itens bonificados</div></div>
         </div>
 
-        <div class="charts-area">
-            <div class="chart-card">
-                <canvas id="graficoVendas"></canvas>
-            </div>
-            <div class="chart-card">
-                <canvas id="graficoCategorias"></canvas>
-            </div>
+        <div class="charts-grid">
+            <div class="chart-box"><h4 style="margin:0 0 10px 0;">Evolução de Vendas</h4><canvas id="graficoLinha"></canvas></div>
+            <div class="chart-box"><h4 style="margin:0 0 10px 0;">Mix de Produtos</h4><canvas id="graficoRosca"></canvas></div>
+        </div>
+
+        <div class="table-box">
+            <h4 style="margin:0 0 15px 0;">Últimas Vendas Realizadas</h4>
+            <table>
+                <thead><tr><th>Data</th><th>Cliente</th><th>Pedido</th><th>Itens</th><th>Total</th></tr></thead>
+                <tbody id="tabela-vendas"><tr><td colspan="5" style="text-align:center; color:#888;">Carregando dados...</td></tr></tbody>
+            </table>
         </div>
     </main>
 
+    <div id="print-area">
+        <div class="print-header">
+            <h1>LM IMPORTS - RELATÓRIO GERENCIAL</h1>
+            <div class="print-meta"><span>Emitido em: <b id="print-date"></b></span><span>Sistema Vértice BI</span></div>
+        </div>
+        <div class="print-section">
+            <h3>Resumo Financeiro</h3>
+            <div class="print-row"><div>Faturamento Bruto:</div><span id="print-faturamento">R$ 0,00</span></div>
+            <div class="print-row"><div>Entrada em Trocas:</div><span id="print-trocas">R$ 0,00</span></div>
+            <div class="print-row"><div>Descontos:</div><span id="print-descontos">R$ 0,00</span></div>
+            <div class="print-row" style="margin-top:10px; font-size:14px; border:none;"><div>TOTAL GERAL:</div><span id="print-total-mov">R$ 0,00</span></div>
+        </div>
+        <div class="print-section">
+            <h3>Indicadores</h3>
+            <div class="print-row"><div>Qtd Vendas:</div><span id="print-qtd-vendas">0</span></div>
+            <div class="print-row"><div>Ticket Médio:</div><span id="print-ticket">R$ 0,00</span></div>
+            <div class="print-row"><div>Brindes:</div><span id="print-qtd-brindes">0</span></div>
+        </div>
+        <div class="print-section">
+            <h3>Extrato de Vendas</h3>
+            <table class="print-table">
+                <thead><tr><th>Data</th><th>Cliente</th><th>Itens</th><th>Valor</th></tr></thead>
+                <tbody id="print-tabela-body"></tbody>
+            </table>
+        </div>
+        <div class="print-footer">
+            <div style="display:flex; justify-content:space-between; margin-bottom:40px; margin-top:40px;">
+                <div style="border-top:1px solid #000; width:40%; text-align:center;">Assinatura Gerente</div>
+                <div style="border-top:1px solid #000; width:40%; text-align:center;">Conferência Caixa</div>
+            </div>
+            Relatório gerado automaticamente pelo Sistema Vértice.
+        </div>
+    </div>
+
     <script>
-        // Segurança
+        // Segurança: Apenas Admin entra aqui
         if(localStorage.getItem('cargoUsuario') !== 'admin') {
             window.location.href = 'index.html';
         }
 
-        // --- LÓGICA DE DADOS (SIMPLIFICADA PARA CARREGAR RÁPIDO) ---
+        let vendasData = [], estoqueData = [], filtroAtual = 'mensal';
+        let chartLinhaInstance = null, chartRoscaInstance = null;
+
+        window.onload = function() { 
+            document.getElementById('print-date').innerText = new Date().toLocaleString('pt-BR');
+            carregarDados(); 
+        };
+
+        function limparMoeda(valor) {
+            if (typeof valor === 'number') return valor;
+            if (!valor) return 0;
+            let limpo = valor.toString().replace(/[R$\s]/g, '').trim();
+            if (limpo.indexOf(',') > -1 && limpo.indexOf('.') > -1) { limpo = limpo.replace(/\./g, '').replace(',', '.'); }
+            else if (limpo.indexOf(',') > -1) { limpo = limpo.replace(',', '.'); }
+            return parseFloat(limpo) || 0;
+        }
+
         async function carregarDados() {
-            const hoje = new Date();
-            const inicioDia = new Date(hoje.setHours(0,0,0,0)).toISOString();
-
             try {
-                // Pega vendas de hoje
-                const snap = await db.collection("vendas").where("data", ">=", inicioDia).get();
+                const snapVendas = await db.collection("vendas").orderBy("data", "desc").get();
+                vendasData = []; snapVendas.forEach(doc => vendasData.push({ id: doc.id, ...doc.data() }));
+                const snapEstoque = await db.collection("estoque").get();
+                estoqueData = []; snapEstoque.forEach(doc => estoqueData.push({ id: doc.id, ...doc.data() }));
                 
-                let total = 0;
-                let pedidos = 0;
-
-                snap.forEach(doc => {
-                    let v = doc.data();
-                    let valor = typeof v.total === 'number' ? v.total : parseFloat(v.total.replace('R$', '').replace('.', '').replace(',', '.'));
-                    total += valor;
-                    pedidos++;
-                });
-
-                document.getElementById('kpi-vendas').innerText = total.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
-                document.getElementById('kpi-pedidos').innerText = pedidos;
-                
-                if(pedidos > 0) {
-                    document.getElementById('kpi-ticket').innerText = (total/pedidos).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
-                }
-
-                initGraficos(); // Inicia gráficos visuais
-
-            } catch (e) {
-                console.error("Erro dados:", e);
+                calcularValuationEstoque(); 
+                aplicarFiltroData();
+            } catch (error) {
+                console.error("Erro ao carregar dados:", error);
             }
         }
 
-        function initGraficos() {
-            const ctx1 = document.getElementById('graficoVendas').getContext('2d');
-            new Chart(ctx1, {
-                type: 'line',
-                data: {
-                    labels: ['08h', '10h', '12h', '14h', '16h', '18h'],
-                    datasets: [{
-                        label: 'Vendas Hoje',
-                        data: [0, 500, 1200, 1800, 2500, 3200], // Dados exemplo
-                        borderColor: '#00e0ff',
-                        tension: 0.4
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { labels: { color: '#fff' } } }, scales: { y: { ticks: { color: '#aaa' } }, x: { ticks: { color: '#aaa' } } } }
+        function calcularValuationEstoque() {
+            let val = { celular: 0, acessorio: 0, roupa: 0, perfume: 0, total: 0 };
+            estoqueData.forEach(p => {
+                if (p.status === 'disponível') {
+                    let valor = limparMoeda(p.venda);
+                    let cat = (p.categoria || 'outros').toLowerCase();
+                    if (cat.includes('celular')) val.celular += valor;
+                    else if (cat.includes('acessorio')) val.acessorio += valor;
+                    else if (cat.includes('roupa')) val.roupa += valor;
+                    else if (cat.includes('perfume')) val.perfume += valor;
+                    val.total += valor;
+                }
             });
-            
-            const ctx2 = document.getElementById('graficoCategorias').getContext('2d');
-            new Chart(ctx2, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Celular', 'Acessório'],
-                    datasets: [{ data: [80, 20], backgroundColor: ['#00e0ff', '#ef4444'], borderWidth: 0 }]
-                },
-                options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#fff' } } } }
-            });
+            document.getElementById('val-celular').innerText = formatMoeda(val.celular);
+            document.getElementById('val-acessorio').innerText = formatMoeda(val.acessorio);
+            document.getElementById('val-roupa').innerText = formatMoeda(val.roupa);
+            document.getElementById('val-perfume').innerText = formatMoeda(val.perfume);
+            document.getElementById('val-total').innerText = formatMoeda(val.total);
         }
 
-        carregarDados();
+        function mudarFiltro(tipo, btn) {
+            filtroAtual = tipo;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            aplicarFiltroData();
+        }
+
+        function aplicarFiltroData() {
+            const agora = new Date();
+            const vendasFiltradas = vendasData.filter(v => {
+                try {
+                    const dataVenda = new Date(v.data);
+                    if (filtroAtual === 'todos') return true;
+                    if (filtroAtual === 'semanal') return Math.ceil(Math.abs(agora - dataVenda) / (1000 * 60 * 60 * 24)) <= 7;
+                    if (filtroAtual === 'mensal') return dataVenda.getMonth() === agora.getMonth() && dataVenda.getFullYear() === agora.getFullYear();
+                } catch(e) { return false; }
+            });
+            calcularKPIs(vendasFiltradas); 
+            renderizarGraficos(vendasFiltradas); 
+            renderizarTabela(vendasFiltradas);
+        }
+
+        function calcularKPIs(dados) {
+            let faturamento = 0, totalDescontos = 0, qtdBrindes = 0, qtdTrocas = 0;
+            dados.forEach(v => {
+                faturamento += limparMoeda(v.total);
+                totalDescontos += limparMoeda(v.desconto);
+                if (v.trocas && Array.isArray(v.trocas)) qtdTrocas += v.trocas.length;
+                if (v.itens) v.itens.forEach(item => { if (item.isBrinde) qtdBrindes++; });
+            });
+
+            let valorEntradaTroca = 0;
+            estoqueData.forEach(p => {
+                if(p.modelo && p.modelo.includes("TROCA")) valorEntradaTroca += limparMoeda(p.custo);
+            });
+
+            document.getElementById('kpi-faturamento').innerText = formatMoeda(faturamento);
+            document.getElementById('kpi-descontos').innerText = formatMoeda(totalDescontos);
+            document.getElementById('kpi-brindes').innerText = qtdBrindes;
+            document.getElementById('kpi-trocas').innerText = formatMoeda(valorEntradaTroca); 
+            document.getElementById('kpi-qtd-trocas').innerText = `${qtdTrocas} itens`;
+
+            document.getElementById('print-faturamento').innerText = formatMoeda(faturamento);
+            document.getElementById('print-descontos').innerText = formatMoeda(totalDescontos);
+            document.getElementById('print-trocas').innerText = formatMoeda(valorEntradaTroca);
+            document.getElementById('print-total-mov').innerText = formatMoeda(faturamento + valorEntradaTroca);
+            document.getElementById('print-qtd-vendas').innerText = dados.length;
+            document.getElementById('print-ticket').innerText = dados.length > 0 ? formatMoeda(faturamento / dados.length) : "R$ 0,00";
+            document.getElementById('print-qtd-brindes').innerText = qtdBrindes;
+        }
+
+        function renderizarGraficos(dados) {
+            try {
+                const vendasPorDia = {};
+                dados.forEach(v => {
+                    const dia = new Date(v.data).toLocaleDateString('pt-BR').slice(0,5);
+                    vendasPorDia[dia] = (vendasPorDia[dia] || 0) + limparMoeda(v.total);
+                });
+                const labels = Object.keys(vendasPorDia).reverse();
+                const values = Object.values(vendasPorDia).reverse();
+
+                const ctxL = document.getElementById('graficoLinha').getContext('2d');
+                if(chartLinhaInstance) chartLinhaInstance.destroy();
+                chartLinhaInstance = new Chart(ctxL, {
+                    type: 'line', data: { labels: labels, datasets: [{ label: 'Vendas R$', data: values, borderColor: '#00e0ff', backgroundColor: 'rgba(0,224,255,0.1)', fill: true }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins:{legend:{display:false}}, scales:{x:{grid:{color:'#334155'}},y:{grid:{color:'#334155'}}} }
+                });
+
+                let cats = { 'Celular':0, 'Acessório':0, 'Roupa':0, 'Perfume':0, 'Outros':0 };
+                dados.forEach(v => {
+                    if(v.itens) {
+                        v.itens.forEach(i => {
+                            let nomeItem = (i.modelo || i || '').toString().toLowerCase();
+                            if(nomeItem.includes('iphone') || nomeItem.includes('celular') || nomeItem.includes('samsung')) cats['Celular']++;
+                            else if(nomeItem.includes('capa')||nomeItem.includes('película')||nomeItem.includes('fonte')) cats['Acessório']++;
+                            else if(nomeItem.includes('camisa')||nomeItem.includes('calça')) cats['Roupa']++;
+                            else if(nomeItem.includes('perfume')) cats['Perfume']++;
+                            else cats['Outros']++;
+                        });
+                    }
+                });
+
+                const ctxR = document.getElementById('graficoRosca').getContext('2d');
+                if(chartRoscaInstance) chartRoscaInstance.destroy();
+                chartRoscaInstance = new Chart(ctxR, {
+                    type: 'doughnut',
+                    data: { labels: Object.keys(cats), datasets: [{ data: Object.values(cats), backgroundColor: ['#00e0ff', '#8b5cf6', '#ec4899', '#d97706', '#334155'], borderWidth: 0 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins:{legend:{position:'right', labels:{color:'#fff'}}} }
+                });
+            } catch(e) { console.log("Erro gráfico", e); }
+        }
+
+        function renderizarTabela(dados) {
+            const tbody = document.getElementById('tabela-vendas');
+            const printBody = document.getElementById('print-tabela-body');
+            tbody.innerHTML = "";
+            printBody.innerHTML = "";
+            dados.slice(0, 15).forEach(v => {
+                let itensStr = v.itens ? v.itens.map(i => i.modelo || i).join(", ") : "-";
+                let itensResumo = itensStr.length > 30 ? itensStr.substring(0,30)+"..." : itensStr;
+                tbody.innerHTML += `<tr><td>${new Date(v.data).toLocaleDateString('pt-BR')}</td><td style="font-weight:bold; color:#fff;">${v.cliente}</td><td style="color:#94a3b8;">#${v.numeroPedido || '---'}</td><td style="color:#94a3b8;">${itensResumo}</td><td style="color:#10b981; font-weight:bold;">${formatMoeda(limparMoeda(v.total))}</td></tr>`;
+                printBody.innerHTML += `<tr><td>${new Date(v.data).toLocaleDateString('pt-BR')}</td><td>${v.cliente}</td><td>${itensStr}</td><td>${formatMoeda(limparMoeda(v.total))}</td></tr>`;
+            });
+        }
+        function formatMoeda(val) { return val.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); }
     </script>
 </body>
 </html>
