@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VÉRTICE - CENTRAL DE COMANDO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+
+    <style>
+        :root { --bg: #020617; --card: #0f172a; --accent: #3b82f6; --text: #f8fafc; --hover: #1e293b; --danger: #ef4444; }
+        
+        body { 
+            background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; 
+            margin: 0; display: flex; flex-direction: column; min-height: 100vh; 
+            align-items: center; justify-content: center; position: relative; padding: 20px; box-sizing: border-box; 
+        }
+        
+        /* CABEÇALHO */
+        .header { text-align: center; margin-bottom: 40px; animation: fadeIn 1s ease-in; width: 100%; }
+        .brand { font-size: 60px; font-weight: 900; letter-spacing: 5px; color: var(--accent); text-shadow: 0 0 20px rgba(59, 130, 246, 0.3); margin: 0; }
+        .subtitle { font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px; }
+
+        /* MENU FLEXÍVEL */
+        .menu-container { 
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; 
+            max-width: 1200px; width: 100%; z-index: 10; 
+        }
+        
+        .card { 
+            background: var(--card); border: 1px solid #1e293b; border-radius: 20px; 
+            padding: 40px 20px; text-align: center; cursor: pointer; transition: 0.3s; 
+            text-decoration: none; color: var(--text); position: relative; overflow: hidden;
+            width: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        }
+        
+        .card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2); }
+        .icon-box { font-size: 40px; margin-bottom: 20px; color: var(--accent); transition: 0.3s; }
+        .card:hover .icon-box { transform: scale(1.1); color: #fff; }
+        .card-title { font-size: 18px; font-weight: bold; margin: 0; }
+        .card-desc { font-size: 11px; color: #64748b; margin-top: 10px; }
+
+        /* RELÓGIO E FOOTER (Desktop) */
+        .clock-container { position: absolute; bottom: 40px; right: 40px; text-align: right; }
+        .time { font-size: 28px; font-weight: bold; color: #fff; opacity: 0.8; }
+        .date { font-size: 12px; color: #64748b; }
+        
+        .dev-footer { position: absolute; bottom: 10px; width: 100%; text-align: center; font-size: 10px; color: #334155; letter-spacing: 1px; opacity: 0.7; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- RESPONSIVIDADE MOBILE --- */
+        @media (max-width: 768px) {
+            body { justify-content: flex-start; padding-top: 40px; height: auto; overflow-y: auto; }
+            .brand { font-size: 40px; letter-spacing: 2px; } 
+            .menu-container { flex-direction: column; gap: 15px; }
+            .card { width: 100%; flex-direction: row; padding: 20px; box-sizing: border-box; justify-content: flex-start; gap: 20px; text-align: left; min-height: 80px; }
+            .icon-box { margin-bottom: 0; font-size: 28px; width: 40px; text-align: center; }
+            .card div { display: flex; flex-direction: column; } 
+            .card-title { font-size: 16px; } 
+            .card-desc { margin-top: 2px; }
+            .clock-container { position: relative; bottom: auto; right: auto; margin-top: 40px; text-align: center; width: 100%; }
+            .dev-footer { position: relative; bottom: auto; margin-top: 20px; padding-bottom: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="brand">VÉRTICE</h1>
+        <div class="subtitle" id="msg-bemvindo">Sistema de Gestão LM Imports</div>
+    </div>
+
+    <div class="menu-container">
+        <a href="vendas.html" class="card">
+            <i class="fas fa-cash-register icon-box"></i>
+            <div>
+                <h2 class="card-title">PDV Vendas</h2>
+                <p class="card-desc">Frente de Caixa</p>
+            </div>
+        </a>
+
+        <a href="clientes.html" class="card">
+            <i class="fas fa-users icon-box"></i>
+            <div>
+                <h2 class="card-title">Clientes</h2>
+                <p class="card-desc">CRM e Histórico</p>
+            </div>
+        </a>
+
+        <a href="estoque.html" class="card">
+            <i class="fas fa-boxes icon-box"></i>
+            <div>
+                <h2 class="card-title">Estoque</h2>
+                <p class="card-desc">Produtos e Preços</p>
+            </div>
+        </a>
+
+        <a href="equipes.html" class="card" id="card-equipe" style="border-color: rgba(0, 224, 255, 0.3);">
+            <i class="fas fa-user-shield icon-box" style="color: #00e0ff;"></i>
+            <div>
+                <h2 class="card-title">Equipe</h2>
+                <p class="card-desc">Gerir Usuários</p>
+            </div>
+        </a>
+
+        <a href="admin.html" class="card" id="card-financeiro" style="border-color: rgba(239, 68, 68, 0.3);">
+            <i class="fas fa-chart-pie icon-box" style="color: #ef4444;"></i>
+            <div>
+                <h2 class="card-title">Financeiro</h2>
+                <p class="card-desc">Relatórios e Lucro</p>
+            </div>
+        </a>
+
+        <a href="#" onclick="logout()" class="card" style="border-color: rgba(255, 255, 255, 0.1);">
+            <i class="fas fa-sign-out-alt icon-box" style="color: #94a3b8;"></i>
+            <div>
+                <h2 class="card-title">Sair</h2>
+                <p class="card-desc">Fazer Logout</p>
+            </div>
+        </a>
+
+    </div>
+
+    <div class="clock-container">
+        <div class="time" id="clock">00:00</div>
+        <div class="date" id="date">Carregando data...</div>
+    </div>
+
+    <div class="dev-footer">
+        Desenvolvido por Rodrigo N Carvalho Ltda © 2026
+    </div>
+
+    <script>
+        // --- 1. RELÓGIO ---
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const dateString = now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+            document.getElementById('clock').innerText = timeString;
+            document.getElementById('date').innerText = dateString.charAt(0).toUpperCase() + dateString.slice(1);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- 2. LÓGICA DE ACESSO (O "Cérebro" da tela) ---
+        window.onload = function() {
+            // Verifica se está logado
+            const usuario = localStorage.getItem('usuarioLogado');
+            const cargo = localStorage.getItem('cargoUsuario');
+
+            if (!usuario) {
+                // Se não tiver usuário, manda pro login
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Mensagem de Boas Vindas
+            document.getElementById('msg-bemvindo').innerText = `Bem-vindo, ${usuario.toUpperCase()}`;
+
+            // Se for VENDEDOR, esconde os botões de chefe
+            if (cargo !== 'admin') {
+                const cardFin = document.getElementById('card-financeiro');
+                const cardEquipe = document.getElementById('card-equipe');
+                
+                if(cardFin) cardFin.style.display = 'none';
+                if(cardEquipe) cardEquipe.style.display = 'none';
+            }
+        };
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
