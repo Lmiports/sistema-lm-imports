@@ -7,91 +7,63 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
 
     <style>
-        :root { --bg: #020617; --card: #0f172a; --accent: #3b82f6; --text: #f8fafc; --hover: #1e293b; --danger: #ef4444; --success: #10b981; --warning: #f59e0b; }
+        :root { --bg: #020617; --card: #0f172a; --accent: #3b82f6; --text: #f8fafc; --danger: #ef4444; --success: #10b981; --warning: #f59e0b; }
         
         body { 
             background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; 
             margin: 0; display: flex; flex-direction: column; min-height: 100vh; 
-            align-items: center; justify-content: center; position: relative; padding: 20px; box-sizing: border-box; 
+            align-items: center; justify-content: center; padding: 20px; 
         }
         
-        /* CABEÇALHO */
-        .header { text-align: center; margin-bottom: 30px; animation: fadeIn 1s ease-in; width: 100%; }
-        .brand { font-size: 50px; font-weight: 900; letter-spacing: 5px; color: var(--accent); text-shadow: 0 0 20px rgba(59, 130, 246, 0.3); margin: 0; }
-        .subtitle { font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px; }
+        .header { text-align: center; margin-bottom: 30px; animation: fadeIn 1s; }
+        .brand { font-size: 50px; font-weight: 900; letter-spacing: 5px; color: var(--accent); margin: 0; }
+        .subtitle { font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 2px; }
 
-        /* MENU GRID (3 colunas x 2 linhas) */
-        .menu-container { 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 20px; 
-            max-width: 900px; 
-            width: 100%; 
-            z-index: 10; 
-        }
+        .menu-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 900px; width: 100%; }
         
         .card { 
             background: var(--card); border: 1px solid #1e293b; border-radius: 15px; 
             padding: 30px 20px; text-align: center; cursor: pointer; transition: 0.3s; 
             text-decoration: none; color: var(--text); position: relative; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            height: 140px; /* Altura fixa para ficarem iguais */
+            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 140px;
         }
         
-        .card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2); background: #1e293b; }
-        
-        .icon-box { font-size: 32px; margin-bottom: 15px; color: var(--accent); transition: 0.3s; }
-        .card:hover .icon-box { transform: scale(1.1); color: #fff; }
-        
-        .card-title { font-size: 16px; font-weight: bold; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+        .card:hover { transform: translateY(-5px); border-color: var(--accent); background: #1e293b; }
+        .icon-box { font-size: 32px; margin-bottom: 15px; color: var(--accent); }
+        .card-title { font-size: 16px; font-weight: bold; text-transform: uppercase; }
         .card-desc { font-size: 11px; color: #64748b; margin-top: 5px; }
 
-        /* CORES ESPECÍFICAS PARA CADA CARTÃO */
-        .card-financeiro:hover { border-color: var(--danger); box-shadow: 0 10px 30px rgba(239, 68, 68, 0.2); }
-        .card-financeiro .icon-box { color: var(--danger); }
-        
-        .card-equipe:hover { border-color: var(--warning); box-shadow: 0 10px 30px rgba(245, 158, 11, 0.2); }
-        .card-equipe .icon-box { color: var(--warning); }
-
-        .card-fornecedor:hover { border-color: var(--success); box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2); }
-        .card-fornecedor .icon-box { color: var(--success); }
-
-        /* RODAPÉ E RELÓGIO */
-        .footer-bar {
-            margin-top: 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            max-width: 900px;
-            border-top: 1px solid #1e293b;
-            padding-top: 20px;
+        /* --- O CADEADO (BLOQUEIO) --- */
+        .locked {
+            filter: grayscale(100%); /* Fica preto e branco */
+            opacity: 0.4;            /* Fica meio apagado */
+            cursor: not-allowed;     /* Mouse de bloqueio */
+            pointer-events: none;    /* Não dá pra clicar */
+            border-color: #333 !important;
         }
-        
-        .btn-logout {
-            color: #94a3b8; text-decoration: none; font-size: 12px; display: flex; align-items: center; gap: 5px; transition: 0.3s;
-            border: 1px solid #334155; padding: 8px 15px; border-radius: 20px;
-        }
-        .btn-logout:hover { color: var(--danger); border-color: var(--danger); background: rgba(239, 68, 68, 0.1); }
 
-        .clock-container { text-align: right; }
-        .time { font-size: 20px; font-weight: bold; color: #fff; }
-        .date { font-size: 10px; color: #64748b; }
+        .locked::after {
+            content: '\f023'; /* Ícone de cadeado FontAwesome */
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 50px;
+            color: #fff;
+            opacity: 0.8;
+            text-shadow: 0 0 10px #000;
+        }
+
+        .footer-bar { margin-top: 40px; display: flex; justify-content: space-between; width: 100%; max-width: 900px; border-top: 1px solid #1e293b; padding-top: 20px; }
+        .btn-logout { color: #94a3b8; text-decoration: none; border: 1px solid #334155; padding: 8px 15px; border-radius: 20px; font-size: 12px; }
+        .btn-logout:hover { color: var(--danger); border-color: var(--danger); }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* RESPONSIVO */
-        @media (max-width: 768px) {
-            .menu-container { grid-template-columns: 1fr; gap: 10px; } /* 1 por linha no celular */
-            .card { flex-direction: row; height: auto; padding: 20px; justify-content: flex-start; gap: 20px; text-align: left; }
-            .icon-box { margin-bottom: 0; width: 40px; text-align: center; }
-            .brand { font-size: 35px; }
-            .footer-bar { flex-direction: column-reverse; gap: 20px; }
-        }
+        @media (max-width: 768px) { .menu-container { grid-template-columns: 1fr; } .card { flex-direction: row; height: auto; justify-content: start; gap: 20px; padding: 20px; } }
     </style>
 </head>
 <body>
@@ -101,107 +73,81 @@
     </div>
 
     <div class="menu-container">
-        <a href="vendas.html" class="card">
+        <a href="vendas.html" class="card" data-perm="pdv">
             <i class="fas fa-cash-register icon-box"></i>
-            <div>
-                <h2 class="card-title">PDV / Caixa</h2>
-                <p class="card-desc">Vendas e Trocas</p>
-            </div>
+            <div><h2 class="card-title">PDV / Caixa</h2><p class="card-desc">Vendas e Trocas</p></div>
         </a>
 
-        <a href="clientes.html" class="card">
+        <a href="clientes.html" class="card" data-perm="clientes">
             <i class="fas fa-users icon-box"></i>
-            <div>
-                <h2 class="card-title">Clientes</h2>
-                <p class="card-desc">CRM e Histórico</p>
-            </div>
+            <div><h2 class="card-title">Clientes</h2><p class="card-desc">CRM e Histórico</p></div>
         </a>
 
-        <a href="estoque.html" class="card">
+        <a href="estoque.html" class="card" data-perm="estoque">
             <i class="fas fa-boxes icon-box"></i>
-            <div>
-                <h2 class="card-title">Estoque</h2>
-                <p class="card-desc">Produtos e Preços</p>
-            </div>
+            <div><h2 class="card-title">Estoque</h2><p class="card-desc">Produtos e Preços</p></div>
         </a>
 
-        <a href="fornecedores.html" class="card card-fornecedor">
+        <a href="fornecedores.html" class="card" data-perm="fornecedores">
             <i class="fas fa-truck icon-box"></i>
-            <div>
-                <h2 class="card-title">Fornecedores</h2>
-                <p class="card-desc">Compras e Parceiros</p>
-            </div>
+            <div><h2 class="card-title">Fornecedores</h2><p class="card-desc">Compras e Parceiros</p></div>
         </a>
 
-        <a href="admin.html" class="card card-financeiro" id="btn-financeiro">
-            <i class="fas fa-chart-pie icon-box"></i>
-            <div>
-                <h2 class="card-title">Financeiro</h2>
-                <p class="card-desc">Relatórios e Lucro</p>
-            </div>
+        <a href="admin.html" class="card" data-perm="financeiro">
+            <i class="fas fa-chart-pie icon-box" style="color:#ef4444;"></i>
+            <div><h2 class="card-title">Financeiro</h2><p class="card-desc">Relatórios e Lucro</p></div>
         </a>
 
-        <a href="equipes.html" class="card card-equipe" id="btn-equipe">
-            <i class="fas fa-user-shield icon-box"></i>
-            <div>
-                <h2 class="card-title">Equipe</h2>
-                <p class="card-desc">Gestão de Acessos</p>
-            </div>
+        <a href="equipes.html" class="card" data-perm="equipe">
+            <i class="fas fa-user-shield icon-box" style="color:#f59e0b;"></i>
+            <div><h2 class="card-title">Equipe</h2><p class="card-desc">Gestão de Acessos</p></div>
         </a>
     </div>
 
     <div class="footer-bar">
-        <a href="#" onclick="logout()" class="btn-logout">
-            <i class="fas fa-sign-out-alt"></i> Sair do Sistema
-        </a>
-
-        <div class="clock-container">
-            <div class="time" id="clock">00:00</div>
-            <div class="date" id="date">Carregando data...</div>
-        </div>
+        <a href="#" onclick="logout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Sair do Sistema</a>
+        <div style="color:#fff;" id="clock">00:00</div>
     </div>
 
     <script>
-        // --- 1. RELÓGIO ---
-        function updateClock() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            const dateString = now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
-            document.getElementById('clock').innerText = timeString;
-            document.getElementById('date').innerText = dateString.charAt(0).toUpperCase() + dateString.slice(1);
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+        function updateClock() { document.getElementById('clock').innerText = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}); }
+        setInterval(updateClock, 1000); updateClock();
 
-        // --- 2. CONTROLE DE ACESSO ---
         window.onload = function() {
             const usuario = localStorage.getItem('usuarioLogado');
-            const cargo = localStorage.getItem('cargoUsuario');
+            
+            // 1. RECUPERA AS PERMISSÕES SALVAS NO LOGIN
+            let perms = [];
+            try {
+                perms = JSON.parse(localStorage.getItem('permissoesUsuario') || '[]');
+            } catch(e) { perms = []; }
 
-            if (!usuario) {
-                window.location.href = 'index.html'; // Chuta pro login se não tiver usuário
-                return;
+            // SE FOR ADMIN PRINCIPAL, LIBERA TUDO AUTOMATICAMENTE
+            // (Para você nunca ficar trancado pra fora)
+            if(usuario === 'admin') {
+                perms = ['pdv', 'clientes', 'estoque', 'fornecedores', 'financeiro', 'equipe'];
             }
 
+            if (!usuario) { window.location.href = 'index.html'; return; }
             document.getElementById('msg-bemvindo').innerText = `Bem-vindo, ${usuario.toUpperCase()}`;
 
-            // Se for Vendedor, ESCONDE Financeiro e Equipe
-            if (cargo !== 'admin') {
-                const btnFin = document.getElementById('btn-financeiro');
-                const btnEq = document.getElementById('btn-equipe');
+            // 2. VERIFICA CADA CARTÃO
+            const cards = document.querySelectorAll('.card[data-perm]');
+            
+            cards.forEach(card => {
+                const permissaoNecessaria = card.getAttribute('data-perm');
                 
-                if(btnFin) btnFin.style.display = 'none';
-                if(btnEq) btnEq.style.display = 'none';
-                
-                // (Opcional) Se quiser esconder fornecedores de vendedor, descomente a linha abaixo:
-                // document.querySelector('.card-fornecedor').style.display = 'none';
-            }
+                // Se o usuário NÃO tiver essa permissão na lista dele...
+                if (!perms.includes(permissaoNecessaria)) {
+                    // ... ADICIONA O CADEADO E BLOQUEIA
+                    card.classList.add('locked');
+                    card.removeAttribute('href'); // Remove o link
+                    card.title = "Acesso Bloqueado pelo Administrador";
+                }
+            });
         };
 
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
-        }
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
     </script>
 </body>
 </html>
