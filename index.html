@@ -9,15 +9,14 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    
     <script src="js/firebase-config.js"></script>
 
     <style>
         :root { --bg: #020617; --accent: #00e0ff; --glass: rgba(15, 23, 42, 0.6); --text: #f8fafc; }
         body { margin: 0; background: var(--bg); font-family: 'Inter', sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        
         .background-grid { position: absolute; width: 200%; height: 200%; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 50px 50px; transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px); animation: move 20s linear infinite; z-index: -1; }
         @keyframes move { 0% {transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px);} 100% {transform: perspective(500px) rotateX(60deg) translateY(50px) translateZ(-200px);} }
-
         .login-card { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); padding: 40px; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
         .logo { font-size: 2rem; font-weight: 900; color: #fff; margin-bottom: 5px; }
         .logo span { color: var(--accent); }
@@ -25,10 +24,8 @@
         .input-group label { color: #94a3b8; font-size: 12px; margin-left: 5px; }
         input { width: 100%; padding: 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; box-sizing: border-box; outline: none; transition: 0.3s; }
         input:focus { border-color: var(--accent); }
-        
         .btn-login { width: 100%; padding: 15px; background: linear-gradient(135deg, #00e0ff 0%, #0066ff 100%); border: none; border-radius: 10px; color: #fff; font-weight: bold; cursor: pointer; margin-top: 10px; text-transform: uppercase; }
         .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(0,224,255,0.3); }
-
         #welcome-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 20; opacity: 0; pointer-events: none; transition: 0.5s; background: var(--bg); }
         #welcome-screen.active { opacity: 1; pointer-events: all; }
         .welcome-text { font-size: 3rem; font-weight: 900; color: #fff; text-align: center; }
@@ -46,7 +43,7 @@
         <form onsubmit="fazerLogin(event)">
             <div class="input-group">
                 <label>USUÁRIO</label>
-                <input type="text" id="user" placeholder="admin" required>
+                <input type="text" id="user" placeholder="admin" required autocomplete="off">
             </div>
             <div class="input-group">
                 <label>SENHA</label>
@@ -57,4 +54,78 @@
     </div>
 
     <div id="welcome-screen">
-        <div class="welcome-text">BEM-VINDO <span>VÉ
+        <div class="welcome-text">BEM-VINDO <span>VÉRTICE BI</span></div>
+    </div>
+
+    <script>
+        // --- CHECKUP DE INICIALIZAÇÃO ---
+        // Isso vai te avisar se o Firebase não carregou antes mesmo de você tentar logar
+        window.onload = function() {
+            if (typeof db === 'undefined') {
+                alert("ERRO CRÍTICO: O sistema não conseguiu carregar o arquivo 'js/firebase-config.js'.\n\nVerifique se o arquivo existe na pasta 'js'.");
+            }
+        };
+
+        async function fazerLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnEntrar');
+            const welcome = document.getElementById('welcome-screen');
+            
+            // Tratamento de Texto
+            let user = document.getElementById('user').value;
+            let pass = document.getElementById('pass').value;
+
+            // Limpeza de segurança
+            if(user) user = user.toLowerCase().trim().replace(/\s/g, '');
+            if(pass) pass = pass.trim();
+
+            btn.innerText = "VERIFICANDO...";
+            btn.style.opacity = "0.7";
+
+            try {
+                // VERIFICAÇÃO 1: O Firebase está funcionando?
+                if (typeof db === 'undefined') throw new Error("Banco de dados desconectado (db is undefined).");
+
+                console.log(`Tentando logar com: ${user} / ${pass}`);
+
+                // BUSCA NO BANCO
+                const snapshot = await db.collection("equipe")
+                    .where("login", "==", user)
+                    .where("pass", "==", pass)
+                    .get();
+
+                if (!snapshot.empty) {
+                    // --- SUCESSO ---
+                    const dados = snapshot.docs[0].data();
+                    
+                    localStorage.setItem('usuarioLogado', dados.login);
+                    localStorage.setItem('cargoUsuario', dados.role);
+
+                    // Animação
+                    document.getElementById('loginBox').style.opacity = '0';
+                    setTimeout(() => { welcome.classList.add('active'); }, 300);
+
+                    setTimeout(() => {
+                        // TENTATIVA DE REDIRECIONAMENTO
+                        console.log("Redirecionando para menu.html...");
+                        window.location.href = 'menu.html';
+                    }, 2000);
+
+                } else {
+                    // --- SENHA ERRADA ---
+                    btn.innerText = "ACESSAR";
+                    btn.style.opacity = "1";
+                    alert(`Login Incorreto!\n\nO sistema procurou por:\nUsuário: "${user}"\nSenha: "${pass}"\n\nMas não achou na coleção 'equipe'.`);
+                }
+
+            } catch (error) {
+                // --- ERRO TÉCNICO ---
+                console.error(error);
+                btn.innerText = "ERRO";
+                btn.style.opacity = "1";
+                alert("ERRO TÉCNICO:\n" + error.message + "\n\nSe o erro for 'network', verifique sua internet.");
+            }
+        }
+    </script>
+</body>
+</html>
