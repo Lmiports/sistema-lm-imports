@@ -22,10 +22,14 @@
         .content { flex: 1; padding: 30px; overflow-y: auto; }
         h2 { border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-top: 0; }
 
-        .form-card { background: var(--card); padding: 25px; border-radius: 12px; border: 1px solid var(--border); max-width: 600px; margin-bottom: 30px; }
+        .form-card { background: var(--card); padding: 25px; border-radius: 12px; border: 1px solid var(--border); max-width: 600px; margin-bottom: 30px; border-left: 5px solid var(--accent); }
         .form-group { margin-bottom: 15px; }
         label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 5px; }
         input[type="text"] { width: 100%; padding: 12px; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 6px; outline: none; box-sizing: border-box; }
+        input[type="text"]:focus { border-color: var(--accent); }
+
+        /* MUDANÇA VISUAL NA EDIÇÃO */
+        .editing { border-color: #f59e0b; border-left-color: #f59e0b; }
         
         /* CHECKBOXES DE PERMISSÃO */
         .perms-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 5px; }
@@ -34,15 +38,17 @@
         .perm-item input { cursor: pointer; transform: scale(1.2); }
         .perm-item span { font-size: 12px; color: #fff; }
 
-        .btn-salvar { width: 100%; padding: 12px; background: var(--accent); border: none; font-weight: bold; cursor: pointer; border-radius: 6px; color: #000; margin-top: 20px; }
+        .btn-salvar { width: 100%; padding: 12px; background: var(--accent); border: none; font-weight: bold; cursor: pointer; border-radius: 6px; color: #000; margin-top: 20px; transition: 0.3s; }
+        .btn-salvar:hover { opacity: 0.9; transform: scale(1.01); }
         
         .user-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .user-card { background: var(--card); padding: 20px; border-radius: 10px; border: 1px solid var(--border); position: relative; }
+        .user-card { background: var(--card); padding: 20px; border-radius: 10px; border: 1px solid var(--border); position: relative; transition: 0.3s; }
+        .user-card:hover { transform: translateY(-2px); border-color: #333; }
         .user-login { font-size: 18px; font-weight: bold; color: #fff; }
         .role-badge { display: inline-block; font-size: 10px; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; background: rgba(0,224,255,0.1); color: var(--accent); }
         
         .actions { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; }
-        .action-btn { cursor: pointer; background: none; border: none; color: #666; transition: 0.2s; }
+        .action-btn { cursor: pointer; background: none; border: none; color: #666; transition: 0.2s; font-size: 14px; }
         .action-btn:hover { color: var(--accent); transform: scale(1.2); }
         .btn-del:hover { color: var(--danger); }
 
@@ -61,13 +67,13 @@
     <main class="content">
         <h2>Gestão de Equipe & Permissões</h2>
 
-        <div class="form-card">
-            <h3 style="margin-top:0;">Usuário</h3>
+        <div class="form-card" id="cardForm">
+            <h3 style="margin-top:0;" id="tituloForm">Novo Usuário</h3>
             <form onsubmit="salvarUsuario(event)">
                 <input type="hidden" id="editId">
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
                     <div class="form-group">
-                        <label>Login</label>
+                        <label>Login (Nome de acesso)</label>
                         <input type="text" id="login" placeholder="Ex: joao" required>
                     </div>
                     <div class="form-group">
@@ -88,7 +94,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-salvar" id="btnSalvar">SALVAR USUÁRIO</button>
+                <button type="submit" class="btn-salvar" id="btnSalvar">CADASTRAR</button>
                 <button type="button" onclick="limparForm()" style="width:100%; background:none; border:none; color:#666; margin-top:10px; cursor:pointer;">Cancelar / Limpar</button>
             </form>
         </div>
@@ -100,7 +106,7 @@
     <script>
         if(localStorage.getItem('cargoUsuario') !== 'admin') window.location.href = 'index.html';
 
-        // 1. CARREGAR
+        // 1. CARREGAR LISTA
         db.collection("equipe").onSnapshot(snap => {
             const div = document.getElementById('lista-usuarios');
             div.innerHTML = "";
@@ -125,47 +131,67 @@
             });
         });
 
-        // 2. SALVAR
+        // 2. SALVAR (COM PROTEÇÃO CONTRA DUPLICIDADE)
         async function salvarUsuario(e) {
             e.preventDefault();
             const id = document.getElementById('editId').value;
+            // Limpa o nome (sem espaços, minúsculo)
             const login = document.getElementById('login').value.toLowerCase().trim().replace(/\s/g, '');
             const pass = document.getElementById('pass').value.trim();
             
-            // Pega os checkboxes marcados
             const marcados = [];
             document.querySelectorAll('input[name="perm"]:checked').forEach(c => marcados.push(c.value));
-
-            // Se tiver Financeiro ou Equipe, vira Admin automaticamente. Se não, Vendedor.
             const role = (marcados.includes('financeiro') || marcados.includes('equipe')) ? 'admin' : 'vendedor';
-
             const dados = { login, pass, role, permissoes: marcados };
 
             try {
+                // VERIFICAÇÃO INTELIGENTE DE DUPLICIDADE
+                // Procura se já existe ALGUÉM com esse login
+                const check = await db.collection("equipe").where("login", "==", login).get();
+
+                if(!check.empty) {
+                    // Se achou alguém, verifica: É outra pessoa? ou sou eu mesmo editando?
+                    const usuarioEncontrado = check.docs[0];
+                    if (id) {
+                        // Estou editando. Se o ID do usuário encontrado for DIFERENTE do meu ID, então o nome já é de outro.
+                        if (usuarioEncontrado.id !== id) {
+                            return alert(`Erro: O login "${login}" já está sendo usado por outra pessoa!`);
+                        }
+                    } else {
+                        // Estou criando. Se achou qualquer um, já era.
+                        return alert(`Erro: O login "${login}" já existe!`);
+                    }
+                }
+
                 if(id) {
                     await db.collection("equipe").doc(id).update(dados);
-                    alert("Atualizado!");
+                    alert("Usuário atualizado com sucesso!");
                 } else {
-                    const check = await db.collection("equipe").where("login", "==", login).get();
-                    if(!check.empty) return alert("Login já existe!");
                     await db.collection("equipe").add(dados);
-                    alert("Criado!");
+                    alert("Usuário criado com sucesso!");
                 }
                 limparForm();
             } catch(err) { alert("Erro: " + err.message); }
         }
 
-        // 3. EDITAR
+        // 3. EDITAR (AGORA SEM TRAVA NO NOME)
         function editar(id, login, pass, permsStr) {
             document.getElementById('editId').value = id;
             document.getElementById('login').value = login;
-            document.getElementById('login').setAttribute('readonly', true);
+            
+            // REMOVIDO: document.getElementById('login').setAttribute('readonly', true);
+            // AGORA VOCÊ PODE EDITAR O NOME!
+            
             document.getElementById('pass').value = pass;
-            document.getElementById('btnSalvar').innerText = "ATUALIZAR";
+            
+            document.getElementById('btnSalvar').innerText = "SALVAR ALTERAÇÕES";
+            document.getElementById('btnSalvar').style.background = "#f59e0b"; // Amarelo para indicar edição
+            document.getElementById('tituloForm').innerText = "Editando: " + login.toUpperCase();
+            document.getElementById('cardForm').classList.add('editing');
 
-            // Limpa e Marca checkboxes
+            // Checkboxes
             document.querySelectorAll('input[name="perm"]').forEach(c => c.checked = false);
-            if(permsStr) {
+            if(permsStr && permsStr !== 'undefined') {
                 const arr = permsStr.split(',');
                 arr.forEach(p => {
                     const el = document.querySelector(`input[value="${p}"]`);
@@ -179,10 +205,13 @@
         function limparForm() {
             document.getElementById('editId').value = "";
             document.getElementById('login').value = "";
-            document.getElementById('login').removeAttribute('readonly');
             document.getElementById('pass').value = "";
             document.querySelectorAll('input[name="perm"]').forEach(c => c.checked = false);
-            document.getElementById('btnSalvar').innerText = "SALVAR USUÁRIO";
+            
+            document.getElementById('btnSalvar').innerText = "CADASTRAR";
+            document.getElementById('btnSalvar').style.background = "var(--accent)";
+            document.getElementById('tituloForm').innerText = "Novo Usuário";
+            document.getElementById('cardForm').classList.remove('editing');
         }
 
         async function deletar(id, login) {
