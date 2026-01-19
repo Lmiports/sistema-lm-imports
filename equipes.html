@@ -11,249 +11,183 @@
     <script src="js/firebase-config.js"></script>
 
     <style>
-        :root {
-            --bg: #020617; --card: #0f172a; --accent: #00e0ff; --text: #f8fafc;
-            --success: #10b981; --danger: #ef4444; --warning: #f59e0b; --border: #1e293b;
-        }
+        :root { --bg: #020617; --card: #0f172a; --accent: #00e0ff; --text: #f8fafc; --border: #1e293b; --danger: #ef4444; }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
 
-        /* SIDEBAR (PADRÃO VÉRTICE) */
         .sidebar { width: 250px; background: #000; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
         .logo { color: var(--accent); text-align: center; font-weight: bold; font-size: 24px; margin-bottom: 40px; letter-spacing: 2px; }
-        
         .nav-item { padding: 15px; color: #94a3b8; text-decoration: none; border-radius: 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; transition: 0.3s; cursor: pointer; }
-        .nav-item:hover, .nav-item.active { background: var(--accent); color: #000; font-weight: bold; box-shadow: 0 0 15px rgba(0, 224, 255, 0.4); }
+        .nav-item:hover, .nav-item.active { background: var(--accent); color: #000; font-weight: bold; }
 
-        /* CONTEÚDO */
         .content { flex: 1; padding: 30px; overflow-y: auto; }
-        h2 { border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-top: 0; color: var(--text); }
+        h2 { border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-top: 0; }
 
-        /* FORMULÁRIO */
-        .form-card { background: var(--card); padding: 25px; border-radius: 12px; border: 1px solid var(--border); max-width: 500px; margin-bottom: 30px; position: relative; }
+        .form-card { background: var(--card); padding: 25px; border-radius: 12px; border: 1px solid var(--border); max-width: 600px; margin-bottom: 30px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 12px; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 6px; outline: none; box-sizing: border-box; }
-        input:focus, select:focus { border-color: var(--accent); }
-        input[readonly] { opacity: 0.5; cursor: not-allowed; }
-
-        .btn-group { display: flex; gap: 10px; }
-        .btn-salvar { flex: 1; padding: 12px; background: var(--accent); border: none; font-weight: bold; cursor: pointer; border-radius: 6px; color: #000; transition: 0.3s; }
-        .btn-salvar:hover { opacity: 0.9; }
+        input[type="text"] { width: 100%; padding: 12px; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 6px; outline: none; box-sizing: border-box; }
         
-        .btn-cancelar { padding: 12px; background: transparent; border: 1px solid var(--danger); color: var(--danger); border-radius: 6px; cursor: pointer; display: none; }
-        .btn-cancelar:hover { background: var(--danger); color: #fff; }
+        /* CHECKBOXES DE PERMISSÃO */
+        .perms-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 5px; }
+        .perm-item { background: #1e293b; padding: 10px; border-radius: 5px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 1px solid var(--border); }
+        .perm-item:hover { border-color: var(--accent); }
+        .perm-item input { cursor: pointer; transform: scale(1.2); }
+        .perm-item span { font-size: 12px; color: #fff; }
 
-        /* ESTADO DE EDIÇÃO */
-        .form-card.editing { border-color: var(--warning); }
-        .form-card.editing .btn-salvar { background: var(--warning); color: #000; }
-
-        /* LISTA DE USUÁRIOS */
+        .btn-salvar { width: 100%; padding: 12px; background: var(--accent); border: none; font-weight: bold; cursor: pointer; border-radius: 6px; color: #000; margin-top: 20px; }
+        
         .user-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .user-card { background: var(--card); padding: 20px; border-radius: 10px; border: 1px solid var(--border); position: relative; transition: 0.3s; }
-        .user-card:hover { border-color: var(--accent); transform: translateY(-3px); }
-
-        .role-badge { display: inline-block; font-size: 10px; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; }
-        .role-admin { background: rgba(0, 224, 255, 0.15); color: var(--accent); }
-        .role-vendedor { background: rgba(16, 185, 129, 0.15); color: var(--success); }
-
-        .user-login { font-size: 18px; font-weight: bold; color: #fff; margin-bottom: 5px; }
-        .user-pass { font-size: 13px; color: #94a3b8; display: flex; align-items: center; gap: 5px; }
+        .user-card { background: var(--card); padding: 20px; border-radius: 10px; border: 1px solid var(--border); position: relative; }
+        .user-login { font-size: 18px; font-weight: bold; color: #fff; }
+        .role-badge { display: inline-block; font-size: 10px; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; background: rgba(0,224,255,0.1); color: var(--accent); }
         
         .actions { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; }
-        .action-btn { cursor: pointer; font-size: 14px; transition: 0.2s; background: none; border: none; }
-        .btn-edit { color: var(--warning); }
-        .btn-del { color: var(--danger); }
-        .action-btn:hover { transform: scale(1.2); }
+        .action-btn { cursor: pointer; background: none; border: none; color: #666; transition: 0.2s; }
+        .action-btn:hover { color: var(--accent); transform: scale(1.2); }
+        .btn-del:hover { color: var(--danger); }
 
-        @media (max-width: 768px) {
-            .sidebar { display: none; }
-            body { flex-direction: column; overflow: auto; height: auto; }
-        }
+        @media (max-width: 768px) { .sidebar { display: none; } body { flex-direction: column; overflow: auto; height: auto; } }
     </style>
 </head>
 <body>
-
     <aside class="sidebar">
         <div class="logo">VÉRTICE</div>
         <nav>
             <a href="admin.html" class="nav-item"><i class="fas fa-chart-pie"></i> Dashboard</a>
-            <a href="vendas.html" class="nav-item"><i class="fas fa-cash-register"></i> PDV</a>
-            <a href="#" class="nav-item active"><i class="fas fa-users"></i> Equipe</a>
-            <a href="index.html" class="nav-item" style="margin-top: auto; color: var(--danger);"><i class="fas fa-sign-out-alt"></i> Sair</a>
+            <a href="menu.html" class="nav-item active"><i class="fas fa-arrow-left"></i> Voltar Menu</a>
         </nav>
     </aside>
 
     <main class="content">
-        <h2>Gestão de Equipe</h2>
+        <h2>Gestão de Equipe & Permissões</h2>
 
-        <div class="form-card" id="cardFormulario">
-            <h3 style="margin-top:0; color:var(--text);" id="tituloForm">Novo Usuário</h3>
+        <div class="form-card">
+            <h3 style="margin-top:0;">Usuário</h3>
             <form onsubmit="salvarUsuario(event)">
-                <input type="hidden" id="editId"> <div class="form-group">
-                    <label>Login de Acesso</label>
-                    <input type="text" id="login" placeholder="Ex: joao" required>
-                    <small style="font-size:10px; color:#666;">Sem espaços ou acentos.</small>
-                </div>
-                
-                <div class="form-group">
-                    <label>Senha</label>
-                    <input type="text" id="pass" placeholder="Ex: 1234" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Cargo / Permissão</label>
-                    <select id="role">
-                        <option value="vendedor">Vendedor (Acesso PDV)</option>
-                        <option value="admin">Administrador (Acesso Total)</option>
-                    </select>
+                <input type="hidden" id="editId">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                    <div class="form-group">
+                        <label>Login</label>
+                        <input type="text" id="login" placeholder="Ex: joao" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="text" id="pass" placeholder="Ex: 1234" required>
+                    </div>
                 </div>
 
-                <div class="btn-group">
-                    <button type="submit" class="btn-salvar" id="btnSalvar">CADASTRAR</button>
-                    <button type="button" class="btn-cancelar" id="btnCancelar" onclick="resetarFormulario()">CANCELAR</button>
+                <div class="form-group">
+                    <label style="color: var(--accent); font-weight: bold; margin-bottom: 10px;">O QUE ELE PODE ACESSAR?</label>
+                    <div class="perms-grid">
+                        <label class="perm-item"><input type="checkbox" name="perm" value="pdv"> <span>PDV / Vendas</span></label>
+                        <label class="perm-item"><input type="checkbox" name="perm" value="clientes"> <span>Clientes</span></label>
+                        <label class="perm-item"><input type="checkbox" name="perm" value="estoque"> <span>Estoque</span></label>
+                        <label class="perm-item"><input type="checkbox" name="perm" value="fornecedores"> <span>Fornecedores</span></label>
+                        <label class="perm-item"><input type="checkbox" name="perm" value="financeiro"> <span>Financeiro (Admin)</span></label>
+                        <label class="perm-item"><input type="checkbox" name="perm" value="equipe"> <span>Equipe (Admin)</span></label>
+                    </div>
                 </div>
+
+                <button type="submit" class="btn-salvar" id="btnSalvar">SALVAR USUÁRIO</button>
+                <button type="button" onclick="limparForm()" style="width:100%; background:none; border:none; color:#666; margin-top:10px; cursor:pointer;">Cancelar / Limpar</button>
             </form>
         </div>
 
-        <h3 style="margin-bottom: 20px; color: #94a3b8;">Usuários Ativos</h3>
-        <div class="user-grid" id="lista-usuarios">
-            <p style="color:#666;">Carregando equipe...</p>
-        </div>
+        <h3>Equipe Ativa</h3>
+        <div class="user-grid" id="lista-usuarios">Carregando...</div>
     </main>
 
     <script>
-        // SEGURANÇA BÁSICA
-        if(localStorage.getItem('cargoUsuario') !== 'admin') {
-            window.location.href = 'index.html';
-        }
+        if(localStorage.getItem('cargoUsuario') !== 'admin') window.location.href = 'index.html';
 
-        // --- 1. CARREGAR LISTA ---
+        // 1. CARREGAR
         db.collection("equipe").onSnapshot(snap => {
             const div = document.getElementById('lista-usuarios');
             div.innerHTML = "";
-
-            if(snap.empty) {
-                div.innerHTML = "<p>Nenhum usuário encontrado.</p>";
-                return;
-            }
-
             snap.forEach(doc => {
                 const u = doc.data();
-                const id = doc.id;
+                const perms = u.permissoes ? u.permissoes.join(", ") : "Nenhuma";
                 
-                // Define cor do badge
-                const badgeClass = u.role === 'admin' ? 'role-admin' : 'role-vendedor';
-                
-                // Cria o Card
-                const card = document.createElement('div');
-                card.className = 'user-card';
-                card.innerHTML = `
-                    <div class="actions">
-                        <button class="action-btn btn-edit" onclick="editarUsuario('${id}', '${u.login}', '${u.pass}', '${u.role}')" title="Editar">
-                            <i class="fas fa-pencil-alt"></i>
-                        </button>
-                        <button class="action-btn btn-del" onclick="excluirUsuario('${id}', '${u.login}')" title="Excluir">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                div.innerHTML += `
+                    <div class="user-card">
+                        <div class="actions">
+                            <button class="action-btn" onclick="editar('${doc.id}', '${u.login}', '${u.pass}', '${u.permissoes}')"><i class="fas fa-pencil-alt"></i></button>
+                            <button class="action-btn btn-del" onclick="deletar('${doc.id}', '${u.login}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <span class="role-badge">${u.role || 'Vendedor'}</span>
+                        <div class="user-login">${u.login}</div>
+                        <div style="font-size:12px; color:#999; margin-top:5px;">Senha: ${u.pass}</div>
+                        <div style="font-size:10px; color:var(--accent); margin-top:10px; border-top:1px solid #333; padding-top:5px;">
+                            ${perms.toUpperCase()}
+                        </div>
                     </div>
-                    
-                    <span class="role-badge ${badgeClass}">${u.role}</span>
-                    <div class="user-login">${u.login}</div>
-                    <div class="user-pass"><i class="fas fa-key"></i> ${u.pass}</div>
                 `;
-                div.appendChild(card);
             });
         });
 
-        // --- 2. SALVAR (CRIAR OU ATUALIZAR) ---
+        // 2. SALVAR
         async function salvarUsuario(e) {
             e.preventDefault();
-            
             const id = document.getElementById('editId').value;
-            const login = document.getElementById('login').value.toLowerCase().trim().replace(/\s/g, ''); // Remove espaços
+            const login = document.getElementById('login').value.toLowerCase().trim().replace(/\s/g, '');
             const pass = document.getElementById('pass').value.trim();
-            const role = document.getElementById('role').value;
+            
+            // Pega os checkboxes marcados
+            const marcados = [];
+            document.querySelectorAll('input[name="perm"]:checked').forEach(c => marcados.push(c.value));
 
-            if(login.length < 2) return alert("Login muito curto!");
+            // Se tiver Financeiro ou Equipe, vira Admin automaticamente. Se não, Vendedor.
+            const role = (marcados.includes('financeiro') || marcados.includes('equipe')) ? 'admin' : 'vendedor';
+
+            const dados = { login, pass, role, permissoes: marcados };
 
             try {
                 if(id) {
-                    // MODO EDIÇÃO: Atualiza o existente
-                    await db.collection("equipe").doc(id).update({
-                        pass: pass,
-                        role: role
-                        // Não atualizamos o login para evitar duplicidade, mas se quiser pode liberar
-                    });
-                    alert("Usuário atualizado com sucesso!");
+                    await db.collection("equipe").doc(id).update(dados);
+                    alert("Atualizado!");
                 } else {
-                    // MODO CRIAÇÃO: Cria um novo
-                    // Verifica se já existe esse login
                     const check = await db.collection("equipe").where("login", "==", login).get();
-                    if(!check.empty) return alert("Erro: Esse login JÁ EXISTE!");
-
-                    await db.collection("equipe").add({
-                        login: login,
-                        pass: pass,
-                        role: role
-                    });
-                    alert("Usuário criado!");
+                    if(!check.empty) return alert("Login já existe!");
+                    await db.collection("equipe").add(dados);
+                    alert("Criado!");
                 }
-                
-                resetarFormulario();
-
-            } catch (error) {
-                console.error(error);
-                alert("Erro ao salvar: " + error.message);
-            }
+                limparForm();
+            } catch(err) { alert("Erro: " + err.message); }
         }
 
-        // --- 3. PREPARAR PARA EDITAR ---
-        function editarUsuario(id, login, pass, role) {
-            // Preenche o formulário com os dados do card
+        // 3. EDITAR
+        function editar(id, login, pass, permsStr) {
             document.getElementById('editId').value = id;
             document.getElementById('login').value = login;
-            document.getElementById('login').setAttribute('readonly', true); // Trava o login na edição
+            document.getElementById('login').setAttribute('readonly', true);
             document.getElementById('pass').value = pass;
-            document.getElementById('role').value = role;
+            document.getElementById('btnSalvar').innerText = "ATUALIZAR";
 
-            // Muda o visual para "Modo Edição"
-            document.getElementById('cardFormulario').classList.add('editing');
-            document.getElementById('tituloForm').innerText = "Editando: " + login.toUpperCase();
-            document.getElementById('btnSalvar').innerText = "SALVAR ALTERAÇÕES";
-            document.getElementById('btnCancelar').style.display = 'block'; // Mostra botão cancelar
-            
-            // Rola a tela para cima
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Limpa e Marca checkboxes
+            document.querySelectorAll('input[name="perm"]').forEach(c => c.checked = false);
+            if(permsStr) {
+                const arr = permsStr.split(',');
+                arr.forEach(p => {
+                    const el = document.querySelector(`input[value="${p}"]`);
+                    if(el) el.checked = true;
+                });
+            }
+            window.scrollTo(0,0);
         }
 
-        // --- 4. EXCLUIR ---
-        async function excluirUsuario(id, login) {
-            if(login === 'admin' || login === 'a') {
-                return alert("Proteção: O usuário Admin Principal não pode ser excluído.");
-            }
-            
-            if(confirm(`Tem certeza que deseja excluir o usuário "${login}"?`)) {
-                try {
-                    await db.collection("equipe").doc(id).delete();
-                } catch (error) {
-                    alert("Erro ao excluir.");
-                }
-            }
-        }
-
-        // --- 5. LIMPAR FORMULÁRIO ---
-        function resetarFormulario() {
+        // 4. LIMPAR
+        function limparForm() {
             document.getElementById('editId').value = "";
             document.getElementById('login').value = "";
-            document.getElementById('login').removeAttribute('readonly'); // Destrava login
+            document.getElementById('login').removeAttribute('readonly');
             document.getElementById('pass').value = "";
-            document.getElementById('role').value = "vendedor";
+            document.querySelectorAll('input[name="perm"]').forEach(c => c.checked = false);
+            document.getElementById('btnSalvar').innerText = "SALVAR USUÁRIO";
+        }
 
-            // Volta visual para "Modo Novo"
-            document.getElementById('cardFormulario').classList.remove('editing');
-            document.getElementById('tituloForm').innerText = "Novo Usuário";
-            document.getElementById('btnSalvar').innerText = "CADASTRAR";
-            document.getElementById('btnCancelar').style.display = 'none';
+        async function deletar(id, login) {
+            if(login==='admin') return alert("Não pode apagar o admin principal!");
+            if(confirm("Apagar?")) await db.collection("equipe").doc(id).delete();
         }
     </script>
 </body>
