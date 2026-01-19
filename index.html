@@ -1,192 +1,287 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VÉRTICE - CENTRAL DE COMANDO</title>
+    <title>Login | VÉRTICE BI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&display=swap" rel="stylesheet">
+
     <style>
-        :root { --bg: #020617; --card: #0f172a; --accent: #3b82f6; --text: #f8fafc; --hover: #1e293b; }
+        :root {
+            --bg: #020617;
+            --accent: #00e0ff;
+            --accent-glow: rgba(0, 224, 255, 0.5);
+            --text: #f8fafc;
+            --glass: rgba(15, 23, 42, 0.6);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(0, 224, 255, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: var(--text);
+        }
+
+        /* ANIMAÇÃO DE FUNDO SUTIL */
+        .background-grid {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+            animation: moveGrid 20s linear infinite;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        @keyframes moveGrid {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(50px) translateZ(-200px); }
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            perspective: 1000px;
+        }
+
+        .login-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 5px;
+            letter-spacing: -1px;
+            color: #fff;
+        }
         
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; 
-            min-height: 100vh; /* Garante altura mínima */
-            align-items: center; 
-            justify-content: center; 
-            position: relative; 
-            padding: 20px; /* Espaço nas bordas */
+        .logo span {
+            color: var(--accent);
+            text-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            margin-left: 5px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            transition: 0.3s;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
             box-sizing: border-box;
         }
-        
-        /* CABEÇALHO */
-        .header { text-align: center; margin-bottom: 40px; animation: fadeIn 1s ease-in; width: 100%; }
-        .brand { font-size: 60px; font-weight: 900; letter-spacing: 5px; color: var(--accent); text-shadow: 0 0 20px rgba(59, 130, 246, 0.3); margin: 0; }
-        .subtitle { font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px; }
 
-        /* MENU FLEXÍVEL */
-        .menu-container { 
-            display: flex; 
-            flex-wrap: wrap; 
-            justify-content: center; 
-            gap: 30px; 
-            max-width: 1200px; 
-            width: 100%; 
-            z-index: 10;
-        }
-        
-        .card { 
-            background: var(--card); border: 1px solid #1e293b; border-radius: 20px; 
-            padding: 40px 20px; text-align: center; cursor: pointer; transition: 0.3s; 
-            text-decoration: none; color: var(--text); position: relative; overflow: hidden;
-            width: 200px; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        
-        .card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2); }
-        .icon-box { font-size: 40px; margin-bottom: 20px; color: var(--accent); transition: 0.3s; }
-        .card:hover .icon-box { transform: scale(1.1); color: #fff; }
-        .card-title { font-size: 18px; font-weight: bold; margin: 0; }
-        .card-desc { font-size: 11px; color: #64748b; margin-top: 10px; }
-
-        /* RELÓGIO E FOOTER (Desktop) */
-        .clock-container { position: absolute; bottom: 40px; right: 40px; text-align: right; }
-        .time { font-size: 28px; font-weight: bold; color: #fff; opacity: 0.8; }
-        .date { font-size: 12px; color: #64748b; }
-        
-        .dev-footer {
-            position: absolute; bottom: 10px; width: 100%; text-align: center;
-            font-size: 10px; color: #334155; letter-spacing: 1px; opacity: 0.7;
+        input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(0, 224, 255, 0.1);
+            background: rgba(0, 224, 255, 0.05);
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- RESPONSIVIDADE MOBILE --- */
-        @media (max-width: 768px) {
-            body {
-                justify-content: flex-start; /* Começa do topo */
-                padding-top: 40px;
-                height: auto;
-                overflow-y: auto; /* Permite rolar */
-            }
-
-            .brand { font-size: 40px; letter-spacing: 2px; } /* Título menor */
-            
-            .menu-container {
-                flex-direction: column; /* Um item abaixo do outro */
-                gap: 15px;
-            }
-
-            .card {
-                width: 100%; /* Largura total */
-                flex-direction: row; /* Ícone na esquerda, Texto na direita */
-                padding: 20px;
-                box-sizing: border-box; /* Garante que padding não estoure a tela */
-                justify-content: flex-start; /* Alinha a esquerda */
-                gap: 20px;
-                text-align: left;
-                min-height: 80px;
-            }
-
-            .icon-box { margin-bottom: 0; font-size: 28px; width: 40px; text-align: center; }
-            
-            .card div { display: flex; flex-direction: column; } /* Agrupa Título e Desc */
-            .card-title { font-size: 16px; }
-            .card-desc { margin-top: 2px; }
-
-            /* Relógio e Footer deixam de ser absolutos e vão para o final da página */
-            .clock-container {
-                position: relative;
-                bottom: auto;
-                right: auto;
-                margin-top: 40px;
-                text-align: center;
-                width: 100%;
-            }
-            
-            .dev-footer {
-                position: relative;
-                bottom: auto;
-                margin-top: 20px;
-                padding-bottom: 20px;
-            }
+        input:focus + i {
+            color: var(--accent);
         }
+
+        .toggle-pass {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            cursor: pointer;
+        }
+        .toggle-pass:hover { color: #fff; }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #00e0ff 0%, #0066ff 100%);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 10px 20px -5px rgba(0, 224, 255, 0.3);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(0, 224, 255, 0.5);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .footer-text {
+            margin-top: 25px;
+            font-size: 0.75rem;
+            color: #475569;
+        }
+
+        /* Efeito de carregamento no botão */
+        .btn-login.loading {
+            pointer-events: none;
+            opacity: 0.8;
+            font-size: 0;
+        }
+        .btn-login.loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to {transform: rotate(360deg);} }
+
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1 class="brand">VÉRTICE</h1>
-        <div class="subtitle">Sistema de Gestão LM Imports</div>
-    </div>
+    <div class="background-grid"></div>
 
-    <div class="menu-container">
-        <a href="vendas.html" class="card">
-            <i class="fas fa-cash-register icon-box"></i>
-            <div>
-                <h2 class="card-title">PDV Vendas</h2>
-                <p class="card-desc">Frente de Caixa</p>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo">VÉRTICE <span>BI</span></div>
+            <div class="subtitle">Gestão Inteligente</div>
+
+            <form id="loginForm" onsubmit="fazerLogin(event)">
+                <div class="input-group">
+                    <label>USUÁRIO</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="user" placeholder="admin" required>
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>SENHA</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="pass" placeholder="••••••••" required>
+                        <i class="fas fa-lock"></i>
+                        <i class="fas fa-eye toggle-pass" onclick="toggleSenha()"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login" id="btnEntrar">
+                    Acessar Sistema
+                </button>
+            </form>
+
+            <div class="footer-text">
+                Sistema Exclusivo &copy; 2023
             </div>
-        </a>
-
-        <a href="clientes.html" class="card">
-            <i class="fas fa-users icon-box"></i>
-            <div>
-                <h2 class="card-title">Clientes</h2>
-                <p class="card-desc">CRM e Histórico</p>
-            </div>
-        </a>
-
-        <a href="estoque.html" class="card">
-            <i class="fas fa-boxes icon-box"></i>
-            <div>
-                <h2 class="card-title">Estoque</h2>
-                <p class="card-desc">Produtos e Preços</p>
-            </div>
-        </a>
-
-        <a href="fornecedores.html" class="card">
-            <i class="fas fa-truck icon-box"></i>
-            <div>
-                <h2 class="card-title">Fornecedores</h2>
-                <p class="card-desc">Parceiros e Compras</p>
-            </div>
-        </a>
-
-        <a href="admin.html" class="card" style="border-color: rgba(239, 68, 68, 0.3);">
-            <i class="fas fa-chart-pie icon-box" style="color: #ef4444;"></i>
-            <div>
-                <h2 class="card-title">Financeiro</h2>
-                <p class="card-desc">Relatórios e Lucro</p>
-            </div>
-        </a>
-    </div>
-
-    <div class="clock-container">
-        <div class="time" id="clock">00:00</div>
-        <div class="date" id="date">Carregando data...</div>
-    </div>
-
-    <div class="dev-footer">
-        Desenvolvido por Rodrigo N Carvalho Ltda © 2026
+        </div>
     </div>
 
     <script>
-        function updateClock() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            const dateString = now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
-            
-            document.getElementById('clock').innerText = timeString;
-            document.getElementById('date').innerText = dateString.charAt(0).toUpperCase() + dateString.slice(1);
+        // Função para mostrar/esconder senha
+        function toggleSenha() {
+            const input = document.getElementById('pass');
+            const icon = document.querySelector('.toggle-pass');
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = "password";
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
         }
-        setInterval(updateClock, 1000);
-        updateClock();
+
+        function fazerLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnEntrar');
+            const user = document.getElementById('user').value;
+            
+            // Efeito visual de carregamento
+            btn.classList.add('loading');
+
+            // Simulação de delay de rede (para parecer sistema pro)
+            setTimeout(() => {
+                // Aqui você poderia colocar validação real com Firebase Auth no futuro
+                // Por enquanto, aceita qualquer coisa ou valida "admin"
+                
+                localStorage.setItem('usuarioLogado', user);
+                window.location.href = 'admin.html';
+                
+            }, 1500);
+        }
     </script>
 
 </body>
