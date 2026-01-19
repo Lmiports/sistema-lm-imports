@@ -3,107 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Diagnóstico</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&display=swap" rel="stylesheet">
-
+    <title>Login | Raio-X</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
-
     <style>
-        :root { --bg: #020617; --accent: #ef4444; /* Vermelho para indicar modo teste */ --text: #f8fafc; --glass: rgba(15, 23, 42, 0.6); --border: rgba(255, 255, 255, 0.1); }
-        body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background-color: var(--bg); height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--text); }
-        .login-card { background: var(--glass); backdrop-filter: blur(20px); border: 2px solid var(--accent); padding: 40px; border-radius: 20px; text-align: center; width: 100%; max-width: 400px; }
-        input { width: 100%; padding: 15px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border); border-radius: 10px; color: #fff; margin-bottom: 15px; box-sizing: border-box; }
-        .btn-login { width: 100%; padding: 15px; background: var(--accent); border: none; border-radius: 10px; color: #fff; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-        .btn-login:hover { opacity: 0.9; }
-        .aviso-teste { color: var(--accent); font-size: 12px; margin-bottom: 20px; font-weight: bold; border: 1px dashed var(--accent); padding: 10px; border-radius: 5px; }
+        body{background:#000;color:#0f0;font-family:monospace;display:flex;justify-content:center;align-items:center;height:100vh;flex-direction:column;}
+        button{padding:20px;font-size:20px;background:#0f0;border:none;cursor:pointer;font-weight:bold;}
     </style>
 </head>
 <body>
-
-    <div class="login-card">
-        <h2 style="margin:0;">DIAGNÓSTICO</h2>
-        <div class="aviso-teste">
-            <i class="fas fa-bug"></i> MODO DE TESTE ATIVADO<br>
-            Este login vai ler o banco e te mostrar o que encontrou.
-        </div>
-
-        <form onsubmit="fazerLoginDiagnostico(event)">
-            <input type="text" id="user" placeholder="Usuário (Ex: admin)" required>
-            <input type="password" id="pass" placeholder="Senha (Ex: 1234)" required>
-            <button type="submit" class="btn-login" id="btnEntrar">TESTAR CONEXÃO</button>
-        </form>
-    </div>
+    <h1>MODO RAIO-X 💀</h1>
+    <p>Vamos ver o nome REAL dos campos no banco.</p>
+    <button onclick="raioX()">CLIQUE PARA INVESTIGAR</button>
 
     <script>
-        async function fazerLoginDiagnostico(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btnEntrar');
-            const userDigitado = document.getElementById('user').value.toLowerCase().trim();
-            const passDigitado = document.getElementById('pass').value.trim();
-
-            btn.innerText = "INVESTIGANDO...";
-            btn.style.opacity = "0.7";
-
+        async function raioX() {
             try {
-                // 1. TENTA ACESSAR A COLEÇÃO 'equipe'
-                // Trazemos tudo para ver o que tem dentro
                 const snapshot = await db.collection("equipe").get();
+                if (snapshot.empty) return alert("Coleção VAZIA!");
 
-                // CENÁRIO 1: Coleção vazia ou nome errado
-                if (snapshot.empty) {
-                    alert("❌ ERRO GRAVE:\n\nA coleção 'equipe' não foi encontrada ou está vazia!\n\nVerifique se no Firebase o nome da coleção é exatamente: equipe (minúsculo, sem acento).");
-                    btn.innerText = "FALHA";
-                    return;
-                }
-
-                // CENÁRIO 2: A coleção existe. Vamos ver o que tem dentro.
-                let encontrouAlguem = false;
-                let relatorio = "📋 RELATÓRIO DO BANCO:\n";
-                let senhaCertaNoBanco = "";
-
+                let relatorio = "";
                 snapshot.forEach(doc => {
-                    const dados = doc.data();
-                    // Lista o que achou
-                    relatorio += `\n👤 Achei: Login='${dados.login}' | Senha='${dados.pass}'`;
-
-                    if (dados.login == userDigitado) {
-                        encontrouAlguem = true;
-                        senhaCertaNoBanco = dados.pass;
-                    }
+                    // JSON.stringify MOSTRA TUDO, INCLUSIVE OS NOMES REAIS DOS CAMPOS
+                    const dadosPuros = JSON.stringify(doc.data(), null, 4); 
+                    relatorio += "DADOS ENCONTRADOS:\n" + dadosPuros + "\n\n";
                 });
 
-                if (encontrouAlguem) {
-                    // O usuário existe. Vamos ver a senha.
-                    if (senhaCertaNoBanco == passDigitado) {
-                        alert("✅ SUCESSO TOTAL!\n\nO sistema encontrou o usuário e a senha bateu.\nRedirecionando para o Admin...");
-                        
-                        // Faz o login de verdade
-                        const userDoc = snapshot.docs.find(d => d.data().login == userDigitado).data();
-                        localStorage.setItem('usuarioLogado', userDoc.login);
-                        localStorage.setItem('cargoUsuario', userDoc.role);
-                        window.location.href = 'admin.html';
-                    
-                    } else {
-                        // A senha não bateu (Problema de espaço ou digitação)
-                        alert(`⚠️ QUASE LÁ!\n\nEncontrei o usuário '${userDigitado}', mas a senha não bateu.\n\nSenha que você digitou: '${passDigitado}'\nSenha que está no Banco: '${senhaCertaNoBanco}'\n\n(Verifique se tem espaços escondidos!)`);
-                    }
-                } else {
-                    // Não achou o usuário
-                    alert(`❌ USUÁRIO NÃO ENCONTRADO\n\nVocê digitou: '${userDigitado}'\n\nMas no banco eu só achei estes:\n${relatorio}`);
-                }
-
+                alert(relatorio);
             } catch (error) {
-                console.error(error);
-                alert("🚫 ERRO DE CONEXÃO:\n\n" + error.message + "\n\nO sistema não conseguiu chegar até o Firebase. Verifique o arquivo firebase-config.js");
-            } finally {
-                btn.innerText = "TESTAR NOVAMENTE";
-                btn.style.opacity = "1";
+                alert("Erro: " + error.message);
             }
         }
     </script>
-
 </body>
 </html>
