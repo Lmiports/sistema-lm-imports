@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Equipe | VÉRTICE</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+
+    <style>
+        :root { --bg: #020617; --card: #0f172a; --accent: #00e0ff; --text: #f8fafc; --danger: #ef4444; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; }
+
+        /* SIDEBAR (Igual ao Admin) */
+        .sidebar { width: 250px; background: #000; height: 100vh; padding: 20px; display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.1); }
+        .logo { color: var(--accent); font-size: 24px; font-weight: bold; margin-bottom: 40px; text-align: center; }
+        .nav-item { padding: 15px; color: #94a3b8; text-decoration: none; border-radius: 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
+        .nav-item:hover, .nav-item.active { background: var(--accent); color: #000; font-weight: bold; }
+
+        /* CONTEÚDO */
+        .main { flex: 1; padding: 30px; overflow-y: auto; }
+        h2 { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-top: 0; }
+
+        /* FORMULÁRIO */
+        .form-card { background: var(--card); padding: 25px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); max-width: 500px; margin-bottom: 30px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 12px; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 5px; box-sizing: border-box; outline: none; }
+        input:focus { border-color: var(--accent); }
+        
+        .btn-salvar { width: 100%; padding: 12px; background: var(--accent); border: none; font-weight: bold; cursor: pointer; border-radius: 5px; color: #000; margin-top: 10px; }
+        .btn-salvar:hover { background: #fff; }
+
+        /* LISTA */
+        .user-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+        .user-card { background: var(--card); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); position: relative; }
+        .user-role { font-size: 10px; text-transform: uppercase; background: rgba(0,224,255,0.1); color: var(--accent); padding: 2px 6px; border-radius: 4px; }
+        .user-login { font-size: 18px; font-weight: bold; margin: 10px 0; }
+        .btn-delete { position: absolute; top: 15px; right: 15px; color: var(--danger); cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo">VÉRTICE</div>
+        <a href="admin.html" class="nav-item"><i class="fas fa-chart-pie"></i> Dashboard</a>
+        <a href="vendas.html" class="nav-item"><i class="fas fa-cash-register"></i> PDV</a>
+        <a href="#" class="nav-item active"><i class="fas fa-users"></i> Equipe</a>
+        <a href="index.html" class="nav-item" style="margin-top: auto; color: var(--danger);"><i class="fas fa-sign-out-alt"></i> Sair</a>
+    </div>
+
+    <div class="main">
+        <h2>Gestão de Usuários</h2>
+
+        <div class="form-card">
+            <h3 style="margin-top:0;">Novo Usuário</h3>
+            <form onsubmit="cadastrarUsuario(event)">
+                <div class="form-group">
+                    <label>Login (Usuário de Acesso)</label>
+                    <input type="text" id="novoLogin" placeholder="Ex: vendedor1" required>
+                    <small style="color: #666; font-size: 10px;">Será salvo minúsculo e sem espaços.</small>
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="text" id="novaSenha" placeholder="Ex: 1234" required>
+                </div>
+                <div class="form-group">
+                    <label>Cargo (Permissão)</label>
+                    <select id="novoCargo">
+                        <option value="vendedor">Vendedor (Acesso PDV)</option>
+                        <option value="admin">Administrador (Acesso Total)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-salvar">CADASTRAR</button>
+            </form>
+        </div>
+
+        <h3>Usuários Ativos</h3>
+        <div class="user-list" id="lista-usuarios">
+            <p>Carregando...</p>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CARREGAR USUÁRIOS ---
+        window.onload = function() {
+            // Verifica se quem está acessando é admin
+            if (localStorage.getItem('cargoUsuario') !== 'admin') {
+                alert("Acesso restrito!");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            carregarEquipe();
+        };
+
+        function carregarEquipe() {
+            db.collection("equipe").onSnapshot(snap => {
+                const div = document.getElementById('lista-usuarios');
+                div.innerHTML = "";
+                
+                snap.forEach(doc => {
+                    const u = doc.data();
+                    const card = document.createElement('div');
+                    card.className = 'user-card';
+                    card.innerHTML = `
+                        <span class="user-role">${u.role}</span>
+                        <div class="user-login">${u.login}</div>
+                        <div style="font-size:12px; color:#aaa;">Senha: ${u.pass}</div>
+                        <i class="fas fa-trash btn-delete" onclick="deletarUsuario('${doc.id}', '${u.login}')"></i>
+                    `;
+                    div.appendChild(card);
+                });
+            });
+        }
+
+        // --- 2. CADASTRAR NOVO (COM PROTEÇÃO DE ESPAÇOS) ---
+        async function cadastrarUsuario(e) {
+            e.preventDefault();
+            
+            // PEGA E LIMPA OS DADOS (Trim remove espaços, toLowerCase põe minúsculo)
+            const loginLimpo = document.getElementById('novoLogin').value.toLowerCase().trim().replace(/\s/g, ''); // Remove todos os espaços
+            const senhaLimpa = document.getElementById('novaSenha').value.trim();
+            const cargo = document.getElementById('novoCargo').value;
+
+            if (loginLimpo.length < 3) return alert("Login muito curto!");
+
+            try {
+                // Verifica se já existe
+                const check = await db.collection("equipe").where("login", "==", loginLimpo).get();
+                if (!check.empty) {
+                    alert("Este login já existe! Escolha outro.");
+                    return;
+                }
+
+                // Salva no Padrão Novo (equipe / login / pass / role)
+                await db.collection("equipe").add({
+                    login: loginLimpo,
+                    pass: senhaLimpa,
+                    role: cargo,
+                    dataCriacao: new Date().toISOString()
+                });
+
+                alert(`Usuário '${loginLimpo}' criado com sucesso!`);
+                document.getElementById('novoLogin').value = "";
+                document.getElementById('novaSenha').value = "";
+
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao cadastrar.");
+            }
+        }
+
+        // --- 3. DELETAR ---
+        async function deletarUsuario(id, login) {
+            if (login === 'admin' || login === 'a') {
+                alert("Você não pode excluir o administrador principal por aqui.");
+                return;
+            }
+            
+            if (confirm(`Tem certeza que deseja excluir ${login}?`)) {
+                await db.collection("equipe").doc(id).delete();
+            }
+        }
+    </script>
+</body>
+</html>
