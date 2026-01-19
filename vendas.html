@@ -17,7 +17,10 @@
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
         .header h2 { margin: 0; color: var(--accent); letter-spacing: 2px; }
         .version-tag { font-size: 10px; color: #64748b; margin-left: 10px; }
-        .btn-voltar { color: #fff; text-decoration: none; font-size: 20px; }
+        
+        /* Botão Voltar Inteligente */
+        .btn-voltar { color: #fff; text-decoration: none; font-size: 20px; padding: 10px; border-radius: 5px; transition: 0.3s; }
+        .btn-voltar:hover { background: rgba(255,255,255,0.1); color: var(--accent); }
 
         .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; flex: 1; overflow: hidden; }
         .products-section { display: flex; flex-direction: column; gap: 15px; overflow-y: hidden; }
@@ -88,7 +91,6 @@
         .btn-cancel { flex: 1; padding: 10px; background: #334155; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
         .btn-confirm { flex: 1; padding: 10px; background: var(--success); color: #000; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
 
-        /* ESTILO DO BOTÃO BI */
         .btn-dashboard-link { display: none; text-decoration: none; background: var(--accent); color: #000; padding: 5px 15px; border-radius: 5px; font-weight: bold; font-size: 12px; align-items: center; gap: 5px; box-shadow: 0 0 10px rgba(0,224,255,0.3); }
         .btn-dashboard-link:hover { background: #fff; transform: scale(1.05); }
 
@@ -99,7 +101,9 @@
 
     <div class="header">
         <div style="display:flex; gap:15px; align-items:center;">
-            <a href="index.html" class="btn-voltar" title="Sair"><i class="fas fa-sign-out-alt"></i></a>
+            <a href="#" id="btn-voltar-main" class="btn-voltar" title="Voltar">
+                <i class="fas fa-arrow-left"></i>
+            </a>
             
             <a href="admin.html" id="btn-bi-admin" class="btn-dashboard-link">
                 <i class="fas fa-chart-pie"></i> PAINEL BI
@@ -122,8 +126,11 @@
                     <option value="acessorio">🎧 Acessórios</option>
                 </select>
             </div>
+            
             <div class="products-list" id="lista-produtos">
-                <div style="padding:20px; text-align:center; color:#888;">Carregando Estoque...</div>
+                <div style="padding:20px; text-align:center; color:#888;">
+                    <i class="fas fa-circle-notch fa-spin"></i> Carregando Estoque...
+                </div>
             </div>
         </div>
 
@@ -149,20 +156,16 @@
 
             <div class="totals">
                 <div class="row"><span>Subtotal:</span><span id="valor-subtotal">R$ 0,00</span></div>
-                
                 <div class="row" style="color: var(--danger);">
                     <span>Desconto (R$):</span>
                     <input type="number" class="input-desconto" id="valor-desconto-manual" value="" placeholder="0,00" oninput="atualizarTotais()">
                 </div>
-                
                 <div class="row" style="color: var(--accent); display:none;" id="row-taxas">
                     <span>Taxa Maquininha:</span>
                     <span id="valor-taxas">+ R$ 0,00</span>
                 </div>
-
                 <div class="row" style="color: var(--warning);"><span>Troca/Abatimento:</span><span id="valor-abatimento">- R$ 0,00</span></div>
                 <div class="row total-final"><span>TOTAL:</span><span id="valor-total">R$ 0,00</span></div>
-                
                 <div id="detalhe-parcelas" class="parcela-info"></div>
             </div>
 
@@ -184,9 +187,8 @@
         <div class="modal">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3>Simulação de Cartão</h3>
-                <button onclick="abrirConfigTaxas()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:18px;" title="Configurar Taxas"><i class="fas fa-cog"></i></button>
+                <button onclick="abrirConfigTaxas()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:18px;"><i class="fas fa-cog"></i></button>
             </div>
-            <p style="font-size:12px; color:#94a3b8;">Clique na opção desejada para aplicar a taxa.</p>
             <table class="sim-table">
                 <thead><tr><th>Parc.</th><th>Valor Parc.</th><th>Total Final</th></tr></thead>
                 <tbody id="lista-simulacao"></tbody>
@@ -198,11 +200,10 @@
     <div class="modal-overlay" id="modal-config-taxas">
         <div class="modal">
             <h3>Configurar Taxas (%)</h3>
-            <p style="font-size:11px; color:#94a3b8;">Edite a % de juros da sua maquininha.</p>
             <div class="taxas-grid" id="grid-inputs-taxas"></div>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button onclick="document.getElementById('modal-config-taxas').style.display='none'" class="btn-cancel">Cancelar</button>
-                <button onclick="salvarConfigTaxas()" class="btn-confirm">Salvar Alterações</button>
+                <button onclick="salvarConfigTaxas()" class="btn-confirm">Salvar</button>
             </div>
         </div>
     </div>
@@ -239,41 +240,56 @@
 
     <script>
         let dbEstoque = [], dbClientes = [], carrinho = [], trocas = [];
-        let totalVendaGlobal = 0;
-        let valorTaxaAplicada = 0; 
+        let totalVendaGlobal = 0, valorTaxaAplicada = 0, parcelasSelecionadas = 0;
         let taxasAtuais = {};
-        let parcelasSelecionadas = 0; 
 
         window.onload = function() {
-            // VERIFICA SE É ADMIN PARA MOSTRAR BOTÃO
             const cargo = localStorage.getItem('cargoUsuario');
+            const btnVoltar = document.getElementById('btn-voltar-main');
+            const btnBI = document.getElementById('btn-bi-admin');
+
+            // --- 1. CONFIGURAÇÃO DO BOTÃO VOLTAR E BI ---
             if (cargo === 'admin') {
-                document.getElementById('btn-bi-admin').style.display = 'inline-flex';
+                // DONO: Seta volta para o Menu (Admin)
+                btnVoltar.href = "admin.html";
+                btnVoltar.innerHTML = '<i class="fas fa-arrow-left"></i>'; // Seta esquerda
+                btnVoltar.title = "Voltar ao Menu";
+                btnBI.style.display = 'inline-flex'; // Mostra botão BI
+            } else {
+                // VENDEDOR: Seta faz Logout
+                btnVoltar.href = "index.html";
+                btnVoltar.innerHTML = '<i class="fas fa-sign-out-alt"></i>'; // Sair
+                btnVoltar.title = "Sair do Sistema";
+                btnBI.style.display = 'none'; // Esconde botão BI
             }
 
             carregarOpcoesPagamento();
             restaurarRascunho();
             carregarTaxasDoBanco();
             
-            // CARREGA ESTOQUE (Suporta Maiúsculo e Minúsculo)
+            // --- 2. CARREGAMENTO DO ESTOQUE (Sem filtro rigoroso para testar) ---
             const carregarEstoque = (colecao) => {
                 db.collection(colecao).onSnapshot(snap => { 
+                    if(snap.empty) {
+                        console.log(`Coleção ${colecao} vazia ou não encontrada.`);
+                        return;
+                    }
                     dbEstoque = []; 
                     snap.forEach(doc => {
                         const data = doc.data();
-                        if (data.status && data.status.toLowerCase() !== "vendido") {
+                        // Traz tudo que NÃO for vendido. Aceita null, undefined, "disponível", "Disponível", etc.
+                        if (!data.status || data.status.toLowerCase() !== "vendido") {
                             dbEstoque.push({ id: doc.id, ...data });
-                        } else if (!data.status) {
-                            dbEstoque.push({ id: doc.id, ...data, status: 'disponível' });
                         }
                     }); 
                     renderizarProdutos(); 
                 }, err => {
-                    console.log(`Tentando carregar ${colecao}... falhou ou vazia.`);
+                    console.error(`Erro ao ler ${colecao}:`, err);
+                    document.getElementById('lista-produtos').innerHTML = `<div style="color:red; text-align:center;">Erro ao carregar estoque.<br>${err.message}</div>`;
                 });
             };
 
-            // Tenta carregar as duas coleções para garantir
+            // Tenta as duas possibilidades de nome
             carregarEstoque("estoque");
             carregarEstoque("Estoque");
 
@@ -385,25 +401,20 @@
             salvarRascunho();
         }
 
-        // --- RENDERIZAR PRODUTOS ---
         function renderizarProdutos(){
             const d=document.getElementById('lista-produtos'); 
             d.innerHTML=""; 
-            if(dbEstoque.length===0) return d.innerHTML='<div style="color:#888;text-align:center;padding:20px;">Estoque vazio</div>';
+            if(dbEstoque.length===0) return d.innerHTML='<div style="color:#888;text-align:center;padding:20px;">Estoque vazio ou não encontrado.</div>';
             
             dbEstoque.forEach(p=>{
                 const el=document.createElement('div');
                 const isReserved = p.status === 'em_negociacao';
                 
                 el.className = isReserved ? 'product-card reserved' : 'product-card';
-                
-                if(!isReserved) {
-                    el.onclick=()=>adicionarAoCarrinho(p);
-                }
+                if(!isReserved) el.onclick=()=>adicionarAoCarrinho(p);
 
                 let cat=(p.categoria||'').toLowerCase();
                 let icon=cat.includes('celular')?'📱':cat.includes('roupa')?'👕':cat.includes('perfume')?'🌸':'📦';
-                
                 let reservedBadge = isReserved ? '<span class="reserved-tag">EM USO</span>' : '';
 
                 el.innerHTML=`
@@ -440,29 +451,13 @@
             
             try { 
                 const b=db.batch(); 
-                
                 carrinho.forEach(i=>{ b.update(db.collection("estoque").doc(i.id),{status:"vendido",dataVenda:Date.now(),clienteVenda:cli,foiBrinde:i.isBrinde}); }); 
-                
                 trocas.forEach(t=>{ const r=db.collection("estoque").doc(); b.set(r,{categoria:'celular',modelo:`${t.modelo} (TROCA ${cli})`,nomeP:`${t.modelo} (TROCA)`,marca:'Apple',cor:t.cor,gb:t.gb,imei1:t.imei,bateria:t.bateria,custo:t.valor,venda:0,status:'disponível',fornecedor:`Cliente: ${cli}`,dataEntrada:Date.now()}); }); 
-                
                 const snap=await db.collection("vendas").get(); 
                 const num=String(snap.size+1).padStart(4,'0'); 
                 b.set(db.collection("vendas").doc(),{ numeroPedido: num, cliente: cli, data: new Date().toISOString(), itens: carrinho.map(c=>({modelo:c.modelo||c.nomeP,isBrinde:c.isBrinde})), trocas: trocas.map(t=>t.modelo), desconto: parseFloat(document.getElementById('valor-desconto-manual').value)||0, taxaMaquininha: valorTaxaAplicada, total: totalVendaGlobal, pagamento: pg }); 
-                
                 await b.commit(); 
-
-                db.collection("clientes").where("nome", "==", cli).get().then(qs => {
-                    qs.forEach(doc => {
-                        let hist = doc.data().historico || "";
-                        let resumoCompra = `[${new Date().toLocaleDateString('pt-BR')}] Pedido #${num} - Total: R$ ${totalVendaGlobal.toFixed(2)}\n`;
-                        carrinho.forEach(item => { resumoCompra += `   + ${item.modelo || item.nomeP}\n`; });
-                        
-                        db.collection("clientes").doc(doc.id).update({
-                            historico: resumoCompra + "\n" + hist
-                        });
-                    });
-                });
-
+                db.collection("clientes").where("nome", "==", cli).get().then(qs => { qs.forEach(doc => { let hist = doc.data().historico || ""; let resumoCompra = `[${new Date().toLocaleDateString('pt-BR')}] Pedido #${num} - Total: R$ ${totalVendaGlobal.toFixed(2)}\n`; carrinho.forEach(item => { resumoCompra += `   + ${item.modelo || item.nomeP}\n`; }); db.collection("clientes").doc(doc.id).update({ historico: resumoCompra + "\n" + hist }); }); });
                 limparRascunho(); 
                 alert(`Pedido ${num} Finalizado!`); 
                 window.location.reload(); 
@@ -475,22 +470,9 @@
             const cFull=dbClientes.find(c=>c.nome===cli)||{nome:cli};
             let itensR=carrinho.map(i=>({nome:i.modelo||i.nomeP,desc:i.cor||'',preco:i.venda,isBrinde:i.isBrinde}));
             trocas.forEach(t=>itensR.push({nome:"TROCA: "+t.modelo,desc:t.imei,preco:-t.valor,isTroca:true}));
-            
             let textoParcela = "";
-            if (parcelasSelecionadas > 0 && totalVendaGlobal > 0) {
-                const valorParcela = totalVendaGlobal / parcelasSelecionadas;
-                textoParcela = `(${parcelasSelecionadas}x de ${formatMoeda(valorParcela)})`;
-            }
-
-            const dados={
-                numeroPedido: num, cliente: cFull.nome, cpf: cFull.cpf||'', tel: cFull.whats||'', endereco: cFull.logradouro||'',
-                itens: itensR, descontoManual: parseFloat(document.getElementById('valor-desconto-manual').value)||0,
-                taxaMaquininha: valorTaxaAplicada,
-                total: totalVendaGlobal, 
-                pagamento: document.getElementById('forma-pagamento').value,
-                textoParcelas: textoParcela,
-                data: new Date().toLocaleDateString('pt-BR')
-            };
+            if (parcelasSelecionadas > 0 && totalVendaGlobal > 0) { const valorParcela = totalVendaGlobal / parcelasSelecionadas; textoParcela = `(${parcelasSelecionadas}x de ${formatMoeda(valorParcela)})`; }
+            const dados={ numeroPedido: num, cliente: cFull.nome, cpf: cFull.cpf||'', tel: cFull.whats||'', endereco: cFull.logradouro||'', itens: itensR, descontoManual: parseFloat(document.getElementById('valor-desconto-manual').value)||0, taxaMaquininha: valorTaxaAplicada, total: totalVendaGlobal, pagamento: document.getElementById('forma-pagamento').value, textoParcelas: textoParcela, data: new Date().toLocaleDateString('pt-BR') };
             localStorage.setItem('dadosRecibo',JSON.stringify(dados)); window.open('orcamento.html','_blank');
         }
 
