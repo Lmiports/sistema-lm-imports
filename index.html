@@ -9,7 +9,6 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-    
     <script src="js/firebase-config.js"></script>
 
     <style>
@@ -58,11 +57,10 @@
     </div>
 
     <script>
-        // --- CHECKUP DE INICIALIZAÇÃO ---
-        // Isso vai te avisar se o Firebase não carregou antes mesmo de você tentar logar
+        // Checkup inicial
         window.onload = function() {
             if (typeof db === 'undefined') {
-                alert("ERRO CRÍTICO: O sistema não conseguiu carregar o arquivo 'js/firebase-config.js'.\n\nVerifique se o arquivo existe na pasta 'js'.");
+                alert("ERRO CRÍTICO: O sistema não conseguiu carregar o arquivo 'js/firebase-config.js'.");
             }
         };
 
@@ -71,11 +69,9 @@
             const btn = document.getElementById('btnEntrar');
             const welcome = document.getElementById('welcome-screen');
             
-            // Tratamento de Texto
             let user = document.getElementById('user').value;
             let pass = document.getElementById('pass').value;
 
-            // Limpeza de segurança
             if(user) user = user.toLowerCase().trim().replace(/\s/g, '');
             if(pass) pass = pass.trim();
 
@@ -83,47 +79,43 @@
             btn.style.opacity = "0.7";
 
             try {
-                // VERIFICAÇÃO 1: O Firebase está funcionando?
-                if (typeof db === 'undefined') throw new Error("Banco de dados desconectado (db is undefined).");
+                if (typeof db === 'undefined') throw new Error("Banco de dados desconectado.");
 
-                console.log(`Tentando logar com: ${user} / ${pass}`);
-
-                // BUSCA NO BANCO
                 const snapshot = await db.collection("equipe")
                     .where("login", "==", user)
                     .where("pass", "==", pass)
                     .get();
 
                 if (!snapshot.empty) {
-                    // --- SUCESSO ---
                     const dados = snapshot.docs[0].data();
                     
+                    // --- SALVA DADOS NO NAVEGADOR ---
                     localStorage.setItem('usuarioLogado', dados.login);
                     localStorage.setItem('cargoUsuario', dados.role);
+                    
+                    // --- AQUI ESTÁ A ATUALIZAÇÃO IMPORTANTE ---
+                    // Salva a lista de permissões (ex: ['pdv', 'estoque']) para o menu ler depois
+                    localStorage.setItem('permissoesUsuario', JSON.stringify(dados.permissoes || []));
 
-                    // Animação
+                    // Animação e Redirecionamento
                     document.getElementById('loginBox').style.opacity = '0';
                     setTimeout(() => { welcome.classList.add('active'); }, 300);
 
                     setTimeout(() => {
-                        // TENTATIVA DE REDIRECIONAMENTO
-                        console.log("Redirecionando para menu.html...");
                         window.location.href = 'menu.html';
                     }, 2000);
 
                 } else {
-                    // --- SENHA ERRADA ---
                     btn.innerText = "ACESSAR";
                     btn.style.opacity = "1";
-                    alert(`Login Incorreto!\n\nO sistema procurou por:\nUsuário: "${user}"\nSenha: "${pass}"\n\nMas não achou na coleção 'equipe'.`);
+                    alert(`Login Incorreto! Verifique usuário e senha.`);
                 }
 
             } catch (error) {
-                // --- ERRO TÉCNICO ---
                 console.error(error);
                 btn.innerText = "ERRO";
                 btn.style.opacity = "1";
-                alert("ERRO TÉCNICO:\n" + error.message + "\n\nSe o erro for 'network', verifique sua internet.");
+                alert("Erro Técnico: " + error.message);
             }
         }
     </script>
