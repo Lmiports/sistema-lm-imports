@@ -2,279 +2,165 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Imprimir Documento</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+    <title>Imprimir Recibo</title>
     <style>
-        :root { --bg: #020617; --card: #0f172a; --accent: #00e0ff; --text: #f8fafc; --border: rgba(255, 255, 255, 0.1); }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; background: var(--card); padding: 30px; border-radius: 15px; border: 1px solid var(--border); }
-        input { width: 100%; padding: 8px; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 4px; box-sizing: border-box; font-family: inherit; margin-bottom: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 8px; text-align: left; border-bottom: 1px solid var(--border); }
-        th { color: var(--accent); }
+        body { font-family: 'Courier New', Courier, monospace; margin: 0; padding: 20px; color: #000; }
+        .container { max-width: 800px; margin: 0 auto; border: 1px solid #000; padding: 20px; }
         
-        .btn { background: var(--accent); color: #000; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 20px; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; font-size: 13px; }
-        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
-        .btn-outline:hover { background: rgba(0, 224, 255, 0.1); }
+        .header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 20px; }
+        .header h1 { margin: 0; font-size: 24px; text-transform: uppercase; }
+        .logo-img { max-height: 60px; margin-bottom: 5px; }
+
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .box { border: 1px solid #000; padding: 10px; margin-bottom: 15px; }
+        .box h3 { margin: 0 0 5px 0; font-size: 14px; text-transform: uppercase; border-bottom: 1px solid #000; }
+
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 12px; }
+        th, td { border: 1px solid #000; padding: 5px; text-align: left; }
+        th { background: #eee; }
+        .text-right { text-align: right; }
+
+        .totals { display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 20px; }
+        .total-row { display: flex; justify-content: space-between; width: 250px; font-weight: bold; font-size: 14px; }
         
-        /* BOTÃO ZAP */
-        .btn-zap { background: #25D366; color: #fff; border: none; }
-        .btn-zap:hover { background: #1ebc57; }
-
-        .contract-area { margin-top: 30px; background: #fff; color: #000; padding: 25px; border-radius: 5px; }
+        .legal-text { font-size: 10px; text-align: justify; margin-top: 20px; border-top: 1px solid #000; padding-top: 10px; line-height: 1.4; }
         
-        /* SELECT DE TÍTULO */
-        .title-select { background: transparent; border: none; color: var(--accent); font-size: 20px; font-weight: bold; text-transform: uppercase; outline: none; cursor: pointer; text-align: center; width: 100%; -webkit-appearance: none; -moz-appearance: none; appearance: none; }
-        .title-select:hover { border-bottom: 1px dashed #555; }
+        .signatures { display: flex; justify-content: space-between; margin-top: 50px; }
+        .sig-line { width: 45%; border-top: 1px solid #000; text-align: center; font-size: 12px; padding-top: 5px; }
 
-        #texto-contrato { outline: none; text-align: justify; font-size: 11px; line-height: 1.4; min-height: 400px; white-space: pre-wrap; }
+        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 100px; color: rgba(0,0,0,0.05); z-index: -1; pointer-events: none; }
 
-        .total-row { display: flex; justify-content: space-between; margin-top: 5px; font-size: 14px; }
-        .final-total { font-size: 22px; font-weight: bold; color: var(--accent); margin-top: 10px; border-top: 1px solid #444; padding-top: 10px; }
-
-        @media print {
-            @page { margin: 0; size: A4; }
-            body { background: #fff; color: #000; padding: 0; margin: 1.5cm; font-size: 12pt; }
-            .container { box-shadow: none; border: none; max-width: 100%; width: 100%; padding: 0; margin: 0; }
-            .no-print { display: none !important; } 
-            input { background: transparent; border: none; color: #000; padding: 0; font-size: 12px; font-weight: bold; }
-            h2, h1, h3 { color: #000; border-bottom: 1px solid #000; }
-            table th { color: #000; border-bottom: 1px solid #000; }
-            table td { border-bottom: 1px solid #ccc; color: #000; }
-            .title-select { color: #000; border: none; font-size: 24px; text-align: center; text-align-last: center; }
-            .contract-area { page-break-before: always; margin-top: 0; padding: 0; padding-top: 30px; border: none; }
-            #texto-contrato { min-height: auto; height: auto; overflow: visible; font-size: 10px; }
-            .signatures { display: flex !important; margin-top: 50px; justify-content: space-between; page-break-inside: avoid; }
-            .sig-line { width: 45%; border-top: 1px solid #000; text-align: center; font-size: 11px; padding-top: 5px; }
-            .footer-print { position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 8px; color: #888; text-transform: uppercase; letter-spacing: 2px; padding-bottom: 10px; }
-            .final-total { color: #000 !important; border-top: 1px solid #000; }
-        }
+        /* Esconde botões na impressão */
+        @media print { .no-print { display: none; } }
+        .no-print { position: fixed; top: 20px; right: 20px; background: #000; color: #fff; padding: 10px 20px; cursor: pointer; border-radius: 5px; text-decoration: none; }
     </style>
 </head>
 <body>
 
+    <a href="#" onclick="window.print()" class="no-print">IMPRIMIR</a>
+
     <div class="container">
-        <div class="no-print" style="margin-bottom: 20px; display: flex; justify-content: space-between;">
-            <div style="display:flex; gap:10px;">
-                <a href="vendas.html" onclick="tentarFechar(event)" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Voltar</a>
+        <div class="header">
+            <h1 id="titulo-doc">RECIBO DE VENDA</h1>
+            <p>LM IMPORTS • CNPJ: 00.000.000/0001-00</p>
+            <p>Rua Exemplo, 123 - Centro - Cidade/UF</p>
+            <p>Tel/Zap: (11) 99999-9999</p>
+        </div>
+
+        <div class="info-row">
+            <span><strong>PEDIDO Nº:</strong> <span id="num-pedido">0000</span></span>
+            <span><strong>DATA:</strong> <span id="data-pedido">01/01/2026</span></span>
+        </div>
+
+        <div class="box">
+            <h3>Dados do Cliente</h3>
+            <div id="dados-cliente">Carregando...</div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>PRODUTO / SERVIÇO</th>
+                    <th>DETALHES</th>
+                    <th class="text-right">VALOR</th>
+                </tr>
+            </thead>
+            <tbody id="lista-itens"></tbody>
+        </table>
+
+        <div class="totals">
+            <div class="total-row"><span>SUBTOTAL:</span> <span id="val-sub">R$ 0,00</span></div>
+            <div class="total-row"><span>DESCONTO:</span> <span id="val-desc">R$ 0,00</span></div>
+            <div class="total-row" style="margin-top:5px; font-size:16px;"><span>TOTAL:</span> <span id="val-total">R$ 0,00</span></div>
+            <div style="font-size:11px; margin-top:5px;" id="forma-pgto"></div>
+        </div>
+
+        <div id="area-contrato">
+            <div class="legal-text">
+                <strong>TERMOS DE GARANTIA E CONTRATO DE VENDA</strong><br>
+                1. A LM Imports oferece garantia de 90 (noventa) dias para defeitos de fabricação, conforme Art. 26 do CDC.<br>
+                2. A garantia NÃO cobre: danos causados por líquidos, quedas, mau uso, ou violação do selo de garantia.<br>
+                3. Em caso de troca, o produto deve estar nas mesmas condições de venda.<br>
+                4. O cliente declara ter testado o aparelho e verificado que todas as funções (câmera, face ID, áudio, rede) estão funcionais no ato da compra.<br>
+                5. Aparelhos usados podem conter marcas de uso que não afetam o funcionamento.
             </div>
-            <div style="display:flex; gap:10px;">
-                <button onclick="enviarWhatsApp()" class="btn btn-zap"><i class="fab fa-whatsapp"></i> Enviar no Zap</button>
-                <button onclick="window.print()" class="btn"><i class="fas fa-print"></i> Imprimir / PDF</button>
+
+            <div class="signatures">
+                <div class="sig-line">LM IMPORTS<br>Vendedor</div>
+                <div class="sig-line"><span id="nome-cli-sig">CLIENTE</span><br>Comprador</div>
             </div>
         </div>
 
-        <div class="receipt-page">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <h1 style="margin: 0; font-size: 26px; text-transform: uppercase;">LM IMPORTS</h1>
-                
-                <select id="titulo-doc" class="title-select">
-                    <option>RECIBO DE VENDA</option>
-                    <option>ORÇAMENTO VÁLIDO POR 5 DIAS</option>
-                    <option>PEDIDO DE COMPRA</option>
-                </select>
-                
-                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 10px; border-bottom: 1px solid #000; padding-bottom: 10px;">
-                    <span>Data: <input type="text" id="data-venda" style="width: 80px; display: inline;"></span>
-                    <span>Vendedor: <input type="text" value="Rodrigo" style="width: 100px; display: inline;"></span>
-                    <span>Nº: <input type="text" id="pedido-num" value="001" style="width: 60px; display: inline;"></span>
-                </div>
-            </div>
-
-            <div style="margin-top: 15px;">
-                <label style="font-size: 12px; color: #888; text-transform: uppercase; font-weight: bold;">Dados do Cliente</label>
-                <div style="border: 1px solid #ddd; padding: 10px; border-radius: 5px; margin-top: 5px;">
-                    <input type="text" id="cliente-nome" placeholder="Nome do Cliente" style="font-size: 14px;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <input type="text" id="cliente-cpf" placeholder="CPF">
-                        <input type="text" id="cliente-tel" placeholder="Telefone/WhatsApp">
-                    </div>
-                    <input type="text" id="cliente-endereco" placeholder="Endereço Completo">
-                </div>
-            </div>
-
-            <h3 style="font-size: 14px; margin-top: 20px; text-transform: uppercase; border-bottom: 2px solid #000;">Produtos / Serviços</h3>
-            <table>
-                <thead><tr><th>Descrição</th><th width="20%">Valor</th></tr></thead>
-                <tbody id="lista-produtos"></tbody>
-            </table>
-
-            <div style="margin-top: 20px; text-align: right; padding-top: 10px;">
-                <div class="total-row"><span>Subtotal:</span> <span id="recibo-sub">R$ 0,00</span></div>
-                <div class="total-row"><span>Descontos/Trocas:</span> <span id="recibo-desc">R$ 0,00</span></div>
-                
-                <div class="final-total" id="recibo-total">TOTAL: R$ 0,00</div>
-                
-                <div style="margin-top: 10px;">
-                    <label style="font-size: 12px;">Forma de Pagamento:</label>
-                    <input type="text" id="forma-pagamento" style="text-align: right; font-weight: bold;">
-                </div>
-            </div>
+        <div id="area-orcamento" style="display:none; text-align:center; margin-top:50px; border:2px solid #000; padding:20px;">
+            <h3>ORÇAMENTO VÁLIDO POR 5 DIAS</h3>
+            <p>Este documento não garante reserva de estoque.</p>
+            <p>Valores sujeitos a alteração sem aviso prévio.</p>
         </div>
-        
-        <div class="footer-print no-print-screen">Sistema Vértice • Gestão Inteligente</div>
 
-        <div class="contract-area">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <h3 style="margin: 0; text-transform: uppercase; border: none; font-size: 16px;">Termo de Garantia e Condições Gerais</h3>
-                <p style="font-size: 10px; margin: 0;">Anexo ao pedido LM Imports</p>
-            </div>
-            <div id="texto-contrato" contenteditable="true">
-DO OBJETO
-Cláusula 1: O comprador está adquirindo o produto descrito na página anterior, em plenas condições de uso, devidamente lacrado (ou seminovo revisado), testado, concordando com todas as características, inexistindo qualquer defeito, mediante valor e forma de pagamento ajustado entre as partes.
-
-Cláusula 2: Por tratar-se de aparelho eletrônico, o item acompanha manual (físico ou digital via site do fabricante).
-
-DAS OBRIGAÇÕES DO COMPRADOR
-Cláusula 3: A LM IMPORTS orienta o comprador a não expor o celular a líquidos ou poeira. A resistência contra respingos e água não é uma condição permanente e pode diminuir com o tempo. Danos por líquidos não são cobertos.
-
-Cláusula 4: O consumidor se compromete a utilizar o aparelho celular com proteção adequada (capa/película) e carregadores originais ou homologados.
-
-DAS OBRIGAÇÕES DA VENDEDORA
-Cláusula 5: Na hipótese de o produto apresentar falha ou vício de fabricação dentro do prazo de garantia, o consumidor deverá procurar imediatamente a LM IMPORTS. Não é permitido que terceiros avaliem ou reparem o produto sem autorização prévia, sob pena de perda imediata da garantia.
-
-Cláusula 6: Caso seja necessário reparo e formatação, é responsabilidade do comprador manter backup atualizado. A LM IMPORTS não se responsabiliza por perda de dados, contatos ou fotos.
-
-DA GARANTIA DO PRODUTO
-Cláusula 7: A garantia do produto terá validade descrita no momento da venda (Ex: 3 meses loja ou 1 ano fabricante), contados da retirada.
-   
-Cláusula 8: A garantia CESSARÁ (perde a validade) nos seguintes casos:
-a) Danos por líquidos, oxidação ou umidade;
-b) Quedas, amassados, telas trincadas ou danos físicos;
-c) Uso de carregadores não originais/piratas;
-d) Violação dos lacres de segurança da loja;
-e) Reparo em outra assistência técnica não autorizada.
-
-DISPOSIÇÕES GERAIS
-Cláusula 9: Ao assinar, o comprador concorda que a LM IMPORTS poderá utilizar imagens do produto nas redes sociais para fins de marketing.
-
-Cláusula 10: O comprador declara ter conferido o aparelho (câmeras, face ID, áudio, tela e carcaça) no ato da retirada. Ao assinar, concorda com todos os termos acima descritos.
-            </div>
-            <div class="signatures" style="display: none;">
-                <div class="sig-line">ASSINATURA DO COMPRADOR<br>CPF: _______________________</div>
-                <div class="sig-line">LM IMPORTS<br>VISTO DO VENDEDOR</div>
-            </div>
-            <div class="footer-print">Sistema Vértice • Gestão Inteligente</div>
-        </div>
     </div>
 
     <script>
-        function tentarFechar(e) {
-            if(window.opener) {
-                e.preventDefault(); 
-                window.close();     
-            }
-        }
+        // Pega os dados do LocalStorage
+        const dados = JSON.parse(localStorage.getItem('dadosRecibo'));
 
-        // --- FUNÇÃO ENVIAR WHATSAPP ---
-        function enviarWhatsApp() {
-            const cliente = document.getElementById('cliente-nome').value;
-            const tel = document.getElementById('cliente-tel').value.replace(/\D/g, ''); // Limpa número
-            const total = document.getElementById('recibo-total').innerText;
-            const pedido = document.getElementById('pedido-num').value;
-            
-            // Monta a mensagem
-            let msg = `Olá *${cliente}*! 😃\n\nAqui está o resumo do seu Pedido *#${pedido}* na LM Imports:\n\n`;
-            
-            // Pega itens da tabela
-            const linhas = document.querySelectorAll('#lista-produtos tr');
-            linhas.forEach(tr => {
-                const colunas = tr.querySelectorAll('td');
-                if(colunas.length >= 2) {
-                    msg += `▪️ ${colunas[0].innerText} - ${colunas[1].innerText}\n`;
-                }
+        if(dados) {
+            // Preenche dados básicos
+            document.getElementById('num-pedido').innerText = dados.numeroPedido;
+            document.getElementById('data-pedido').innerText = dados.data;
+            document.getElementById('dados-cliente').innerHTML = `
+                ${dados.cliente} <br>
+                CPF: ${dados.cpf} | Tel: ${dados.tel} <br>
+                ${dados.endereco}
+            `;
+            document.getElementById('nome-cli-sig').innerText = dados.cliente;
+
+            // Preenche Itens
+            const tbody = document.getElementById('lista-itens');
+            let subtotal = 0;
+            dados.itens.forEach(item => {
+                let nome = item.nome;
+                let valor = parseFloat(item.preco);
+                if(item.isBrinde) { valor = 0; nome += " (BRINDE)"; }
+                if(item.isTroca) { subtotal += valor; } // Se for troca, é negativo, abate
+                else { subtotal += valor; }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${nome}</td>
+                        <td>${item.desc}</td>
+                        <td class="text-right">${valor.toLocaleString('pt-br',{style:'currency', currency:'BRL'})}</td>
+                    </tr>
+                `;
             });
-            
-            msg += `\n*${total}*\n`;
-            msg += `_Obrigado pela preferência!_`;
 
-            if(tel.length >= 10) {
-                window.open(`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`, '_blank');
+            // Totals
+            document.getElementById('val-sub').innerText = subtotal.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+            document.getElementById('val-desc').innerText = "- " + dados.descontoManual.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+            document.getElementById('val-total').innerText = dados.total.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+            document.getElementById('forma-pgto').innerText = `Forma de Pagamento: ${dados.pagamento} ${dados.textoParcelas || ''}`;
+
+            // LÓGICA DE ORÇAMENTO VS VENDA
+            if (dados.isOrcamento) {
+                // MODO ORÇAMENTO
+                document.getElementById('titulo-doc').innerText = "ORÇAMENTO";
+                document.getElementById('area-contrato').style.display = 'none'; // Esconde contrato
+                document.getElementById('area-orcamento').style.display = 'block'; // Mostra aviso de orçamento
+                
+                // Marca d'água
+                const bg = document.createElement('div');
+                bg.className = 'watermark';
+                bg.innerText = "ORÇAMENTO";
+                document.body.appendChild(bg);
             } else {
-                Swal.fire("Ops!", "O telefone do cliente parece inválido para o WhatsApp.", "warning");
+                // MODO VENDA (Padrão)
+                document.getElementById('titulo-doc').innerText = "RECIBO DE VENDA";
             }
+        } else {
+            document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px;'>Nenhum dado encontrado para impressão.</h1>";
         }
-
-        window.onload = function() {
-            try {
-                const dadosJSON = localStorage.getItem('dadosRecibo');
-                if (!dadosJSON) { 
-                    Swal.fire("Aviso", "Nenhuma venda carregada. Volte ao PDV.", "info");
-                    return; 
-                }
-
-                const dados = JSON.parse(dadosJSON);
-
-                document.getElementById('cliente-nome').value = dados.cliente || "";
-                document.getElementById('cliente-cpf').value = dados.cpf || "";
-                document.getElementById('cliente-tel').value = dados.tel || "";
-                document.getElementById('cliente-endereco').value = dados.endereco || "";
-                document.getElementById('data-venda').value = dados.data;
-                
-                // MÁGICA AQUI: JUNTA PAGAMENTO COM DETALHE DA PARCELA
-                let textoPagamento = dados.pagamento;
-                if(dados.textoParcelas) {
-                    textoPagamento += " - " + dados.textoParcelas;
-                }
-                document.getElementById('forma-pagamento').value = textoPagamento;
-
-                document.getElementById('pedido-num').value = dados.numeroPedido || Math.floor(Math.random() * 9000);
-
-                const tbody = document.getElementById('lista-produtos');
-                tbody.innerHTML = ''; 
-
-                let subTotal = 0;
-                let descontos = 0;
-
-                dados.itens.forEach(item => {
-                    const tr = document.createElement('tr');
-                    let desc = item.nome;
-                    if(item.desc) desc += ` - ${item.desc}`;
-                    
-                    let valorTexto = "";
-                    let valorNumerico = parseFloat(item.preco);
-
-                    if(item.isBrinde) {
-                        desc += " (BRINDE/GRÁTIS)";
-                        valorTexto = "R$ 0,00";
-                    } else if (item.isTroca) {
-                        valorTexto = "- R$ " + Math.abs(valorNumerico).toFixed(2);
-                        descontos += Math.abs(valorNumerico);
-                    } else {
-                        valorTexto = "R$ " + valorNumerico.toFixed(2);
-                        subTotal += valorNumerico;
-                    }
-                    tr.innerHTML = `<td>${desc}</td><td>${valorTexto}</td>`;
-                    tbody.appendChild(tr);
-                });
-
-                if(dados.descontoManual > 0) {
-                    descontos += parseFloat(dados.descontoManual);
-                    const trDesc = document.createElement('tr');
-                    trDesc.innerHTML = `<td style="color:#000;">Desconto Promocional</td><td>- R$ ${parseFloat(dados.descontoManual).toFixed(2)}</td>`;
-                    tbody.appendChild(trDesc);
-                }
-
-                document.getElementById('recibo-sub').innerText = 'R$ ' + subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                document.getElementById('recibo-desc').innerText = '- R$ ' + descontos.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                document.getElementById('recibo-total').innerText = 'TOTAL: R$ ' + parseFloat(dados.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                
-                if (window.matchMedia) {
-                    var mediaQueryList = window.matchMedia('print');
-                    mediaQueryList.addListener(function(mql) {
-                        if (mql.matches) {
-                            document.getElementById('recibo-total').style.color = '#000';
-                        }
-                    });
-                }
-            } catch (e) {
-                console.error("Erro:", e);
-                Swal.fire("Erro", "Erro ao processar os dados do recibo.", "error");
-            }
-        }
+        
+        // Imprime automático ao abrir
+        setTimeout(() => window.print(), 500);
     </script>
 </body>
 </html>
