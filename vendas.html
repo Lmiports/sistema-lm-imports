@@ -11,7 +11,7 @@
     <script src="js/firebase-config.js"></script>
     
     <style>
-        /* --- 1. VISUAL NEON E CORES --- */
+        /* --- VISUAL AZUL NEON --- */
         :root { --bg: #020617; --card: #0f172a; --accent: #00e0ff; --text: #f8fafc; --border: rgba(255, 255, 255, 0.1); --success: #22c55e; --danger: #ef4444; --warning: #eab308; }
         
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; min-height: 100vh; display: flex; flex-direction: column; box-sizing: border-box; }
@@ -23,9 +23,10 @@
         .btn-voltar { color: #fff; text-decoration: none; font-size: 20px; padding: 10px; border-radius: 5px; transition: 0.3s; }
         .btn-voltar:hover { background: rgba(255,255,255,0.1); color: var(--accent); }
 
-        /* --- 2. LAYOUT RESPONSIVO --- */
+        /* LAYOUT */
         .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; flex: 1; overflow: visible; }
         .products-section { display: flex; flex-direction: column; gap: 15px; }
+        
         .search-box { display: flex; gap: 10px; }
         .search-box input, .search-box select { width: 100%; padding: 12px; background: var(--card); border: 1px solid var(--border); color: #fff; border-radius: 8px; outline: none; }
         
@@ -294,7 +295,7 @@
 
         function carregarTaxasDoBanco() { db.collection("config_taxas").doc("geral").onSnapshot(doc => { if (doc.exists) taxasAtuais = doc.data(); else taxasAtuais = {1:4.5, 12:15.5, 18:20, 24:25}; }); }
 
-        // --- SIMULADOR COM OLHO MÁGICO ---
+        // --- SIMULADOR COM OLHO MÁGICO + SELEÇÃO AUTOMÁTICA ---
         function abrirSimulador() {
             let sub = 0; carrinho.forEach(i => sub += i.isBrinde ? 0 : parseFloat(i.venda||0));
             let descTroca = 0; trocas.forEach(i => descTroca += i.valor);
@@ -303,7 +304,7 @@
 
             if (valorBase <= 0) return alert("Adicione itens primeiro.");
 
-            renderizarTabelaSimulacao(valorBase); // Nova função separada
+            renderizarTabelaSimulacao(valorBase); 
             document.getElementById('modal-simulador').setAttribute('data-base', valorBase);
             document.getElementById('modal-simulador').style.display = 'flex';
         }
@@ -343,6 +344,28 @@
             document.getElementById('modal-simulador').setAttribute('data-copy', textoCopy);
         }
 
+        function aplicarParcelamento(parcelas, valorJuros) { 
+            valorTaxaAplicada = valorJuros; 
+            parcelasSelecionadas = parcelas; 
+            
+            // ATUALIZA O DROPDOWN COM A OPÇÃO ESCOLHIDA
+            let sel = document.getElementById('forma-pagamento');
+            let novaOpcao = `Crédito ${parcelas}x`;
+            
+            // Adiciona a opção se ela não existir
+            let existe = false;
+            for(let i=0; i<sel.options.length; i++) { if(sel.options[i].value === novaOpcao) existe = true; }
+            
+            if(!existe) {
+                sel.innerHTML += `<option value="${novaOpcao}">${novaOpcao} (Simulado)</option>`;
+            }
+            sel.value = novaOpcao;
+
+            document.getElementById('modal-simulador').style.display = 'none'; 
+            atualizarTotais(); 
+            salvarRascunho(); 
+        }
+
         function copiarOfertaZap() {
             const txt = document.getElementById('modal-simulador').getAttribute('data-copy');
             navigator.clipboard.writeText(txt);
@@ -355,6 +378,7 @@
             const pg=document.getElementById('forma-pagamento').value; 
             if(carrinho.length===0)return alert("Vazio!"); 
             if(!cli)return alert("Cliente?"); 
+            if(!pg)return alert("Selecione a Forma de Pagamento!");
             
             const tipo = isOrcamento ? "ORÇAMENTO" : "VENDA";
             if(!confirm(`Confirmar ${tipo}?`)) return; 
@@ -402,7 +426,6 @@
             if (parcelasSelecionadas > 0 && totalVendaGlobal > 0) { const valorParcela = totalVendaGlobal / parcelasSelecionadas; textoParcela = `(${parcelasSelecionadas}x de ${valorParcela.toLocaleString('pt-br',{style:'currency', currency:'BRL'})})`; }
             
             const dados={ 
-                // AQUI ESTÁ O SEGREDO: MANDAMOS A FLAG 'isOrcamento'
                 isOrcamento: isOrcamento,
                 numeroPedido: num, 
                 cliente: cFull.nome, 
@@ -421,14 +444,13 @@
             window.open('orcamento.html','_blank');
         }
 
-        // --- AUXILIARES (IGUAIS AO ANTERIOR) ---
-        function aplicarParcelamento(parcelas, valorJuros) { valorTaxaAplicada = valorJuros; parcelasSelecionadas = parcelas; document.getElementById('forma-pagamento').value = `Crédito ${parcelas}x`; document.getElementById('modal-simulador').style.display = 'none'; atualizarTotais(); salvarRascunho(); }
+        // --- AUXILIARES ---
         function abrirConfigTaxas() { const container = document.getElementById('grid-inputs-taxas'); container.innerHTML = ""; for(let i=1; i<=24; i++) { let val = taxasAtuais[i] !== undefined ? taxasAtuais[i] : (4 + (i * 1.2)); container.innerHTML += `<div class="taxa-item"><label>${i}x</label><input type="number" id="taxa-input-${i}" value="${parseFloat(val).toFixed(2)}" step="0.01"> %</div>`; } document.getElementById('modal-config-taxas').style.display = 'flex'; }
         async function salvarConfigTaxas() { let novasTaxas = {}; for(let i=1; i<=24; i++) novasTaxas[i] = parseFloat(document.getElementById(`taxa-input-${i}`).value) || 0; try { await db.collection("config_taxas").doc("geral").set(novasTaxas); alert("Salvo!"); document.getElementById('modal-config-taxas').style.display = 'none'; } catch(e) { alert("Erro: " + e.message); } }
         function atualizarTotais() { const dc=document.getElementById('carrinho-lista'); const dt=document.getElementById('lista-trocas'); dc.innerHTML=""; dt.innerHTML=""; let sub=0; carrinho.forEach((item,i)=>{ const val = item.isBrinde?0:parseFloat(item.venda||0); sub+=val; const cls = item.isBrinde?'brinde':''; const ico=item.isBrinde?'active':''; const txt=item.isBrinde?'<span style="color:#00e0ff;">GRÁTIS</span>':`R$ ${parseFloat(item.venda).toFixed(2)}`; dc.innerHTML+=`<div class="cart-item ${cls}"><div class="item-info"><div>${item.modelo||item.nomeP}</div><small>${txt}</small></div><div class="item-actions"><i class="btn-icon btn-gift fas fa-gift ${ico}" onclick="toggleBrinde(${i})"></i><i class="btn-icon btn-remove fas fa-trash" onclick="removerDoCarrinho(${i})"></i></div></div>`; }); let descTroca=0; trocas.forEach((t,i)=>{ descTroca+=t.valor; dt.innerHTML+=`<div class="trade-in-box"><div class="trade-in-text"><strong>ENTRADA:</strong> ${t.modelo}<br><small>${t.imei} | R$ ${t.valor}</small></div><i class="fas fa-times btn-remove" onclick="removerTroca(${i})"></i></div>`; }); let descMan = parseFloat(document.getElementById('valor-desconto-manual').value)||0; const pgto = document.getElementById('forma-pagamento').value; if(!pgto.includes("Crédito")) { valorTaxaAplicada = 0; parcelasSelecionadas = 0; } if(valorTaxaAplicada > 0) { document.getElementById('row-taxas').style.display = 'flex'; document.getElementById('valor-taxas').innerText = `+ R$ ${valorTaxaAplicada.toFixed(2)}`; } else { document.getElementById('row-taxas').style.display = 'none'; } totalVendaGlobal = sub - descTroca - descMan + valorTaxaAplicada; document.getElementById('valor-subtotal').innerText=`R$ ${sub.toFixed(2)}`; document.getElementById('valor-abatimento').innerText=`- R$ ${descTroca.toFixed(2)}`; document.getElementById('valor-total').innerText=`R$ ${totalVendaGlobal.toFixed(2)}`; const divDetalhe = document.getElementById('detalhe-parcelas'); if (parcelasSelecionadas > 0 && totalVendaGlobal > 0) { const valorParcela = totalVendaGlobal / parcelasSelecionadas; divDetalhe.style.display = 'block'; divDetalhe.innerText = `VALOR SIMULADO DE ${totalVendaGlobal.toLocaleString('pt-br',{style:'currency', currency:'BRL'})} EM ${parcelasSelecionadas}X (${valorParcela.toLocaleString('pt-br',{style:'currency', currency:'BRL'})})`; } else { divDetalhe.style.display = 'none'; } salvarRascunho(); }
         function renderizarProdutos(){ const d=document.getElementById('lista-produtos'); d.innerHTML=""; if(dbEstoque.length===0) return d.innerHTML='<div style="color:#888;text-align:center;padding:20px;">Estoque vazio ou não encontrado.</div>'; dbEstoque.forEach(p=>{ const el=document.createElement('div'); const isReserved = p.status === 'em_negociacao'; el.className = isReserved ? 'product-card reserved' : 'product-card'; if(!isReserved) el.onclick=()=>adicionarAoCarrinho(p); let cat=(p.categoria||'').toLowerCase(); let icon=cat.includes('celular')?'📱':cat.includes('roupa')?'👕':cat.includes('perfume')?'🌸':'📦'; let reservedBadge = isReserved ? '<span class="reserved-tag">EM USO</span>' : ''; el.innerHTML=`${reservedBadge}<span class="prod-cat-tag">${icon} ${cat.toUpperCase()}</span><span class="prod-name">${p.modelo||p.nomeP||'Item'}</span><span class="prod-detail">${p.cor||''} ${p.gb||''}</span><span class="prod-price">R$ ${parseFloat(p.venda||0).toFixed(2)}</span><div style="display:none;">${cat} ${p.modelo}</div>`; d.appendChild(el); }); }
         function salvarRascunho() { const estado = { carrinho, trocas, cliente: document.getElementById('cliente-input').value, desconto: document.getElementById('valor-desconto-manual').value, pagamento: document.getElementById('forma-pagamento').value, taxa: valorTaxaAplicada, parcelas: parcelasSelecionadas }; localStorage.setItem('pdv_rascunho', JSON.stringify(estado)); }
-        function restaurarRascunho() { const s = localStorage.getItem('pdv_rascunho'); if(s) { const e = JSON.parse(s); carrinho=e.carrinho||[]; trocas=e.trocas||[]; valorTaxaAplicada=e.taxa||0; parcelasSelecionadas=e.parcelas||0; document.getElementById('cliente-input').value=e.cliente||""; document.getElementById('valor-desconto-manual').value=e.desconto||""; setTimeout(()=>document.getElementById('forma-pagamento').value=e.pagamento||"Pix",500); atualizarTotais(); } }
+        function restaurarRascunho() { const s = localStorage.getItem('pdv_rascunho'); if(s) { const e = JSON.parse(s); carrinho=e.carrinho||[]; trocas=e.trocas||[]; valorTaxaAplicada=e.taxa||0; parcelasSelecionadas=e.parcelas||0; document.getElementById('cliente-input').value=e.cliente||""; document.getElementById('valor-desconto-manual').value=e.desconto||""; setTimeout(()=>document.getElementById('forma-pagamento').value=e.pagamento||"",500); atualizarTotais(); } }
         function limparRascunho(){ localStorage.removeItem('pdv_rascunho'); carrinho=[]; trocas=[]; valorTaxaAplicada=0; parcelasSelecionadas=0; document.getElementById('cliente-input').value=""; document.getElementById('valor-desconto-manual').value=""; atualizarTotais(); }
         function carregarListasAuxiliares(){ db.collection("lista_modelos_cel").orderBy("nome").onSnapshot(snap=>{document.getElementById('dl-modelos-list').innerHTML="";snap.forEach(d=>document.getElementById('dl-modelos-list').innerHTML+=`<option value="${d.data().nome}">`)}); db.collection("lista_cores_cel").orderBy("nome").onSnapshot(snap=>{document.getElementById('dl-cores-list').innerHTML="";snap.forEach(d=>document.getElementById('dl-cores-list').innerHTML+=`<option value="${d.data().nome}">`)}); }
         function filtrarProdutos(){ const t=document.getElementById('busca').value.toLowerCase(); const c=document.getElementById('filtro-cat').value; document.querySelectorAll('.product-card').forEach(el=>{const txt=el.innerText.toLowerCase();const cat=el.querySelector('.prod-cat-tag').innerText.toLowerCase(); el.style.display=(txt.includes(t)&&(c===""||cat.includes(c)))?'flex':'none'}); }
@@ -445,7 +467,16 @@
         function fecharModalCliente(){document.getElementById('modal-cliente').style.display='none';}
         function buscarCep(){ let cep=document.getElementById('novo-cep').value.replace(/\D/g,''); if(cep.length===8) fetch(`https://viacep.com.br/ws/${cep}/json/`).then(r=>r.json()).then(d=>{if(!d.erro){document.getElementById('novo-endereco').value=d.logradouro;document.getElementById('novo-bairro').value=d.bairro;document.getElementById('novo-cidade').value=`${d.localidade}-${d.uf}`;document.getElementById('novo-numero').focus();}}); }
         async function salvarNovoCliente(){ let n=document.getElementById('novo-nome').value; if(!n)return alert("Nome?"); try{ await db.collection("clientes").add({nome:n, cpf:document.getElementById('novo-cpf').value, whats:document.getElementById('novo-zap').value, email:document.getElementById('novo-email').value, cep:document.getElementById('novo-cep').value, logradouro:document.getElementById('novo-endereco').value, numero:document.getElementById('novo-numero').value, bairro:document.getElementById('novo-bairro').value, cidade:document.getElementById('novo-cidade').value}); alert("Ok!"); document.getElementById('cliente-input').value=n; fecharModalCliente(); salvarRascunho(); }catch(e){alert("Erro");} }
-        function carregarOpcoesPagamento(){ let s=document.getElementById('forma-pagamento'); s.innerHTML=`<optgroup label="À Vista"><option>Pix</option><option>Dinheiro</option><option>Débito</option></optgroup><optgroup label="Crédito">`; for(let i=1;i<=24;i++)s.innerHTML+=`<option>Crédito ${i}x</option>`; }
+        function carregarOpcoesPagamento(){ 
+            let s=document.getElementById('forma-pagamento'); 
+            s.innerHTML=`
+                <option value="">Selecione...</option>
+                <option value="Pix">Pix</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Débito">Débito</option>
+                <option value="Crédito">Crédito</option>
+            `; 
+        }
     </script>
 </body>
 </html>
