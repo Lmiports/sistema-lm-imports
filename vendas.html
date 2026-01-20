@@ -77,6 +77,10 @@
         .btn-limpar { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px; width: 100%; border-radius: 5px; margin-bottom: 10px; cursor: pointer; font-size: 11px; }
         .btn-simular { background: #334155; color: #fff; border: 1px solid var(--border); width: 100%; padding: 8px; border-radius: 5px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .btn-simular:hover { background: #475569; }
+        
+        /* Botão Pré-visualizar */
+        .btn-preview { width:100%; background:transparent; border:1px solid #666; color:#aaa; padding:5px; border-radius:5px; cursor:pointer; font-size:11px; margin-bottom:10px; }
+        .btn-preview:hover { border-color:#fff; color:#fff; }
 
         .sim-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         .sim-table th { text-align: left; color: var(--accent); padding: 5px; border-bottom: 1px solid var(--border); }
@@ -157,7 +161,7 @@
                 <div style="text-align: center; color: #64748b; margin-top: 20px;">Carrinho vazio</div>
             </div>
 
-            <button class="btn-limpar" onclick="cancelarVendaTotal()"><i class="fas fa-trash-alt"></i> LIMPAR TELA</button>
+            <button class="btn-limpar" onclick="cancelarVendaTotal()"><i class="fas fa-trash-alt"></i> LIMPAR TELA / DESTRAVAR</button>
 
             <div id="lista-trocas"></div>
 
@@ -186,6 +190,8 @@
 
             <button class="btn-troca" onclick="abrirModalTroca()"><i class="fas fa-exchange-alt"></i> Entrada de Troca</button>
             
+            <button class="btn-preview" onclick="preVisualizar()"><i class="fas fa-eye"></i> Conferir Recibo (Sem Salvar)</button>
+
             <div class="action-buttons-grid">
                 <button class="btn-orcamento" onclick="finalizar(true)">ORÇAMENTO</button>
                 <button class="btn-vender" onclick="finalizar(false)">VENDER</button>
@@ -252,7 +258,7 @@
         </div>
     </div>
     
-    <div class="marca-registrada">VÉRTICE BI CORE v11.0 © Rodrigo N Carvalho 2026</div>
+    <div class="marca-registrada">VÉRTICE BI v11.0 © 2026 • Rodrigo N Carvalho Ltda</div>
 
     <script>
         // --- 🔒 KILL SWITCH ---
@@ -361,7 +367,41 @@
             alert("Copiado! (Sem taxas visíveis)");
         }
 
-        // --- FUNÇÃO FINALIZAR COM HISTÓRICO DETALHADO ---
+        // --- PRÉ-VISUALIZAÇÃO (NOVO) ---
+        function preVisualizar() {
+            const cli = document.getElementById('cliente-input').value;
+            if (carrinho.length === 0) return alert("Carrinho Vazio!");
+            
+            // Monta os dados apenas para ver o papel, sem salvar no banco
+            const cFull = dbClientes.find(c => c.nome === cli) || {nome: cli || "Consumidor"};
+            let itensR = carrinho.map(i => ({nome: i.modelo || i.nomeP, desc: i.cor || '', preco: i.venda, isBrinde: i.isBrinde}));
+            trocas.forEach(t => itensR.push({nome: "TROCA: " + t.modelo, desc: t.imei, preco: -t.valor, isTroca: true}));
+            let textoParcela = "";
+            if (parcelasSelecionadas > 0 && totalVendaGlobal > 0) {
+                const valorParcela = totalVendaGlobal / parcelasSelecionadas;
+                textoParcela = `(${parcelasSelecionadas}x de ${valorParcela.toLocaleString('pt-br',{style:'currency', currency:'BRL'})})`;
+            }
+
+            const dados = {
+                titulo: "PRÉ-VISUALIZAÇÃO",
+                numeroPedido: "PREVIEW",
+                cliente: cFull.nome,
+                cpf: cFull.cpf||'', tel: cFull.whats||'', endereco: cFull.logradouro||'',
+                itens: itensR,
+                descontoManual: parseFloat(document.getElementById('valor-desconto-manual').value)||0,
+                taxaMaquininha: valorTaxaAplicada,
+                total: totalVendaGlobal,
+                pagamento: document.getElementById('forma-pagamento').value,
+                textoParcelas: textoParcela,
+                data: new Date().toLocaleDateString('pt-BR'),
+                isOrcamento: false 
+            };
+            
+            localStorage.setItem('dadosRecibo', JSON.stringify(dados));
+            window.open('orcamento.html', '_blank');
+        }
+
+        // --- FINALIZAR (CORRIGIDO: NÃO LIMPA SE FOR ORÇAMENTO) ---
         async function finalizar(isOrcamento) { 
             const cli=document.getElementById('cliente-input').value; 
             const pg=document.getElementById('forma-pagamento').value; 
@@ -370,19 +410,17 @@
             if(!pg)return alert("Selecione a Forma de Pagamento!");
             
             const tipo = isOrcamento ? "ORÇAMENTO" : "VENDA";
-            // Para o BI diferenciar depois:
-            const statusVenda = isOrcamento ? "ORCAMENTO" : "CONCRETIZADA";
+            const statusVenda = isOrcamento ? "ORCAMENTO" : "CONCRETIZADA"; // ETIQUETA PRO BI
 
             if(!confirm(`Confirmar ${tipo}?`)) return; 
             
             try { 
                 const b=db.batch(); 
                 
+                // SE FOR VENDA, BAIXA O ESTOQUE. SE FOR ORÇAMENTO, NÃO FAZ NADA COM ESTOQUE AGORA.
                 if (!isOrcamento) {
                     carrinho.forEach(i=>{ b.update(db.collection("estoque").doc(i.id),{status:"vendido",dataVenda:Date.now(),clienteVenda:cli,foiBrinde:i.isBrinde}); }); 
                     trocas.forEach(t=>{ const r=db.collection("estoque").doc(); b.set(r,{categoria:'celular',modelo:`${t.modelo} (TROCA ${cli})`,nomeP:`${t.modelo} (TROCA)`,marca:'Apple',cor:t.cor,gb:t.gb,imei1:t.imei,bateria:t.bateria,custo:t.valor,venda:0,status:'disponível',fornecedor:`Cliente: ${cli}`,dataEntrada:Date.now()}); }); 
-                } else {
-                    carrinho.forEach(i=>{ b.update(db.collection("estoque").doc(i.id),{status:"disponível"}); }); 
                 }
 
                 const snap=await db.collection("vendas").get(); 
@@ -391,7 +429,7 @@
                 b.set(db.collection("vendas").doc(),{ 
                     numeroPedido: num, 
                     tipoRegistro: tipo,
-                    status: statusVenda, // STATUS PARA O BI FILTRAR DEPOIS
+                    status: statusVenda, // STATUS PARA FILTRAR
                     cliente: cli, 
                     data: new Date().toISOString(), 
                     itens: carrinho.map(c=>({modelo:c.modelo||c.nomeP,isBrinde:c.isBrinde})), 
@@ -404,9 +442,7 @@
                 
                 await b.commit(); 
                 
-                // --- CONSTRUÇÃO DO HISTÓRICO DETALHADO ---
-                // "20/01/2026 Rodrigo comprou iPhone 16 5.000,00 deu um iPhone 15 na troca 3.700,00 desconto Nao teve brinde se tiver adicione"
-                
+                // HISTÓRICO NO CLIENTE
                 let itensCompraStr = carrinho.filter(i => !i.isBrinde).map(i => `${i.modelo || i.nomeP} (${formatMoeda(i.venda)})`).join(", ");
                 let itensBrindeStr = carrinho.filter(i => i.isBrinde).map(i => i.modelo || i.nomeP).join(", ");
                 let itensTrocaStr = trocas.map(t => `${t.modelo} (${formatMoeda(t.valor)})`).join(", ");
@@ -421,7 +457,6 @@
                 if(itensTrocaStr) historicoTexto += ` | Deu na troca: ${itensTrocaStr}`;
                 historicoTexto += ` | Desconto: ${descStr} | Brinde: ${brindeStr}`;
 
-                // Salva no Cliente
                 db.collection("clientes").where("nome", "==", cli).get().then(qs => { 
                     qs.forEach(doc => { 
                         let histAntigo = doc.data().historico || ""; 
@@ -431,8 +466,17 @@
 
                 gerarDocumento(isOrcamento, num, cli, pg);
                 
-                limparRascunho(); 
-                window.location.reload(); 
+                // LÓGICA DE LIMPEZA:
+                if (!isOrcamento) {
+                    // SE VENDA: Limpa tudo pois já baixou estoque
+                    limparRascunho(); 
+                    window.location.reload(); 
+                } else {
+                    // SE ORÇAMENTO: Mantém na tela para possível conversão.
+                    // Não recarrega a página.
+                    alert("Orçamento salvo! A tela foi mantida caso o cliente decida fechar agora. Se ele sair, clique em 'LIMPAR TELA'.");
+                }
+
             } catch(e){alert("Erro: "+e.message);} 
         }
 
