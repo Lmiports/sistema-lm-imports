@@ -262,7 +262,7 @@
         let dbEstoque = [], dbClientes = [], carrinho = [], trocas = [];
         let totalVendaGlobal = 0, valorTaxaAplicada = 0, parcelasSelecionadas = 0;
         let taxasAtuais = {};
-        let mostrarTaxasNaTela = true; // Controle do Olho Mágico
+        let mostrarTaxasNaTela = true;
 
         window.onload = function() {
             const cargo = localStorage.getItem('cargoUsuario');
@@ -295,7 +295,7 @@
 
         function carregarTaxasDoBanco() { db.collection("config_taxas").doc("geral").onSnapshot(doc => { if (doc.exists) taxasAtuais = doc.data(); else taxasAtuais = {1:4.5, 12:15.5, 18:20, 24:25}; }); }
 
-        // --- SIMULADOR COM OLHO MÁGICO + SELEÇÃO AUTOMÁTICA ---
+        // --- SIMULADOR ---
         function abrirSimulador() {
             let sub = 0; carrinho.forEach(i => sub += i.isBrinde ? 0 : parseFloat(i.venda||0));
             let descTroca = 0; trocas.forEach(i => descTroca += i.valor);
@@ -332,13 +332,10 @@
                 tr.className = "sim-row";
                 tr.onclick = () => aplicarParcelamento(i, diferencaJuros);
                 
-                // SE O OLHO ESTIVER FECHADO, ESCONDE A PORCENTAGEM
                 let htmlTaxa = mostrarTaxasNaTela ? `<small style="color:#666">(${taxa.toFixed(2)}%)</small>` : '';
-                
                 tr.innerHTML = `<td><strong>${i}x</strong> ${htmlTaxa}</td><td>R$ ${valorParcela.toFixed(2)}</td><td class="sim-total">R$ ${valorComJuros.toFixed(2)}</td>`;
                 tbody.appendChild(tr);
 
-                // Texto para copiar SEMPRE sem taxa
                 textoCopy += `${i}x de ${valorParcela.toLocaleString('pt-br',{style:'currency', currency:'BRL'})} (Total: ${valorComJuros.toLocaleString('pt-br',{style:'currency', currency:'BRL'})})\n`;
             }
             document.getElementById('modal-simulador').setAttribute('data-copy', textoCopy);
@@ -347,20 +344,12 @@
         function aplicarParcelamento(parcelas, valorJuros) { 
             valorTaxaAplicada = valorJuros; 
             parcelasSelecionadas = parcelas; 
-            
-            // ATUALIZA O DROPDOWN COM A OPÇÃO ESCOLHIDA
             let sel = document.getElementById('forma-pagamento');
             let novaOpcao = `Crédito ${parcelas}x`;
-            
-            // Adiciona a opção se ela não existir
             let existe = false;
             for(let i=0; i<sel.options.length; i++) { if(sel.options[i].value === novaOpcao) existe = true; }
-            
-            if(!existe) {
-                sel.innerHTML += `<option value="${novaOpcao}">${novaOpcao} (Simulado)</option>`;
-            }
+            if(!existe) sel.innerHTML += `<option value="${novaOpcao}">${novaOpcao} (Simulado)</option>`;
             sel.value = novaOpcao;
-
             document.getElementById('modal-simulador').style.display = 'none'; 
             atualizarTotais(); 
             salvarRascunho(); 
@@ -372,7 +361,7 @@
             alert("Copiado! (Sem taxas visíveis)");
         }
 
-        // --- FINALIZAR (COM ORÇAMENTO) ---
+        // --- FUNÇÃO FINALIZAR CORRIGIDA (DESTRAVA O ESTOQUE) ---
         async function finalizar(isOrcamento) { 
             const cli=document.getElementById('cliente-input').value; 
             const pg=document.getElementById('forma-pagamento').value; 
@@ -386,9 +375,14 @@
             try { 
                 const b=db.batch(); 
                 
+                // *** CORREÇÃO AQUI ***
                 if (!isOrcamento) {
+                    // VENDA: Baixa Estoque
                     carrinho.forEach(i=>{ b.update(db.collection("estoque").doc(i.id),{status:"vendido",dataVenda:Date.now(),clienteVenda:cli,foiBrinde:i.isBrinde}); }); 
                     trocas.forEach(t=>{ const r=db.collection("estoque").doc(); b.set(r,{categoria:'celular',modelo:`${t.modelo} (TROCA ${cli})`,nomeP:`${t.modelo} (TROCA)`,marca:'Apple',cor:t.cor,gb:t.gb,imei1:t.imei,bateria:t.bateria,custo:t.valor,venda:0,status:'disponível',fornecedor:`Cliente: ${cli}`,dataEntrada:Date.now()}); }); 
+                } else {
+                    // ORÇAMENTO: DESTRAVA O ESTOQUE (Volta para Disponível)
+                    carrinho.forEach(i=>{ b.update(db.collection("estoque").doc(i.id),{status:"disponível"}); }); 
                 }
 
                 const snap=await db.collection("vendas").get(); 
@@ -444,7 +438,6 @@
             window.open('orcamento.html','_blank');
         }
 
-        // --- AUXILIARES ---
         function abrirConfigTaxas() { const container = document.getElementById('grid-inputs-taxas'); container.innerHTML = ""; for(let i=1; i<=24; i++) { let val = taxasAtuais[i] !== undefined ? taxasAtuais[i] : (4 + (i * 1.2)); container.innerHTML += `<div class="taxa-item"><label>${i}x</label><input type="number" id="taxa-input-${i}" value="${parseFloat(val).toFixed(2)}" step="0.01"> %</div>`; } document.getElementById('modal-config-taxas').style.display = 'flex'; }
         async function salvarConfigTaxas() { let novasTaxas = {}; for(let i=1; i<=24; i++) novasTaxas[i] = parseFloat(document.getElementById(`taxa-input-${i}`).value) || 0; try { await db.collection("config_taxas").doc("geral").set(novasTaxas); alert("Salvo!"); document.getElementById('modal-config-taxas').style.display = 'none'; } catch(e) { alert("Erro: " + e.message); } }
         function atualizarTotais() { const dc=document.getElementById('carrinho-lista'); const dt=document.getElementById('lista-trocas'); dc.innerHTML=""; dt.innerHTML=""; let sub=0; carrinho.forEach((item,i)=>{ const val = item.isBrinde?0:parseFloat(item.venda||0); sub+=val; const cls = item.isBrinde?'brinde':''; const ico=item.isBrinde?'active':''; const txt=item.isBrinde?'<span style="color:#00e0ff;">GRÁTIS</span>':`R$ ${parseFloat(item.venda).toFixed(2)}`; dc.innerHTML+=`<div class="cart-item ${cls}"><div class="item-info"><div>${item.modelo||item.nomeP}</div><small>${txt}</small></div><div class="item-actions"><i class="btn-icon btn-gift fas fa-gift ${ico}" onclick="toggleBrinde(${i})"></i><i class="btn-icon btn-remove fas fa-trash" onclick="removerDoCarrinho(${i})"></i></div></div>`; }); let descTroca=0; trocas.forEach((t,i)=>{ descTroca+=t.valor; dt.innerHTML+=`<div class="trade-in-box"><div class="trade-in-text"><strong>ENTRADA:</strong> ${t.modelo}<br><small>${t.imei} | R$ ${t.valor}</small></div><i class="fas fa-times btn-remove" onclick="removerTroca(${i})"></i></div>`; }); let descMan = parseFloat(document.getElementById('valor-desconto-manual').value)||0; const pgto = document.getElementById('forma-pagamento').value; if(!pgto.includes("Crédito")) { valorTaxaAplicada = 0; parcelasSelecionadas = 0; } if(valorTaxaAplicada > 0) { document.getElementById('row-taxas').style.display = 'flex'; document.getElementById('valor-taxas').innerText = `+ R$ ${valorTaxaAplicada.toFixed(2)}`; } else { document.getElementById('row-taxas').style.display = 'none'; } totalVendaGlobal = sub - descTroca - descMan + valorTaxaAplicada; document.getElementById('valor-subtotal').innerText=`R$ ${sub.toFixed(2)}`; document.getElementById('valor-abatimento').innerText=`- R$ ${descTroca.toFixed(2)}`; document.getElementById('valor-total').innerText=`R$ ${totalVendaGlobal.toFixed(2)}`; const divDetalhe = document.getElementById('detalhe-parcelas'); if (parcelasSelecionadas > 0 && totalVendaGlobal > 0) { const valorParcela = totalVendaGlobal / parcelasSelecionadas; divDetalhe.style.display = 'block'; divDetalhe.innerText = `VALOR SIMULADO DE ${totalVendaGlobal.toLocaleString('pt-br',{style:'currency', currency:'BRL'})} EM ${parcelasSelecionadas}X (${valorParcela.toLocaleString('pt-br',{style:'currency', currency:'BRL'})})`; } else { divDetalhe.style.display = 'none'; } salvarRascunho(); }
