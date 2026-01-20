@@ -252,7 +252,7 @@
         </div>
     </div>
     
-    <div class="marca-registrada">VÉRTICE BI v11.0 © 2026 • Rodrigo N Carvalho Ltda</div>
+    <div class="marca-registrada">VÉRTICE BI CORE v11.0 © Rodrigo N Carvalho 2026</div>
 
     <script>
         // --- 🔒 KILL SWITCH ---
@@ -361,7 +361,7 @@
             alert("Copiado! (Sem taxas visíveis)");
         }
 
-        // --- FUNÇÃO FINALIZAR CORRIGIDA (DESTRAVA O ESTOQUE) ---
+        // --- FUNÇÃO FINALIZAR COM HISTÓRICO DETALHADO ---
         async function finalizar(isOrcamento) { 
             const cli=document.getElementById('cliente-input').value; 
             const pg=document.getElementById('forma-pagamento').value; 
@@ -370,18 +370,18 @@
             if(!pg)return alert("Selecione a Forma de Pagamento!");
             
             const tipo = isOrcamento ? "ORÇAMENTO" : "VENDA";
+            // Para o BI diferenciar depois:
+            const statusVenda = isOrcamento ? "ORCAMENTO" : "CONCRETIZADA";
+
             if(!confirm(`Confirmar ${tipo}?`)) return; 
             
             try { 
                 const b=db.batch(); 
                 
-                // *** CORREÇÃO AQUI ***
                 if (!isOrcamento) {
-                    // VENDA: Baixa Estoque
                     carrinho.forEach(i=>{ b.update(db.collection("estoque").doc(i.id),{status:"vendido",dataVenda:Date.now(),clienteVenda:cli,foiBrinde:i.isBrinde}); }); 
                     trocas.forEach(t=>{ const r=db.collection("estoque").doc(); b.set(r,{categoria:'celular',modelo:`${t.modelo} (TROCA ${cli})`,nomeP:`${t.modelo} (TROCA)`,marca:'Apple',cor:t.cor,gb:t.gb,imei1:t.imei,bateria:t.bateria,custo:t.valor,venda:0,status:'disponível',fornecedor:`Cliente: ${cli}`,dataEntrada:Date.now()}); }); 
                 } else {
-                    // ORÇAMENTO: DESTRAVA O ESTOQUE (Volta para Disponível)
                     carrinho.forEach(i=>{ b.update(db.collection("estoque").doc(i.id),{status:"disponível"}); }); 
                 }
 
@@ -391,6 +391,7 @@
                 b.set(db.collection("vendas").doc(),{ 
                     numeroPedido: num, 
                     tipoRegistro: tipo,
+                    status: statusVenda, // STATUS PARA O BI FILTRAR DEPOIS
                     cliente: cli, 
                     data: new Date().toISOString(), 
                     itens: carrinho.map(c=>({modelo:c.modelo||c.nomeP,isBrinde:c.isBrinde})), 
@@ -403,7 +404,30 @@
                 
                 await b.commit(); 
                 
-                db.collection("clientes").where("nome", "==", cli).get().then(qs => { qs.forEach(doc => { let hist = doc.data().historico || ""; let resumoCompra = `[${new Date().toLocaleDateString('pt-BR')}] ${tipo} #${num} - Total: R$ ${totalVendaGlobal.toFixed(2)}\n`; carrinho.forEach(item => { resumoCompra += `   + ${item.modelo || item.nomeP}\n`; }); db.collection("clientes").doc(doc.id).update({ historico: resumoCompra + "\n" + hist }); }); });
+                // --- CONSTRUÇÃO DO HISTÓRICO DETALHADO ---
+                // "20/01/2026 Rodrigo comprou iPhone 16 5.000,00 deu um iPhone 15 na troca 3.700,00 desconto Nao teve brinde se tiver adicione"
+                
+                let itensCompraStr = carrinho.filter(i => !i.isBrinde).map(i => `${i.modelo || i.nomeP} (${formatMoeda(i.venda)})`).join(", ");
+                let itensBrindeStr = carrinho.filter(i => i.isBrinde).map(i => i.modelo || i.nomeP).join(", ");
+                let itensTrocaStr = trocas.map(t => `${t.modelo} (${formatMoeda(t.valor)})`).join(", ");
+                let valDesc = parseFloat(document.getElementById('valor-desconto-manual').value) || 0;
+                let descStr = valDesc > 0 ? formatMoeda(valDesc) : "Não teve";
+                let brindeStr = itensBrindeStr ? itensBrindeStr : "Não teve";
+
+                let historicoTexto = `${new Date().toLocaleDateString('pt-BR')} - ${cli} `;
+                if(isOrcamento) historicoTexto += `fez ORÇAMENTO de: ${itensCompraStr}`;
+                else historicoTexto += `comprou ${itensCompraStr}`;
+
+                if(itensTrocaStr) historicoTexto += ` | Deu na troca: ${itensTrocaStr}`;
+                historicoTexto += ` | Desconto: ${descStr} | Brinde: ${brindeStr}`;
+
+                // Salva no Cliente
+                db.collection("clientes").where("nome", "==", cli).get().then(qs => { 
+                    qs.forEach(doc => { 
+                        let histAntigo = doc.data().historico || ""; 
+                        db.collection("clientes").doc(doc.id).update({ historico: historicoTexto + "\n" + histAntigo }); 
+                    }); 
+                });
 
                 gerarDocumento(isOrcamento, num, cli, pg);
                 
@@ -438,6 +462,9 @@
             window.open('orcamento.html','_blank');
         }
 
+        function formatMoeda(v) { return parseFloat(v).toLocaleString('pt-br',{style:'currency', currency:'BRL'}); }
+
+        // --- AUXILIARES ---
         function abrirConfigTaxas() { const container = document.getElementById('grid-inputs-taxas'); container.innerHTML = ""; for(let i=1; i<=24; i++) { let val = taxasAtuais[i] !== undefined ? taxasAtuais[i] : (4 + (i * 1.2)); container.innerHTML += `<div class="taxa-item"><label>${i}x</label><input type="number" id="taxa-input-${i}" value="${parseFloat(val).toFixed(2)}" step="0.01"> %</div>`; } document.getElementById('modal-config-taxas').style.display = 'flex'; }
         async function salvarConfigTaxas() { let novasTaxas = {}; for(let i=1; i<=24; i++) novasTaxas[i] = parseFloat(document.getElementById(`taxa-input-${i}`).value) || 0; try { await db.collection("config_taxas").doc("geral").set(novasTaxas); alert("Salvo!"); document.getElementById('modal-config-taxas').style.display = 'none'; } catch(e) { alert("Erro: " + e.message); } }
         function atualizarTotais() { const dc=document.getElementById('carrinho-lista'); const dt=document.getElementById('lista-trocas'); dc.innerHTML=""; dt.innerHTML=""; let sub=0; carrinho.forEach((item,i)=>{ const val = item.isBrinde?0:parseFloat(item.venda||0); sub+=val; const cls = item.isBrinde?'brinde':''; const ico=item.isBrinde?'active':''; const txt=item.isBrinde?'<span style="color:#00e0ff;">GRÁTIS</span>':`R$ ${parseFloat(item.venda).toFixed(2)}`; dc.innerHTML+=`<div class="cart-item ${cls}"><div class="item-info"><div>${item.modelo||item.nomeP}</div><small>${txt}</small></div><div class="item-actions"><i class="btn-icon btn-gift fas fa-gift ${ico}" onclick="toggleBrinde(${i})"></i><i class="btn-icon btn-remove fas fa-trash" onclick="removerDoCarrinho(${i})"></i></div></div>`; }); let descTroca=0; trocas.forEach((t,i)=>{ descTroca+=t.valor; dt.innerHTML+=`<div class="trade-in-box"><div class="trade-in-text"><strong>ENTRADA:</strong> ${t.modelo}<br><small>${t.imei} | R$ ${t.valor}</small></div><i class="fas fa-times btn-remove" onclick="removerTroca(${i})"></i></div>`; }); let descMan = parseFloat(document.getElementById('valor-desconto-manual').value)||0; const pgto = document.getElementById('forma-pagamento').value; if(!pgto.includes("Crédito")) { valorTaxaAplicada = 0; parcelasSelecionadas = 0; } if(valorTaxaAplicada > 0) { document.getElementById('row-taxas').style.display = 'flex'; document.getElementById('valor-taxas').innerText = `+ R$ ${valorTaxaAplicada.toFixed(2)}`; } else { document.getElementById('row-taxas').style.display = 'none'; } totalVendaGlobal = sub - descTroca - descMan + valorTaxaAplicada; document.getElementById('valor-subtotal').innerText=`R$ ${sub.toFixed(2)}`; document.getElementById('valor-abatimento').innerText=`- R$ ${descTroca.toFixed(2)}`; document.getElementById('valor-total').innerText=`R$ ${totalVendaGlobal.toFixed(2)}`; const divDetalhe = document.getElementById('detalhe-parcelas'); if (parcelasSelecionadas > 0 && totalVendaGlobal > 0) { const valorParcela = totalVendaGlobal / parcelasSelecionadas; divDetalhe.style.display = 'block'; divDetalhe.innerText = `VALOR SIMULADO DE ${totalVendaGlobal.toLocaleString('pt-br',{style:'currency', currency:'BRL'})} EM ${parcelasSelecionadas}X (${valorParcela.toLocaleString('pt-br',{style:'currency', currency:'BRL'})})`; } else { divDetalhe.style.display = 'none'; } salvarRascunho(); }
