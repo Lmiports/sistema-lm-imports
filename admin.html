@@ -24,6 +24,8 @@
             --border: rgba(255, 255, 255, 0.1); 
             --success: #22c55e; 
             --danger: #ef4444; 
+            --warning: #f59e0b;
+            --purple: #8b5cf6;
         }
 
         body { 
@@ -36,7 +38,7 @@
             box-sizing: border-box;
         }
 
-        /* --- HEADER (Estilo App) --- */
+        /* --- HEADER (Estilo App - Sem Sidebar) --- */
         .header { 
             display: flex; 
             justify-content: space-between; 
@@ -66,10 +68,15 @@
         .app-title { font-size: 20px; font-weight: 800; letter-spacing: 1px; color: #fff; margin: 0; }
         .app-title span { color: var(--accent); }
 
-        /* --- CARDS DE KPI (Resumo) --- */
+        /* FILTROS */
+        .filter-group { display: flex; background: var(--card); padding: 4px; border-radius: 8px; border: 1px solid var(--border); gap: 5px; }
+        .filter-btn { background: transparent; border: none; color: var(--text-muted); padding: 6px 12px; cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12px; transition: 0.2s; }
+        .filter-btn.active { background: var(--accent); color: #000; }
+
+        /* --- CARDS DE KPI --- */
         .kpi-grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); 
             gap: 15px; 
             margin-bottom: 25px; 
         }
@@ -82,21 +89,19 @@
             position: relative; 
             overflow: hidden;
         }
-        .kpi-card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; 
-            background: var(--accent); 
-        }
+        .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); }
         .kpi-card.green::before { background: var(--success); }
         .kpi-card.red::before { background: var(--danger); }
+        .kpi-card.yellow::before { background: var(--warning); }
 
-        .kpi-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-        .kpi-value { font-size: 24px; font-weight: 800; margin-top: 5px; color: #fff; }
+        .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .kpi-value { font-size: 22px; font-weight: 800; margin-top: 5px; color: #fff; }
         .kpi-sub { font-size: 10px; color: var(--text-muted); margin-top: 5px; }
 
         /* --- GRÁFICOS --- */
         .charts-grid { 
             display: grid; 
-            grid-template-columns: 2fr 1fr; /* 2/3 para Vendas, 1/3 para Pizza */
+            grid-template-columns: 2fr 1fr; 
             gap: 20px; 
             margin-bottom: 25px;
         }
@@ -108,11 +113,10 @@
             border-radius: 15px; 
             min-height: 300px;
         }
-        
         .chart-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
-        .chart-title { font-weight: bold; color: var(--accent); }
+        .chart-title { font-weight: bold; color: var(--accent); font-size: 14px; }
 
-        /* --- TABELA DE VENDAS RECENTES --- */
+        /* --- TABELA --- */
         .recent-sales { background: var(--card); border: 1px solid var(--border); border-radius: 15px; padding: 20px; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th { text-align: left; color: var(--text-muted); padding: 10px; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; }
@@ -128,12 +132,10 @@
         .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* RODAPÉ */
         .footer { text-align: center; font-size: 10px; color: rgba(255,255,255,0.2); margin-top: 30px; }
 
-        /* MOBILE */
         @media (max-width: 850px) {
-            .charts-grid { grid-template-columns: 1fr; } /* Um gráfico embaixo do outro */
+            .charts-grid { grid-template-columns: 1fr; } 
             .kpi-grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
@@ -150,46 +152,46 @@
             <a href="menu.html" class="btn-home"><i class="fas fa-home"></i> MENU</a>
             <h1 class="app-title">VÉRTICE <span>BI CORE</span></h1>
         </div>
-        <div>
-            <span style="font-size:12px; color:#666;">Hoje: <span id="data-hoje"></span></span>
+        <div class="filter-group">
+            <button class="filter-btn" onclick="mudarFiltro('semanal', this)">7 Dias</button>
+            <button class="filter-btn active" onclick="mudarFiltro('mensal', this)">Mês</button>
+            <button class="filter-btn" onclick="mudarFiltro('todos', this)">Geral</button>
         </div>
     </div>
 
     <div class="kpi-grid">
         <div class="kpi-card green">
-            <div class="kpi-label">Faturamento Total</div>
+            <div class="kpi-label">Faturamento (Vendas)</div>
             <div class="kpi-value" id="kpi-faturamento">R$ 0,00</div>
-            <div class="kpi-sub">Vendas Concretizadas</div>
+            <div class="kpi-sub">Dinheiro Real no Caixa</div>
         </div>
-        <div class="kpi-card">
-            <div class="kpi-label">Vendas Realizadas</div>
-            <div class="kpi-value" id="kpi-qtd">0</div>
-            <div class="kpi-sub">Pedidos Fechados</div>
+        <div class="kpi-card yellow">
+            <div class="kpi-label">Entrada Trocas</div>
+            <div class="kpi-value" id="kpi-trocas">R$ 0,00</div>
+            <div class="kpi-sub" id="kpi-qtd-trocas">0 aparelhos</div>
         </div>
         <div class="kpi-card">
             <div class="kpi-label">Ticket Médio</div>
             <div class="kpi-value" id="kpi-ticket">R$ 0,00</div>
-            <div class="kpi-sub">Por Venda</div>
+            <div class="kpi-sub">Por venda realizada</div>
         </div>
         <div class="kpi-card red">
-            <div class="kpi-label">Orçamentos</div>
+            <div class="kpi-label">Orçamentos (Não Vendas)</div>
             <div class="kpi-value" id="kpi-orcamentos">0</div>
-            <div class="kpi-sub" style="color:var(--warning);">Não Convertidos</div>
+            <div class="kpi-sub" style="color:var(--warning);">Em Aberto</div>
         </div>
     </div>
 
     <div class="charts-grid">
         <div class="chart-box">
             <div class="chart-header">
-                <span class="chart-title">Desempenho de Vendas (7 Dias)</span>
-                <i class="fas fa-chart-line" style="color:var(--text-muted)"></i>
+                <span class="chart-title">Desempenho Diário (Vendas Reais)</span>
             </div>
             <canvas id="chartVendas"></canvas>
         </div>
         <div class="chart-box">
             <div class="chart-header">
                 <span class="chart-title">Formas de Pagamento</span>
-                <i class="fas fa-chart-pie" style="color:var(--text-muted)"></i>
             </div>
             <canvas id="chartPagamento"></canvas>
         </div>
@@ -198,165 +200,170 @@
     <div class="recent-sales">
         <h3 style="color:var(--accent); margin-top:0; font-size:14px;">Últimas Vendas Concretizadas</h3>
         <table>
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Cliente</th>
-                    <th>Itens</th>
-                    <th>Valor</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="lista-recentes">
-                </tbody>
+            <thead><tr><th>Data</th><th>Cliente</th><th>Itens</th><th>Valor</th><th>Status</th></tr></thead>
+            <tbody id="lista-recentes"></tbody>
         </table>
     </div>
 
     <div class="footer">VÉRTICE BI CORE v11.0 • Rodrigo N Carvalho 2026</div>
 
     <script>
-        // --- CONFIGURAÇÃO INICIAL ---
-        const DATA_HOJE = new Date().toLocaleDateString('pt-BR');
-        document.getElementById('data-hoje').innerText = DATA_HOJE;
+        // Segurança
+        if(localStorage.getItem('cargoUsuario') !== 'admin') {
+            window.location.href = 'index.html';
+        }
 
-        // --- LÓGICA BI ---
-        window.onload = function() {
-            // Verifica Login (Segurança Básica)
-            const cargo = localStorage.getItem('cargoUsuario');
-            if(cargo !== 'admin') {
-                alert("Acesso restrito a gestores.");
-                window.location.href = 'index.html';
-                return;
-            }
+        let vendasData = [], estoqueData = [], filtroAtual = 'mensal';
+        let chartLinhaInstance = null, chartRoscaInstance = null;
 
-            carregarDados();
-        };
+        window.onload = function() { carregarDados(); };
+
+        function limparMoeda(valor) {
+            if (typeof valor === 'number') return valor;
+            if (!valor) return 0;
+            let limpo = valor.toString().replace(/[R$\s]/g, '').trim();
+            if (limpo.indexOf(',') > -1 && limpo.indexOf('.') > -1) { limpo = limpo.replace(/\./g, '').replace(',', '.'); }
+            else if (limpo.indexOf(',') > -1) { limpo = limpo.replace(',', '.'); }
+            return parseFloat(limpo) || 0;
+        }
 
         async function carregarDados() {
             try {
-                const snapshot = await db.collection("vendas").orderBy("data", "desc").get();
+                // Carrega Vendas
+                const snapVendas = await db.collection("vendas").orderBy("data", "desc").get();
+                vendasData = []; 
+                snapVendas.forEach(doc => vendasData.push({ id: doc.id, ...doc.data() }));
                 
-                let totalFat = 0;
-                let qtdVendas = 0;
-                let qtdOrcamentos = 0;
-                let pagamentos = {};
-                let vendasPorDia = {};
-                const listaRecentes = document.getElementById('lista-recentes');
-                listaRecentes.innerHTML = "";
+                // Carrega Estoque (para somar valor de trocas)
+                const snapEstoque = await db.collection("estoque").get();
+                estoqueData = [];
+                snapEstoque.forEach(doc => estoqueData.push({ id: doc.id, ...doc.data() }));
 
-                snapshot.forEach(doc => {
-                    const v = doc.data();
-                    const valor = parseFloat(v.total) || 0;
-                    
-                    // --- O FILTRO DE OURO ---
-                    // Se tiver status 'ORCAMENTO' ou 'ORÇAMENTO', IGNORA na soma
-                    // Se não tiver status (legado), considera venda.
-                    if (v.status === 'ORCAMENTO' || v.tipoRegistro === 'ORÇAMENTO') {
-                        qtdOrcamentos++;
-                        return; // Pula para o próximo, não soma faturamento
-                    }
-
-                    // Se passou daqui, é venda válida
-                    totalFat += valor;
-                    qtdVendas++;
-
-                    // Agrupar Pagamento
-                    const pg = v.pagamento ? v.pagamento.split(" ")[0] : "Outros"; // Pega só 'Crédito', 'Pix'...
-                    pagamentos[pg] = (pagamentos[pg] || 0) + 1;
-
-                    // Agrupar Por Dia (Para o gráfico)
-                    const dataVenda = new Date(v.data).toLocaleDateString('pt-BR').substring(0, 5); // dd/mm
-                    vendasPorDia[dataVenda] = (vendasPorDia[dataVenda] || 0) + valor;
-
-                    // Preencher Tabela (Só as 5 últimas)
-                    if (qtdVendas <= 5) {
-                        const itensStr = v.itens ? v.itens.map(i => i.modelo || i.nome).join(", ") : "-";
-                        listaRecentes.innerHTML += `
-                            <tr>
-                                <td>${new Date(v.data).toLocaleDateString('pt-BR')}</td>
-                                <td>${v.cliente}</td>
-                                <td style="font-size:10px; color:#aaa;">${itensStr.substring(0,30)}...</td>
-                                <td style="color:#22c55e; font-weight:bold;">${valor.toLocaleString('pt-br',{style:'currency', currency:'BRL'})}</td>
-                                <td><span class="status-tag">VENDIDO</span></td>
-                            </tr>
-                        `;
-                    }
-                });
-
-                // Atualiza KPIs
-                document.getElementById('kpi-faturamento').innerText = totalFat.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
-                document.getElementById('kpi-qtd').innerText = qtdVendas;
-                document.getElementById('kpi-orcamentos').innerText = qtdOrcamentos;
-                
-                const ticket = qtdVendas > 0 ? (totalFat / qtdVendas) : 0;
-                document.getElementById('kpi-ticket').innerText = ticket.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
-
-                // Renderiza Gráficos
-                renderChartLinha(vendasPorDia);
-                renderChartPizza(pagamentos);
-
-                // Tira Loading
-                document.getElementById('loading').style.display = 'none';
-
-            } catch (error) {
-                console.error(error);
-                alert("Erro ao carregar dados do BI.");
-            }
+                aplicarFiltroData();
+            } catch (error) { console.error(error); alert("Erro ao carregar dados."); }
         }
 
-        // --- GRÁFICOS (Chart.js) ---
+        function mudarFiltro(tipo, btn) {
+            filtroAtual = tipo;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            aplicarFiltroData();
+        }
+
+        function aplicarFiltroData() {
+            const agora = new Date();
+            const vendasFiltradas = vendasData.filter(v => {
+                // FILTRO DE DATA
+                let dataVenda;
+                try { dataVenda = new Date(v.data); } catch(e) { return false; }
+                
+                let dentroDoPeriodo = false;
+                if (filtroAtual === 'todos') dentroDoPeriodo = true;
+                else if (filtroAtual === 'semanal') dentroDoPeriodo = Math.ceil(Math.abs(agora - dataVenda) / (1000 * 60 * 60 * 24)) <= 7;
+                else if (filtroAtual === 'mensal') dentroDoPeriodo = dataVenda.getMonth() === agora.getMonth() && dataVenda.getFullYear() === agora.getFullYear();
+
+                return dentroDoPeriodo;
+            });
+
+            calcularKPIs(vendasFiltradas);
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function calcularKPIs(dados) {
+            let faturamento = 0, qtdVendas = 0, qtdOrcamentos = 0;
+            let pagamentos = {};
+            let vendasPorDia = {};
+            const listaRecentes = document.getElementById('lista-recentes');
+            listaRecentes.innerHTML = "";
+
+            dados.forEach(v => {
+                // --- O FILTRO DE OURO: SEPARA VENDA DE ORÇAMENTO ---
+                // Se o status for "ORCAMENTO" ou "ORÇAMENTO", conta e pula.
+                if (v.status === 'ORCAMENTO' || v.tipoRegistro === 'ORÇAMENTO' || v.status === 'ORÇAMENTO') {
+                    qtdOrcamentos++;
+                    return; 
+                }
+
+                // Se chegou aqui, é VENDA REAL
+                let val = limparMoeda(v.total);
+                faturamento += val;
+                qtdVendas++;
+
+                // Agrupa Pagamento
+                let pg = v.pagamento ? v.pagamento.split(" ")[0] : "Outros";
+                pagamentos[pg] = (pagamentos[pg] || 0) + 1;
+
+                // Agrupa por Dia
+                let dia = new Date(v.data).toLocaleDateString('pt-BR').substring(0, 5);
+                vendasPorDia[dia] = (vendasPorDia[dia] || 0) + val;
+
+                // Tabela (Top 5)
+                if (qtdVendas <= 5) {
+                    let itensStr = v.itens ? v.itens.map(i => i.modelo || i.nome).join(", ") : "-";
+                    listaRecentes.innerHTML += `
+                        <tr>
+                            <td>${new Date(v.data).toLocaleDateString('pt-BR')}</td>
+                            <td>${v.cliente}</td>
+                            <td style="font-size:10px; color:#aaa;">${itensStr.substring(0,30)}...</td>
+                            <td style="color:#22c55e; font-weight:bold;">${formatMoeda(val)}</td>
+                            <td><span class="status-tag">VENDIDO</span></td>
+                        </tr>
+                    `;
+                }
+            });
+
+            // Calcula Trocas (Estoque)
+            let valorTrocas = 0, qtdTrocas = 0;
+            estoqueData.forEach(p => {
+                if(p.modelo && p.modelo.includes("TROCA")) {
+                    valorTrocas += limparMoeda(p.custo);
+                    qtdTrocas++;
+                }
+            });
+
+            // Atualiza Tela
+            document.getElementById('kpi-faturamento').innerText = formatMoeda(faturamento);
+            document.getElementById('kpi-orcamentos').innerText = qtdOrcamentos;
+            document.getElementById('kpi-trocas').innerText = formatMoeda(valorTrocas);
+            document.getElementById('kpi-qtd-trocas').innerText = `${qtdTrocas} itens`;
+            
+            const ticket = qtdVendas > 0 ? (faturamento / qtdVendas) : 0;
+            document.getElementById('kpi-ticket').innerText = formatMoeda(ticket);
+
+            renderChartLinha(vendasPorDia);
+            renderChartPizza(pagamentos);
+        }
+
         function renderChartLinha(dadosDia) {
             const ctx = document.getElementById('chartVendas').getContext('2d');
-            // Ordenar datas (opcional, básico aqui)
-            const labels = Object.keys(dadosDia).reverse(); // Inverte para ficar cronológico se veio desc
+            const labels = Object.keys(dadosDia).reverse(); 
             const values = Object.values(dadosDia).reverse();
 
-            new Chart(ctx, {
+            if(chartLinhaInstance) chartLinhaInstance.destroy();
+            chartLinhaInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
-                    datasets: [{
-                        label: 'Vendas (R$)',
-                        data: values,
-                        borderColor: '#00e0ff',
-                        backgroundColor: 'rgba(0, 224, 255, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
+                    datasets: [{ label: 'Vendas (R$)', data: values, borderColor: '#00e0ff', backgroundColor: 'rgba(0, 224, 255, 0.1)', tension: 0.4, fill: true }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
-                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }, x: { grid: { display: false }, ticks: { color: '#94a3b8' } } } }
             });
         }
 
         function renderChartPizza(dadosPgto) {
             const ctx = document.getElementById('chartPagamento').getContext('2d');
-            new Chart(ctx, {
+            if(chartRoscaInstance) chartRoscaInstance.destroy();
+            chartRoscaInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(dadosPgto),
-                    datasets: [{
-                        data: Object.values(dadosPgto),
-                        backgroundColor: ['#22c55e', '#eab308', '#00e0ff', '#ef4444', '#a855f7'],
-                        borderWidth: 0
-                    }]
+                    datasets: [{ data: Object.values(dadosPgto), backgroundColor: ['#22c55e', '#eab308', '#00e0ff', '#ef4444', '#a855f7'], borderWidth: 0 }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { position: 'right', labels: { color: '#fff', font: { size: 10 } } } 
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#fff', font: { size: 10 } } } } }
             });
         }
+
+        function formatMoeda(val) { return val.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); }
     </script>
 </body>
 </html>
