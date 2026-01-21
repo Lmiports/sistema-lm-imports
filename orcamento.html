@@ -21,9 +21,23 @@
             width: 210mm;
             min-height: 297mm;
             padding: 15mm;
+            padding-bottom: 20mm; /* Espaço extra para o rodapé */
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             position: relative;
             box-sizing: border-box;
+        }
+
+        /* RODAPÉ DO SISTEMA (NOVO) */
+        .system-footer {
+            position: absolute;
+            bottom: 10mm;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 9px;
+            color: #bbb;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         /* CABEÇALHO */
@@ -80,7 +94,7 @@
             padding-bottom: 2px;
         }
 
-        /* CAMPOS EDITÁVEIS (Estilo Invisível na Impressão) */
+        /* CAMPOS EDITÁVEIS */
         .input-editable {
             border: none;
             border-bottom: 1px dashed #999;
@@ -92,7 +106,6 @@
             padding: 0;
             margin: 0;
         }
-        /* Ajuste específico para o número do pedido */
         .input-pedido { width: 100px; }
         .input-vendedor { width: 100%; }
 
@@ -160,7 +173,7 @@
             body { background: #fff; padding: 0; }
             .page { box-shadow: none; width: 100%; height: auto; padding: 0; }
             .screen-btns { display: none; }
-            .input-editable { border-bottom: none; } /* Remove tracejado na impressão */
+            .input-editable { border-bottom: none; } 
         }
     </style>
 </head>
@@ -187,7 +200,7 @@
             </div>
         </div>
 
-        <div class="doc-title" id="titulo-doc">RECIBO</div>
+        <div class="doc-title" id="titulo-doc">RECIBO DE VENDA</div>
 
         <div class="meta-grid">
             <div class="box">
@@ -224,7 +237,7 @@
 
         <div class="totals-area">
             <div class="totals-box">
-                <div class="t-row" style="color:#666;">SUBTOTAL: <span id="val-sub">R$ 0,00</span></div>
+                <div class="t-row" style="color:#666;">SUBTOTAL: <span id="val-sub">R$ ...</span></div>
                 <div class="t-row" style="color:red;">DESCONTO: <span id="val-desc">R$ 0,00</span></div>
                 <div class="t-row" style="font-size:11px;">TAXAS/JUROS: <span id="val-taxa">R$ 0,00</span></div>
                 <div class="t-row t-total">TOTAL: <span id="val-total">R$ 0,00</span></div>
@@ -238,19 +251,12 @@
                 1. A LM Imports oferece garantia de 90 (noventa) dias para defeitos de fabricação, conforme Art. 26 do CDC.<br>
                 2. A garantia <strong>NÃO COBRE:</strong> Danos causados por líquidos, quedas, mau uso, telas quebradas ou violação do selo de garantia.<br>
                 3. Em caso de troca, o produto deve estar nas mesmas condições estéticas do ato da venda.<br>
-                4. O cliente declara ter testado todas as funções do aparelho (câmeras, face ID, áudio, rede, carregamento) e estar ciente de que se trata de um produto seminovo (se aplicável), podendo conter marcas de uso.<br>
-                5. A nota/recibo é obrigatória para acionamento da garantia.
+                4. O cliente declara ter testado todas as funções do aparelho e estar ciente de que se trata de um produto seminovo (se aplicável).
             </div>
 
             <div class="signatures">
-                <div class="sig-line">
-                    LM IMPORTS<br>
-                    Assinatura do Vendedor
-                </div>
-                <div class="sig-line">
-                    <span id="sig-cli-nome">CLIENTE</span><br>
-                    Assinatura do Comprador
-                </div>
+                <div class="sig-line">LM IMPORTS<br>Vendedor</div>
+                <div class="sig-line"><span id="sig-cli-nome">CLIENTE</span><br>Comprador</div>
             </div>
         </div>
 
@@ -259,24 +265,31 @@
             <p style="font-weight:normal; font-size:12px;">Validade: 10 Dias • Não garante reserva de estoque • Sujeito a alteração de valores.</p>
         </div>
 
+        <div class="system-footer">
+            VÉRTICE BI CORE • SISTEMA DE GESTÃO INTELIGENTE
+        </div>
+
     </div>
 
     <script>
-        // RECUPERA DADOS
         const dados = JSON.parse(localStorage.getItem('dadosRecibo'));
         
-        // VENDEDOR LOGADO (Automático + Editável)
+        // Puxa vendedor do login ou usa padrão
         const usuarioLogado = localStorage.getItem('usuarioLogado') || "Vendedor";
         document.getElementById('vendedor-input').value = usuarioLogado;
 
         if(dados) {
-            document.getElementById('titulo-doc').innerText = dados.titulo;
+            // CORREÇÃO DO UNDEFINED:
+            // Se 'dados.titulo' não existir, cria baseado no 'isOrcamento'
+            let tituloFinal = dados.titulo;
+            if(!tituloFinal) {
+                tituloFinal = dados.isOrcamento ? "ORÇAMENTO" : "RECIBO DE VENDA";
+            }
+            document.getElementById('titulo-doc').innerText = tituloFinal;
             
-            // NUMERO DO PEDIDO (Agora no Input)
+            // Resto dos dados
             document.getElementById('ped-num-input').value = dados.numeroPedido;
-            
             document.getElementById('ped-data').innerText = dados.data;
-
             document.getElementById('cli-nome').innerText = dados.cliente;
             document.getElementById('cli-cpf').innerText = "CPF: " + dados.cpf;
             document.getElementById('cli-tel').innerText = "Tel: " + dados.tel;
@@ -284,20 +297,12 @@
             document.getElementById('sig-cli-nome').innerText = dados.cliente;
 
             const tbody = document.getElementById('lista-itens');
-            let subtotal = 0;
             dados.itens.forEach(item => {
                 let nome = item.nome;
                 let valor = parseFloat(item.preco);
                 
-                if(item.isBrinde) { 
-                    valor = 0; 
-                    nome += " (BRINDE)"; 
-                } else if (item.isTroca) {
-                    // Troca mantém negativo
-                } else {
-                    subtotal += valor;
-                }
-
+                if(item.isBrinde) { valor = 0; nome += " (BRINDE)"; }
+                
                 tbody.innerHTML += `
                     <tr>
                         <td>${nome}</td>
@@ -307,16 +312,12 @@
                 `;
             });
 
-            document.getElementById('val-sub').innerText = "R$ ..."; 
             document.getElementById('val-desc').innerText = "- " + dados.descontoManual.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
-            
             let taxas = dados.taxaMaquininha || 0;
             document.getElementById('val-taxa').innerText = "+ " + taxas.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
-            
             document.getElementById('val-total').innerText = dados.total.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
             document.getElementById('txt-pagamento').innerText = `Forma de Pagamento: ${dados.pagamento} ${dados.textoParcelas || ''}`;
 
-            // CONTROLE DE VISIBILIDADE (CONTRATO vs ORÇAMENTO)
             if (dados.isOrcamento) {
                 document.getElementById('area-contrato').style.display = 'none';
                 document.getElementById('area-orcamento').style.display = 'block';
@@ -324,9 +325,6 @@
                 document.getElementById('area-contrato').style.display = 'block';
                 document.getElementById('area-orcamento').style.display = 'none';
             }
-
-        } else {
-            alert("Erro: Nenhum dado de venda encontrado.");
         }
 
         setTimeout(() => {
