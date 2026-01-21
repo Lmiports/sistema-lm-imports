@@ -3,27 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VÉRTICE - GESTÃO DE CLIENTES</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>VÉRTICE BI | CORE</title>
     
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
 
     <style>
-        :root { --bg: #020617; --card: #0f172a; --accent: #3b82f6; --border: #1e293b; --text: #f8fafc; --success: #10b981; --danger: #ef4444; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        /* --- PADRÃO VISUAL VÉRTICE BI CORE --- */
+        :root { 
+            --bg: #020617; 
+            --card: #0f172a; 
+            --accent: #00e0ff; /* AZUL NEON */
+            --border: #1e293b; 
+            --text: #f8fafc; 
+            --success: #10b981; 
+            --danger: #ef4444; 
+        }
         
-        /* SIDEBAR */
-        .sidebar { width: 250px; background: #000; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; transition: 0.3s; }
-        .logo { color: var(--accent); text-align: center; font-weight: bold; font-size: 20px; margin-bottom: 40px; letter-spacing: 2px; }
-        .nav-item { padding: 15px; color: #94a3b8; text-decoration: none; border-radius: 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
-        .nav-item:hover, .nav-item.active { background: var(--accent); color: #fff; }
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', sans-serif; 
+            margin: 0; 
+            display: block; 
+            min-height: 100vh;
+            overflow-y: auto; 
+        }
+        
+        /* HEADER FIXO */
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        
+        .btn-home {
+            text-decoration: none;
+            color: #fff;
+            background: #1e293b;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-home:hover { background: var(--accent); border-color: var(--accent); color: #000; }
+
+        .page-title { font-size: 18px; font-weight: bold; color: var(--accent); letter-spacing: 1px; margin: 0; }
+        .version-tag { font-size: 10px; color: #000; background: var(--accent); padding: 2px 6px; border-radius: 4px; margin-left: 10px; font-weight: 900; letter-spacing: 1px; vertical-align: middle; }
 
         /* CONTENT */
-        .content { flex: 1; padding: 20px; display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; overflow-y: auto; }
+        .content { 
+            padding: 20px; 
+            display: grid; 
+            grid-template-columns: 1fr 1.5fr; 
+            gap: 20px; 
+            max-width: 1400px;
+            margin: 0 auto;
+        }
         
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; height: fit-content; }
         .card-header { padding: 15px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: center; }
         .card-title { font-size: 14px; font-weight: bold; color: var(--accent); text-transform: uppercase; margin: 0; }
         
@@ -32,21 +85,21 @@
         input, textarea, select { width: 100%; padding: 12px; background: #020617; border: 1px solid var(--border); border-radius: 8px; color: #fff; box-sizing: border-box; outline: none; transition: 0.3s; }
         input:focus, textarea:focus, select:focus { border-color: var(--accent); }
         
-        .client-list { overflow-y: auto; flex: 1; }
+        .client-list { max-height: 600px; overflow-y: auto; flex: 1; }
         .client-item { padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
-        .client-item:hover { background: rgba(59, 130, 246, 0.1); }
-        .client-item.active { background: var(--accent); color: #fff; }
+        .client-item:hover { background: rgba(0, 224, 255, 0.1); }
+        .client-item.active { background: var(--accent); color: #000; }
         .client-meta { font-size: 11px; color: #94a3b8; }
-        .client-item.active .client-meta { color: #e2e8f0; }
+        .client-item.active .client-meta { color: #000; font-weight: bold; }
 
         /* FORMULÁRIO (DIREITA) */
-        .form-body { padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 15px; }
+        .form-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .label { font-size: 11px; color: #64748b; margin-bottom: 5px; display: block; text-transform: uppercase; }
         
         .cep-wrapper { display: flex; gap: 10px; align-items: flex-end; }
-        .btn-cep { background: var(--accent); color: #fff; border: none; padding: 12px 15px; border-radius: 8px; cursor: pointer; height: 42px; width: 50px; display: flex; align-items: center; justify-content: center; }
-        .btn-cep:hover { background: #2563eb; }
+        .btn-cep { background: var(--accent); color: #000; border: none; padding: 12px 15px; border-radius: 8px; cursor: pointer; height: 42px; width: 50px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .btn-cep:hover { background: #fff; }
 
         .historico-box { 
             background: #000; border: 1px solid var(--border); border-radius: 8px; 
@@ -58,52 +111,21 @@
         .btn-group { padding: 15px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; background: var(--card); }
         .btn { padding: 10px 20px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
         .btn-save { background: var(--success); color: #000; }
-        .btn-save:hover { background: #34d399; }
-        .btn-new { background: var(--accent); color: #fff; }
+        .btn-save:hover { filter: brightness(1.1); }
+        .btn-new { background: var(--accent); color: #000; justify-content: center; width: 100%; }
         .btn-del { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
         .btn-del:hover { background: var(--danger); color: #fff; }
 
-        /* MENU MOBILE ICON */
-        .menu-toggle { display: none; position: fixed; top: 15px; left: 15px; z-index: 1001; background: var(--accent); color: white; border: none; padding: 8px; border-radius: 5px; }
+        /* RODAPÉ */
+        .footer { text-align: center; padding: 20px; color: #64748b; font-size: 11px; border-top: 1px solid var(--border); margin-top: 20px; width: 100%; }
 
-        /* --- RESPONSIVIDADE MOBILE --- */
-        @media (max-width: 768px) {
-            body { flex-direction: column; overflow: auto; height: auto; padding-top: 50px; }
-            
-            .menu-toggle { display: block; }
-            .sidebar { 
-                position: fixed; top: 0; left: -250px; height: 100vh; z-index: 1000; 
-                background: rgba(0,0,0,0.95); width: 250px; 
-            }
-            .sidebar.active { left: 0; }
-
-            .content { 
-                display: flex; 
-                flex-direction: column; 
-                height: auto; 
-                overflow: visible;
-                padding: 10px;
-            }
-
-            /* Lista de Clientes menor no topo */
-            .card:first-child {
-                max-height: 300px; /* Limita altura da lista */
-                flex: none;
-            }
-            .client-list { max-height: 200px; }
-
-            /* Formulário vira coluna única */
+        /* RESPONSIVIDADE MOBILE */
+        @media (max-width: 900px) {
+            .content { display: flex; flex-direction: column; padding: 10px; }
+            .card:first-child { max-height: 350px; } /* Lista menor no mobile */
             .form-grid { grid-template-columns: 1fr !important; }
-            
-            /* Ajuste específico para CEP e Bairro */
-            .form-grid[style*="grid-template-columns"] {
-                grid-template-columns: 1fr !important;
-            }
-
-            .form-body { overflow: visible; height: auto; }
-            
-            .btn { width: 100%; justify-content: center; }
             .btn-group { flex-direction: column-reverse; }
+            .btn { width: 100%; justify-content: center; }
         }
 
         /* SCROLLBAR */
@@ -114,19 +136,13 @@
 </head>
 <body>
 
-    <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('active')">
-        <i class="fas fa-bars"></i>
-    </button>
-
-    <aside class="sidebar">
-        <div class="logo">VÉRTICE</div>
-        <nav>
-            <a href="index.html" class="nav-item"><i class="fas fa-home"></i> Início</a>
-            <a href="clientes.html" class="nav-item active"><i class="fas fa-users"></i> Clientes</a>
-            <a href="estoque.html" class="nav-item"><i class="fas fa-box"></i> Estoque</a>
-            <a href="vendas.html" class="nav-item"><i class="fas fa-cash-register"></i> PDV Vendas</a>
-        </nav>
-    </aside>
+    <div class="header-top">
+        <div class="header-left">
+            <a href="menu.html" class="btn-home"><i class="fas fa-home"></i> MENU</a>
+            <h1 class="page-title">VÉRTICE BI <span class="version-tag">CORE</span></h1>
+        </div>
+        <div></div>
+    </div>
 
     <main class="content">
         
@@ -142,7 +158,7 @@
                 <div style="padding:20px; text-align:center; color:#64748b;">Carregando...</div>
             </div>
             <div style="padding:15px; border-top:1px solid var(--border);">
-                <button class="btn btn-new" style="width:100%; justify-content:center;" onclick="novoCliente()">
+                <button class="btn btn-new" onclick="novoCliente()">
                     <i class="fas fa-plus"></i> NOVO CLIENTE
                 </button>
             </div>
@@ -158,7 +174,7 @@
                 <div class="form-grid">
                     <div>
                         <label class="label">Nome Completo</label>
-                        <input type="text" id="nome" placeholder="Ex: Rodrigo Carvalho">
+                        <input type="text" id="nome" placeholder="Nome do Cliente">
                     </div>
                     <div>
                         <label class="label">CPF</label>
@@ -189,7 +205,7 @@
                     </div>
                     <div>
                         <label class="label">Rua / Logradouro</label>
-                        <input type="text" id="logradouro" placeholder="Ex: Av. Paulista">
+                        <input type="text" id="logradouro" placeholder="Endereço">
                     </div>
                 </div>
 
@@ -237,14 +253,25 @@
             </div>
         </section>
 
+        <div class="footer" style="grid-column: 1 / -1;">
+            VÉRTICE BI CORE v11.0 © Rodrigo N Carvalho 2026
+        </div>
+
     </main>
 
     <script>
+        // --- 🔒 KILL SWITCH ---
+        const DATA_LIMITE = new Date('2030-01-01'); 
+        if(new Date() > DATA_LIMITE) { document.body.innerHTML = '<div style="height:100vh;display:flex;justify-content:center;align-items:center;background:#000;color:red;flex-direction:column;"><h1>ACESSO SUSPENSO</h1><p>Contate o suporte.</p></div>'; throw new Error("Bloqueado"); }
+
         let dbClientes = [];
         let clienteSelecionadoId = null;
 
         // INICIALIZAÇÃO
         window.onload = () => {
+            const cargo = localStorage.getItem('cargoUsuario');
+            if(!cargo) window.location.href='index.html';
+
             db.collection("clientes").orderBy("nome").onSnapshot(snap => {
                 dbClientes = [];
                 snap.forEach(doc => dbClientes.push({ id: doc.id, ...doc.data() }));
@@ -291,7 +318,7 @@
             document.getElementById('email').value = c.email || '';
             document.getElementById('historico').value = c.historico || '';
             
-            // Dados de Endereço (Compatibilidade)
+            // Dados de Endereço
             document.getElementById('cep').value = c.cep || '';
             document.getElementById('logradouro').value = c.logradouro || c.endereco || '';
             document.getElementById('numero').value = c.numero || '';
@@ -302,8 +329,8 @@
 
             renderizarLista(dbClientes); 
             
-            // No mobile, rola até o formulário quando clica num cliente
-            if(window.innerWidth <= 768) {
+            // No mobile, rola até o formulário
+            if(window.innerWidth <= 900) {
                 document.querySelector('.form-body').scrollIntoView({behavior: "smooth"});
             }
         }
@@ -328,7 +355,7 @@
             document.getElementById('nome').focus();
             renderizarLista(dbClientes);
             
-            if(window.innerWidth <= 768) {
+            if(window.innerWidth <= 900) {
                 document.querySelector('.form-body').scrollIntoView({behavior: "smooth"});
             }
         }
@@ -367,7 +394,7 @@
             const cidade = document.getElementById('cidade').value;
             const uf = document.getElementById('uf').value;
 
-            // Compatibilidade com PDV antigo
+            // Endereço completo para o PDV usar de forma simplificada
             const enderecoCompleto = `${logradouro}, Nº ${numero} ${complemento ? '- ' + complemento : ''}, ${bairro}, ${cidade}-${uf}`;
 
             const dados = {
