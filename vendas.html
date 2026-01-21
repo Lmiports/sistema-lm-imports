@@ -78,7 +78,6 @@
         .btn-simular { background: #334155; color: #fff; border: 1px solid var(--border); width: 100%; padding: 8px; border-radius: 5px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .btn-simular:hover { background: #475569; }
         
-        /* Botão Pré-visualizar */
         .btn-preview { width:100%; background:transparent; border:1px solid #666; color:#aaa; padding:5px; border-radius:5px; cursor:pointer; font-size:11px; margin-bottom:10px; }
         .btn-preview:hover { border-color:#fff; color:#fff; }
 
@@ -258,7 +257,7 @@
         </div>
     </div>
     
-    <div class="marca-registrada">VÉRTICE BI v11.0 © 2026 • Rodrigo N Carvalho Ltda</div>
+    <div class="marca-registrada">VÉRTICE BI CORE v11.0 © Rodrigo N Carvalho 2026</div>
 
     <script>
         // --- 🔒 KILL SWITCH ---
@@ -301,7 +300,6 @@
 
         function carregarTaxasDoBanco() { db.collection("config_taxas").doc("geral").onSnapshot(doc => { if (doc.exists) taxasAtuais = doc.data(); else taxasAtuais = {1:4.5, 12:15.5, 18:20, 24:25}; }); }
 
-        // --- SIMULADOR ---
         function abrirSimulador() {
             let sub = 0; carrinho.forEach(i => sub += i.isBrinde ? 0 : parseFloat(i.venda||0));
             let descTroca = 0; trocas.forEach(i => descTroca += i.valor);
@@ -367,12 +365,10 @@
             alert("Copiado! (Sem taxas visíveis)");
         }
 
-        // --- PRÉ-VISUALIZAÇÃO (NOVO) ---
         function preVisualizar() {
             const cli = document.getElementById('cliente-input').value;
             if (carrinho.length === 0) return alert("Carrinho Vazio!");
             
-            // Monta os dados apenas para ver o papel, sem salvar no banco
             const cFull = dbClientes.find(c => c.nome === cli) || {nome: cli || "Consumidor"};
             let itensR = carrinho.map(i => ({nome: i.modelo || i.nomeP, desc: i.cor || '', preco: i.venda, isBrinde: i.isBrinde}));
             trocas.forEach(t => itensR.push({nome: "TROCA: " + t.modelo, desc: t.imei, preco: -t.valor, isTroca: true}));
@@ -396,12 +392,10 @@
                 data: new Date().toLocaleDateString('pt-BR'),
                 isOrcamento: false 
             };
-            
             localStorage.setItem('dadosRecibo', JSON.stringify(dados));
             window.open('orcamento.html', '_blank');
         }
 
-        // --- FINALIZAR (CORRIGIDO: NÃO LIMPA SE FOR ORÇAMENTO) ---
         async function finalizar(isOrcamento) { 
             const cli=document.getElementById('cliente-input').value; 
             const pg=document.getElementById('forma-pagamento').value; 
@@ -410,17 +404,19 @@
             if(!pg)return alert("Selecione a Forma de Pagamento!");
             
             const tipo = isOrcamento ? "ORÇAMENTO" : "VENDA";
-            const statusVenda = isOrcamento ? "ORCAMENTO" : "CONCRETIZADA"; // ETIQUETA PRO BI
+            const statusVenda = isOrcamento ? "ORCAMENTO" : "CONCRETIZADA";
 
             if(!confirm(`Confirmar ${tipo}?`)) return; 
             
             try { 
                 const b=db.batch(); 
                 
-                // SE FOR VENDA, BAIXA O ESTOQUE. SE FOR ORÇAMENTO, NÃO FAZ NADA COM ESTOQUE AGORA.
                 if (!isOrcamento) {
                     carrinho.forEach(i=>{ b.update(db.collection("estoque").doc(i.id),{status:"vendido",dataVenda:Date.now(),clienteVenda:cli,foiBrinde:i.isBrinde}); }); 
                     trocas.forEach(t=>{ const r=db.collection("estoque").doc(); b.set(r,{categoria:'celular',modelo:`${t.modelo} (TROCA ${cli})`,nomeP:`${t.modelo} (TROCA)`,marca:'Apple',cor:t.cor,gb:t.gb,imei1:t.imei,bateria:t.bateria,custo:t.valor,venda:0,status:'disponível',fornecedor:`Cliente: ${cli}`,dataEntrada:Date.now()}); }); 
+                } else {
+                    // ORÇAMENTO: LIBERA O ESTOQUE
+                    carrinho.forEach(i=>{ b.update(db.collection("estoque").doc(i.id),{status:"disponível"}); });
                 }
 
                 const snap=await db.collection("vendas").get(); 
@@ -429,7 +425,7 @@
                 b.set(db.collection("vendas").doc(),{ 
                     numeroPedido: num, 
                     tipoRegistro: tipo,
-                    status: statusVenda, // STATUS PARA FILTRAR
+                    status: statusVenda,
                     cliente: cli, 
                     data: new Date().toISOString(), 
                     itens: carrinho.map(c=>({modelo:c.modelo||c.nomeP,isBrinde:c.isBrinde})), 
@@ -442,7 +438,6 @@
                 
                 await b.commit(); 
                 
-                // HISTÓRICO NO CLIENTE
                 let itensCompraStr = carrinho.filter(i => !i.isBrinde).map(i => `${i.modelo || i.nomeP} (${formatMoeda(i.venda)})`).join(", ");
                 let itensBrindeStr = carrinho.filter(i => i.isBrinde).map(i => i.modelo || i.nomeP).join(", ");
                 let itensTrocaStr = trocas.map(t => `${t.modelo} (${formatMoeda(t.valor)})`).join(", ");
@@ -466,15 +461,11 @@
 
                 gerarDocumento(isOrcamento, num, cli, pg);
                 
-                // LÓGICA DE LIMPEZA:
                 if (!isOrcamento) {
-                    // SE VENDA: Limpa tudo pois já baixou estoque
                     limparRascunho(); 
                     window.location.reload(); 
                 } else {
-                    // SE ORÇAMENTO: Mantém na tela para possível conversão.
-                    // Não recarrega a página.
-                    alert("Orçamento salvo! A tela foi mantida caso o cliente decida fechar agora. Se ele sair, clique em 'LIMPAR TELA'.");
+                    alert("Orçamento salvo! A tela continua preenchida caso queira fechar a venda agora. Se o cliente sair, clique em 'LIMPAR TELA'.");
                 }
 
             } catch(e){alert("Erro: "+e.message);} 
@@ -488,6 +479,7 @@
             if (parcelasSelecionadas > 0 && totalVendaGlobal > 0) { const valorParcela = totalVendaGlobal / parcelasSelecionadas; textoParcela = `(${parcelasSelecionadas}x de ${valorParcela.toLocaleString('pt-br',{style:'currency', currency:'BRL'})})`; }
             
             const dados={ 
+                titulo: isOrcamento ? "ORÇAMENTO" : "RECIBO DE VENDA",
                 isOrcamento: isOrcamento,
                 numeroPedido: num, 
                 cliente: cFull.nome, 
@@ -501,7 +493,6 @@
                 textoParcelas: textoParcela, 
                 data: new Date().toLocaleDateString('pt-BR')
             };
-            
             localStorage.setItem('dadosRecibo',JSON.stringify(dados)); 
             window.open('orcamento.html','_blank');
         }
