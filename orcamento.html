@@ -14,73 +14,56 @@
         :root { --bg: #020617; --card: #0f172a; --accent: #00e0ff; --text: #f8fafc; --border: rgba(255, 255, 255, 0.1); --success: #22c55e; --danger: #ef4444; --warning: #eab308; }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; min-height: 100vh; display: flex; flex-direction: column; box-sizing: border-box; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-        .header h2 { margin: 0; color: var(--accent); letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,224,255,0.3); }
-        .version-tag { font-size: 10px; color: #000; background: var(--accent); padding: 2px 6px; border-radius: 4px; margin-left: 10px; font-weight: 900; letter-spacing: 1px; }
-        .btn-voltar { color: #fff; text-decoration: none; font-size: 20px; padding: 10px; border-radius: 5px; transition: 0.3s; }
-        .btn-voltar:hover { background: rgba(255,255,255,0.1); color: var(--accent); }
-        .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; flex: 1; overflow: visible; }
+        .header h2 { margin: 0; color: var(--accent); letter-spacing: 2px; }
+        .version-tag { font-size: 10px; background: var(--accent); color: #000; padding: 2px 6px; border-radius: 4px; font-weight: 900; margin-left: 10px; }
+        .btn-voltar { color: #fff; text-decoration: none; font-size: 20px; padding: 10px; transition: 0.3s; }
+        .btn-voltar:hover { color: var(--accent); }
+        .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; flex: 1; }
         .products-section { display: flex; flex-direction: column; gap: 15px; }
         .search-box { display: flex; gap: 10px; }
         .search-box input, .search-box select { width: 100%; padding: 12px; background: var(--card); border: 1px solid var(--border); color: #fff; border-radius: 8px; outline: none; }
-        .products-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; max-height: 75vh; overflow-y: auto; padding-right: 5px; }
-        .product-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 15px; cursor: pointer; transition: 0.2s; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
-        .product-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,224,255,0.1); }
-        .product-card.reserved { opacity: 0.6; border-color: var(--warning); cursor: not-allowed; filter: grayscale(0.5); }
-        .reserved-tag { position: absolute; top: 10px; right: 10px; background: var(--warning); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
-        .prod-cat-tag { font-size: 10px; text-transform: uppercase; background: rgba(0, 224, 255, 0.1); color: var(--accent); padding: 4px 8px; border-radius: 4px; width: fit-content; margin-bottom: 5px; font-weight: bold; }
+        .products-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; max-height: 75vh; overflow-y: auto; }
+        .product-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 15px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between; }
+        .product-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+        .product-card.reserved { opacity: 0.6; border-color: var(--warning); filter: grayscale(0.5); pointer-events: none; }
+        .prod-cat-tag { font-size: 10px; background: rgba(0,224,255,0.1); color: var(--accent); padding: 4px 8px; border-radius: 4px; width: fit-content; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
         .prod-name { font-weight: bold; margin-bottom: 5px; font-size: 14px; }
         .prod-detail { font-size: 11px; color: #94a3b8; margin-bottom: 5px; }
         .prod-price { color: var(--success); font-weight: bold; font-size: 16px; margin-top: auto; }
         .cart-section { background: var(--card); border-radius: 15px; border: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; height: fit-content; }
         .client-area { margin-bottom: 15px; }
         .client-row { display: flex; gap: 5px; }
-        .client-input-wrapper { width: 100%; position: relative; }
-        .client-row input[list] { width: 100%; padding: 10px; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 5px; box-sizing: border-box; }
-        .btn-add-client { background: var(--success); color: #000; border: none; width: 40px; border-radius: 5px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+        .client-input-wrapper { width: 100%; }
+        .client-row input { width: 100%; padding: 10px; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 5px; box-sizing: border-box; }
+        .btn-add-client { background: var(--success); color: #000; border: none; width: 40px; border-radius: 5px; cursor: pointer; font-size: 18px; }
         .cart-items { max-height: 300px; overflow-y: auto; margin-bottom: 15px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 0; }
         .cart-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin-bottom: 8px; }
         .cart-item.brinde { border: 1px solid var(--accent); background: rgba(0, 224, 255, 0.1); }
         .item-actions { display: flex; gap: 10px; align-items: center; }
-        .btn-icon { cursor: pointer; padding: 5px; font-size: 14px; transition: 0.2s; }
+        .btn-icon { cursor: pointer; padding: 5px; }
         .btn-remove { color: var(--danger); }
         .btn-gift { color: #94a3b8; }
         .btn-gift.active { color: var(--accent); text-shadow: 0 0 5px var(--accent); }
-        .trade-in-box { background: rgba(234, 179, 8, 0.1); border: 1px solid var(--warning); padding: 10px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .trade-in-text { font-size: 12px; color: var(--warning); }
+        .trade-in-box { background: rgba(234, 179, 8, 0.1); border: 1px solid var(--warning); padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .totals { margin-bottom: 15px; font-size: 14px; }
-        .row { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: center;}
+        .row { display: flex; justify-content: space-between; margin-bottom: 5px; }
         .total-final { font-size: 24px; font-weight: 900; color: var(--success); border-top: 1px solid var(--border); padding-top: 10px; }
-        .input-desconto { width: 100px !important; padding: 5px !important; text-align: right; background: #0f172a; border: 1px solid #334155; color: var(--danger); font-weight: bold; }
-        .parcela-info { text-align: right; color: var(--accent); font-size: 12px; font-weight: bold; margin-top: -5px; margin-bottom: 15px; display: none; text-shadow: 0 0 5px rgba(0, 224, 255, 0.5); border-bottom: 1px dashed var(--accent); padding-bottom: 5px; }
+        .input-desconto { width: 100px; padding: 5px; text-align: right; background: #0f172a; border: 1px solid #334155; color: var(--danger); font-weight: bold; }
+        .parcela-info { text-align: right; color: var(--accent); font-size: 12px; font-weight: bold; display: none; padding-bottom: 5px; border-bottom: 1px dashed var(--accent); }
         .action-buttons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .btn-vender { background: var(--success); color: #000; padding: 15px; width: 100%; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.3s; }
-        .btn-orcamento { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.3s; }
-        .btn-vender:hover { transform: scale(1.02); filter: brightness(1.1); }
-        .btn-orcamento:hover { background: rgba(0,224,255,0.1); }
-        .btn-troca { background: transparent; border: 1px solid var(--warning); color: var(--warning); padding: 10px; width: 100%; border-radius: 8px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-vender { background: var(--success); color: #000; padding: 15px; width: 100%; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-orcamento { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-troca { background: transparent; border: 1px solid var(--warning); color: var(--warning); padding: 10px; width: 100%; border-radius: 8px; margin-bottom: 10px; cursor: pointer; }
         .btn-limpar { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px; width: 100%; border-radius: 5px; margin-bottom: 10px; cursor: pointer; font-size: 11px; }
-        .btn-simular { background: #334155; color: #fff; border: 1px solid var(--border); width: 100%; padding: 8px; border-radius: 5px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .btn-simular:hover { background: #475569; }
+        .btn-simular { background: #334155; color: #fff; border: 1px solid var(--border); width: 100%; padding: 8px; border-radius: 5px; margin-bottom: 10px; cursor: pointer; }
         .btn-preview { width:100%; background:transparent; border:1px solid #666; color:#aaa; padding:5px; border-radius:5px; cursor:pointer; font-size:11px; margin-bottom:10px; }
-        .btn-preview:hover { border-color:#fff; color:#fff; }
-        .sim-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-        .sim-table th { text-align: left; color: var(--accent); padding: 5px; border-bottom: 1px solid var(--border); }
-        .sim-table td { padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .sim-row:hover { background: rgba(255,255,255,0.05); cursor: pointer; }
-        .sim-total { color: var(--success); font-weight: bold; }
-        .taxas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 300px; overflow-y: auto; padding-right: 5px; }
-        .taxa-item { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 4px; }
-        .taxa-item label { width: 40px; font-size: 12px; color: #94a3b8; }
-        .taxa-item input { background: transparent; border: none; border-bottom: 1px solid var(--border); color: #fff; width: 100%; text-align: right; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal { background: var(--card); padding: 25px; border-radius: 15px; width: 400px; max-width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--accent); }
-        .modal input, .modal select { width: 100%; padding: 10px; margin: 5px 0; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 5px; box-sizing: border-box; }
-        .modal h3 { margin-top: 0; color: var(--accent); }
+        .modal input, .modal select { width: 100%; padding: 10px; margin: 5px 0; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 5px; }
         .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .btn-cancel { flex: 1; padding: 10px; background: #334155; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
         .btn-confirm { flex: 1; padding: 10px; background: var(--success); color: #000; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .btn-dashboard-link { display: none; text-decoration: none; background: var(--accent); color: #000; padding: 5px 15px; border-radius: 5px; font-weight: bold; font-size: 12px; align-items: center; gap: 5px; box-shadow: 0 0 10px rgba(0,224,255,0.3); }
-        .btn-dashboard-link:hover { background: #fff; transform: scale(1.05); }
+        .btn-dashboard-link { display: none; text-decoration: none; background: var(--accent); color: #000; padding: 5px 15px; border-radius: 5px; font-weight: bold; font-size: 12px; align-items: center; gap: 5px; }
         .marca-registrada { position: fixed; bottom: 5px; right: 10px; font-size: 10px; color: rgba(255, 255, 255, 0.2); pointer-events: none; z-index: 999; }
         @media (max-width: 800px) { .main-grid { grid-template-columns: 1fr; display: flex; flex-direction: column; } .products-list { max-height: 300px; } .cart-section { margin-top: 20px; margin-bottom: 50px; } body { height: auto; display: block; } }
     </style>
@@ -99,7 +82,7 @@
     <div class="main-grid">
         <div class="products-section">
             <div class="search-box">
-                <input type="text" id="busca" placeholder="Buscar produto..." onkeyup="filtrarProdutos()">
+                <input type="text" id="busca" placeholder="Buscar..." onkeyup="filtrarProdutos()">
                 <select id="filtro-cat" onchange="filtrarProdutos()" style="width: 150px;">
                     <option value="">Todas</option>
                     <option value="celular">📱 Celulares</option>
@@ -109,9 +92,7 @@
                 </select>
             </div>
             <div class="products-list" id="lista-produtos">
-                <div style="padding:20px; text-align:center; color:#888;">
-                    <i class="fas fa-circle-notch fa-spin"></i> Carregando Estoque...
-                </div>
+                <div style="padding:20px; text-align:center; color:#888;"><i class="fas fa-circle-notch fa-spin"></i> Carregando...</div>
             </div>
         </div>
 
@@ -123,44 +104,27 @@
                         <input list="lista-clientes-db" id="cliente-input" placeholder="Buscar..." autocomplete="off" onchange="salvarRascunho()">
                         <datalist id="lista-clientes-db"></datalist>
                     </div>
-                    <button class="btn-add-client" onclick="abrirModalCliente()">+</button>
+                    <button class="btn-add-client" onclick="document.getElementById('modal-cliente').style.display='flex'">+</button>
                 </div>
             </div>
 
-            <div class="cart-items" id="carrinho-lista">
-                <div style="text-align: center; color: #64748b; margin-top: 20px;">Carrinho vazio</div>
-            </div>
-
+            <div class="cart-items" id="carrinho-lista"><div style="text-align: center; color: #64748b; margin-top: 20px;">Carrinho vazio</div></div>
             <button class="btn-limpar" onclick="cancelarVendaTotal()"><i class="fas fa-trash-alt"></i> LIMPAR TELA / DESTRAVAR</button>
-
             <div id="lista-trocas"></div>
 
             <div class="totals">
                 <div class="row"><span>Subtotal:</span><span id="valor-subtotal">R$ 0,00</span></div>
-                <div class="row" style="color: var(--danger);">
-                    <span>Desconto (R$):</span>
-                    <input type="number" class="input-desconto" id="valor-desconto-manual" value="" placeholder="0,00" oninput="atualizarTotais()">
-                </div>
-                <div class="row" style="color: var(--accent); display:none;" id="row-taxas">
-                    <span>Taxa Maquininha:</span>
-                    <span id="valor-taxas">+ R$ 0,00</span>
-                </div>
+                <div class="row" style="color: var(--danger);"><span>Desconto (R$):</span><input type="number" class="input-desconto" id="valor-desconto-manual" value="" placeholder="0,00" oninput="atualizarTotais()"></div>
+                <div class="row" style="color: var(--accent); display:none;" id="row-taxas"><span>Taxa Maquininha:</span><span id="valor-taxas">+ R$ 0,00</span></div>
                 <div class="row" style="color: var(--warning);"><span>Troca/Abatimento:</span><span id="valor-abatimento">- R$ 0,00</span></div>
                 <div class="row total-final"><span>TOTAL:</span><span id="valor-total">R$ 0,00</span></div>
                 <div id="detalhe-parcelas" class="parcela-info"></div>
             </div>
 
             <button class="btn-simular" onclick="abrirSimulador()"><i class="fas fa-calculator"></i> Simular Parcelas</button>
-
-            <div style="margin-bottom: 10px;">
-                <label style="font-size: 12px;">Pagamento:</label>
-                <select id="forma-pagamento" style="width: 100%; padding: 8px; background: #1e293b; color: #fff; border: 1px solid var(--border); border-radius: 5px;" onchange="salvarRascunho()">
-                </select>
-            </div>
-
-            <button class="btn-troca" onclick="abrirModalTroca()"><i class="fas fa-exchange-alt"></i> Entrada de Troca</button>
-            
-            <button class="btn-preview" onclick="preVisualizar()"><i class="fas fa-eye"></i> Conferir Recibo (Sem Salvar)</button>
+            <div style="margin-bottom: 10px;"><label style="font-size: 12px;">Pagamento:</label><select id="forma-pagamento" style="width: 100%; padding: 8px; background: #1e293b; color: #fff; border: 1px solid var(--border); border-radius: 5px;" onchange="salvarRascunho()"></select></div>
+            <button class="btn-troca" onclick="document.getElementById('modal-troca').style.display='flex'"><i class="fas fa-exchange-alt"></i> Entrada de Troca</button>
+            <button class="btn-preview" onclick="preVisualizar()"><i class="fas fa-eye"></i> Visualizar Recibo (Sem Salvar)</button>
 
             <div class="action-buttons-grid">
                 <button class="btn-orcamento" onclick="finalizar(true)">ORÇAMENTO</button>
@@ -169,341 +133,124 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="modal-simulador">
-        <div class="modal">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3>Simulação</h3>
-                <div style="display:flex; gap:10px;">
-                    <button onclick="toggleTaxasVisuais()" title="Ocultar/Mostrar Taxas na Tela" style="background:none; border:none; color:#fff; cursor:pointer; font-size:18px;"><i class="fas fa-eye" id="icon-eye"></i></button>
-                    <button onclick="abrirConfigTaxas()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:18px;"><i class="fas fa-cog"></i></button>
-                </div>
-            </div>
-            <table class="sim-table">
-                <thead><tr><th>Parc.</th><th>Valor Parc.</th><th>Total</th></tr></thead>
-                <tbody id="lista-simulacao"></tbody>
-            </table>
-            <button onclick="copiarOfertaZap()" style="margin-top:15px; width:100%; background:#25D366; color:#fff; padding:10px; border:none; border-radius:5px; cursor:pointer; font-weight:bold;"><i class="fab fa-whatsapp"></i> Copiar (Sem Taxas)</button>
-            <button onclick="document.getElementById('modal-simulador').style.display='none'" class="btn-cancel" style="margin-top:5px; width:100%;">Fechar</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="modal-config-taxas">
-        <div class="modal">
-            <h3>Configurar Taxas (%)</h3>
-            <div class="taxas-grid" id="grid-inputs-taxas"></div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button onclick="document.getElementById('modal-config-taxas').style.display='none'" class="btn-cancel">Cancelar</button>
-                <button onclick="salvarConfigTaxas()" class="btn-confirm">Salvar</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="modal-troca">
-        <div class="modal" style="border-color: var(--warning);">
-            <h3 style="color: var(--warning);">Entrada de Troca</h3>
-            <label style="font-size: 11px; color: #999;">Modelo:</label><input list="dl-modelos-list" id="troca-modelo" placeholder="Selecione..."><datalist id="dl-modelos-list"></datalist>
-            <div class="modal-grid"><div><label style="font-size: 11px; color: #999;">GB:</label><select id="troca-gb"><option value="">-</option><option value="64GB">64GB</option><option value="128GB">128GB</option><option value="256GB">256GB</option><option value="512GB">512GB</option></select></div><div><label style="font-size: 11px; color: #999;">Cor:</label><input list="dl-cores-list" id="troca-cor" placeholder="Cor"><datalist id="dl-cores-list"></datalist></div></div>
-            <label style="font-size: 11px; color: #999;">IMEI:</label><input type="text" id="troca-imei" placeholder="15 dígitos" maxlength="15">
-            <div class="modal-grid"><div><label style="font-size: 11px; color: #999;">Valor (R$):</label><input type="number" id="troca-valor"></div><div><label style="font-size: 11px; color: #999;">Bateria (%):</label><input type="number" id="troca-bateria"></div></div>
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button onclick="fecharModalTroca()" class="btn-cancel">Cancelar</button>
-                <button onclick="confirmarTroca()" class="btn-confirm" style="background: var(--warning);">Confirmar</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="modal-cliente">
-        <div class="modal">
-            <h3>Novo Cliente</h3>
-            <input type="text" id="novo-nome" placeholder="Nome Completo">
-            <div class="modal-grid"><input type="text" id="novo-zap" placeholder="Zap"><input type="text" id="novo-cpf" placeholder="CPF"></div>
-            <input type="email" id="novo-email" placeholder="Email">
-            <div class="modal-grid"><input type="text" id="novo-cep" placeholder="CEP" onblur="buscarCep()"><input type="text" id="novo-numero" placeholder="Nº"></div>
-            <input type="text" id="novo-endereco" placeholder="Endereço">
-            <div class="modal-grid"><input type="text" id="novo-bairro" placeholder="Bairro"><input type="text" id="novo-cidade" placeholder="Cidade"></div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button onclick="fecharModalCliente()" class="btn-cancel">Cancelar</button>
-                <button onclick="salvarNovoCliente()" class="btn-confirm">Salvar</button>
-            </div>
-        </div>
-    </div>
+    <div class="modal-overlay" id="modal-simulador"><div class="modal"><div style="display:flex; justify-content:space-between;"><h3>Simulação</h3><div><button onclick="toggleTaxasVisuais()" style="background:none;border:none;color:#fff;font-size:18px;margin-right:10px;"><i class="fas fa-eye" id="icon-eye"></i></button><button onclick="abrirConfigTaxas()" style="background:none;border:none;color:var(--accent);font-size:18px;"><i class="fas fa-cog"></i></button></div></div><table class="sim-table"><thead><tr><th>Parc.</th><th>Valor</th><th>Total</th></tr></thead><tbody id="lista-simulacao"></tbody></table><button onclick="copiarOfertaZap()" style="margin-top:15px;width:100%;background:#25D366;color:#fff;padding:10px;border:none;border-radius:5px;font-weight:bold;">Copiar</button><button onclick="document.getElementById('modal-simulador').style.display='none'" class="btn-cancel" style="margin-top:5px;width:100%;">Fechar</button></div></div>
+    <div class="modal-overlay" id="modal-config-taxas"><div class="modal"><h3>Configurar Taxas</h3><div class="taxas-grid" id="grid-inputs-taxas"></div><div style="display:flex;gap:10px;margin-top:20px;"><button onclick="document.getElementById('modal-config-taxas').style.display='none'" class="btn-cancel">Cancelar</button><button onclick="salvarConfigTaxas()" class="btn-confirm">Salvar</button></div></div></div>
+    <div class="modal-overlay" id="modal-troca"><div class="modal" style="border-color:var(--warning);"><h3 style="color:var(--warning);">Troca</h3><label style="font-size:11px;color:#999;">Modelo:</label><input list="dl-modelos-list" id="troca-modelo"><datalist id="dl-modelos-list"></datalist><div class="modal-grid"><div><label style="font-size:11px;color:#999;">GB:</label><select id="troca-gb"><option value="">-</option><option value="64GB">64GB</option><option value="128GB">128GB</option><option value="256GB">256GB</option><option value="512GB">512GB</option></select></div><div><label style="font-size:11px;color:#999;">Cor:</label><input list="dl-cores-list" id="troca-cor"><datalist id="dl-cores-list"></datalist></div></div><label style="font-size:11px;color:#999;">IMEI:</label><input type="text" id="troca-imei" maxlength="15"><div class="modal-grid"><div><label style="font-size:11px;color:#999;">Valor:</label><input type="number" id="troca-valor"></div><div><label style="font-size:11px;color:#999;">Bat %:</label><input type="number" id="troca-bateria"></div></div><div style="display:flex;gap:10px;margin-top:10px;"><button onclick="document.getElementById('modal-troca').style.display='none'" class="btn-cancel">Cancelar</button><button onclick="confirmarTroca()" class="btn-confirm" style="background:var(--warning);">Confirmar</button></div></div></div>
+    <div class="modal-overlay" id="modal-cliente"><div class="modal"><h3>Novo Cliente</h3><input type="text" id="novo-nome" placeholder="Nome"><div class="modal-grid"><input type="text" id="novo-zap" placeholder="Zap"><input type="text" id="novo-cpf" placeholder="CPF"></div><input type="email" id="novo-email" placeholder="Email"><div class="modal-grid"><input type="text" id="novo-cep" placeholder="CEP" onblur="buscarCep()"><input type="text" id="novo-numero" placeholder="Nº"></div><input type="text" id="novo-endereco" placeholder="Endereço"><div class="modal-grid"><input type="text" id="novo-bairro" placeholder="Bairro"><input type="text" id="novo-cidade" placeholder="Cidade"></div><div style="display:flex;gap:10px;margin-top:20px;"><button onclick="document.getElementById('modal-cliente').style.display='none'" class="btn-cancel">Cancelar</button><button onclick="salvarNovoCliente()" class="btn-confirm">Salvar</button></div></div></div>
     
     <div class="marca-registrada">VÉRTICE BI CORE v11.0 © Rodrigo N Carvalho 2026</div>
 
     <script>
-        // --- 🔒 KILL SWITCH ---
-        const DATA_LIMITE = new Date('2030-01-01'); 
-        if(new Date() > DATA_LIMITE) { document.body.innerHTML = '<div style="height:100vh;display:flex;justify-content:center;align-items:center;background:#000;color:red;flex-direction:column;"><h1>ACESSO SUSPENSO</h1><p>Contate o suporte.</p></div>'; throw new Error("Bloqueado"); }
+        const DATA_LIMITE = new Date('2030-01-01'); if(new Date()>DATA_LIMITE)throw new Error("Bloqueado");
+        let dbEstoque=[],dbClientes=[],carrinho=[],trocas=[],totalVendaGlobal=0,valorTaxaAplicada=0,parcelasSelecionadas=0,taxasAtuais={},mostrarTaxasNaTela=true;
 
-        let dbEstoque = [], dbClientes = [], carrinho = [], trocas = [];
-        let totalVendaGlobal = 0, valorTaxaAplicada = 0, parcelasSelecionadas = 0;
-        let taxasAtuais = {};
-        let mostrarTaxasNaTela = true;
-
-        window.onload = function() {
-            const cargo = localStorage.getItem('cargoUsuario');
-            const btnVoltar = document.getElementById('btn-voltar-main');
-            const btnBI = document.getElementById('btn-bi-admin');
-
-            if (cargo === 'admin') { btnVoltar.href = "menu.html"; btnBI.style.display = 'inline-flex'; } 
-            else { btnVoltar.href = "index.html"; btnBI.style.display = 'none'; }
-
-            carregarOpcoesPagamento();
-            restaurarRascunho();
-            carregarTaxasDoBanco();
-            
-            const carregarEstoque = (colecao) => {
-                db.collection(colecao).onSnapshot(snap => { 
-                    if(snap.empty) return;
-                    dbEstoque = []; 
-                    snap.forEach(doc => {
-                        const data = doc.data();
-                        if (!data.status || data.status.toLowerCase() !== "vendido") { dbEstoque.push({ id: doc.id, ...data }); }
-                    }); 
-                    renderizarProdutos(); 
-                }, err => console.log("Erro estoque"));
-            };
-            carregarEstoque("estoque"); carregarEstoque("Estoque");
-
-            db.collection("clientes").orderBy("nome").onSnapshot(snap => { dbClientes = []; snap.forEach(doc => dbClientes.push({ id: doc.id, ...doc.data() })); renderizarDatalistClientes(); });
+        window.onload=function(){
+            const cargo=localStorage.getItem('cargoUsuario');
+            const btnVoltar=document.getElementById('btn-voltar-main');
+            const btnBI=document.getElementById('btn-bi-admin');
+            if(cargo==='admin'){btnVoltar.href="menu.html";btnBI.style.display='inline-flex';}else{btnVoltar.href="index.html";btnBI.style.display='none';}
+            carregarOpcoesPagamento(); restaurarRascunho(); carregarTaxasDoBanco();
+            db.collection("estoque").onSnapshot(snap=>{if(snap.empty)return;dbEstoque=[];snap.forEach(doc=>{const data=doc.data();if(!data.status||data.status.toLowerCase()!=="vendido")dbEstoque.push({id:doc.id,...data});});renderizarProdutos();});
+            db.collection("clientes").orderBy("nome").onSnapshot(snap=>{dbClientes=[];snap.forEach(doc=>dbClientes.push({id:doc.id,...doc.data()}));renderizarDatalistClientes();});
             carregarListasAuxiliares();
         };
 
-        function carregarTaxasDoBanco() { db.collection("config_taxas").doc("geral").onSnapshot(doc => { if (doc.exists) taxasAtuais = doc.data(); else taxasAtuais = {1:4.5, 12:15.5, 18:20, 24:25}; }); }
-
-        function abrirSimulador() {
-            let sub = 0; carrinho.forEach(i => sub += i.isBrinde ? 0 : parseFloat(i.venda||0));
-            let descTroca = 0; trocas.forEach(i => descTroca += i.valor);
-            let descManual = parseFloat(document.getElementById('valor-desconto-manual').value) || 0;
-            const valorBase = sub - descTroca - descManual;
-
-            if (valorBase <= 0) return alert("Adicione itens primeiro.");
-
-            renderizarTabelaSimulacao(valorBase); 
-            document.getElementById('modal-simulador').setAttribute('data-base', valorBase);
-            document.getElementById('modal-simulador').style.display = 'flex';
-        }
-
-        function toggleTaxasVisuais() {
-            mostrarTaxasNaTela = !mostrarTaxasNaTela;
-            const icon = document.getElementById('icon-eye');
-            icon.className = mostrarTaxasNaTela ? "fas fa-eye" : "fas fa-eye-slash";
-            const valBase = parseFloat(document.getElementById('modal-simulador').getAttribute('data-base'));
-            renderizarTabelaSimulacao(valBase);
-        }
-
-        function renderizarTabelaSimulacao(valorBase) {
-            const tbody = document.getElementById('lista-simulacao');
-            tbody.innerHTML = "";
-            let textoCopy = `*SIMULAÇÃO*\nValor: ${valorBase.toLocaleString('pt-br',{style:'currency', currency:'BRL'})}\n\n`;
-
-            for (let i = 1; i <= 24; i++) {
-                let taxa = parseFloat(taxasAtuais[i]) || (4 + (i*1.2));
-                const valorComJuros = valorBase * (1 + (taxa / 100));
-                const valorParcela = valorComJuros / i;
-                const diferencaJuros = valorComJuros - valorBase;
-
-                const tr = document.createElement('tr');
-                tr.className = "sim-row";
-                tr.onclick = () => aplicarParcelamento(i, diferencaJuros);
-                
-                let htmlTaxa = mostrarTaxasNaTela ? `<small style="color:#666">(${taxa.toFixed(2)}%)</small>` : '';
-                tr.innerHTML = `<td><strong>${i}x</strong> ${htmlTaxa}</td><td>R$ ${valorParcela.toFixed(2)}</td><td class="sim-total">R$ ${valorComJuros.toFixed(2)}</td>`;
-                tbody.appendChild(tr);
-
-                textoCopy += `${i}x de ${valorParcela.toLocaleString('pt-br',{style:'currency', currency:'BRL'})} (Total: ${valorComJuros.toLocaleString('pt-br',{style:'currency', currency:'BRL'})})\n`;
-            }
-            document.getElementById('modal-simulador').setAttribute('data-copy', textoCopy);
-        }
-
-        function aplicarParcelamento(parcelas, valorJuros) { 
-            valorTaxaAplicada = valorJuros; 
-            parcelasSelecionadas = parcelas; 
-            let sel = document.getElementById('forma-pagamento');
-            let novaOpcao = `Crédito ${parcelas}x`;
-            let existe = false;
-            for(let i=0; i<sel.options.length; i++) { if(sel.options[i].value === novaOpcao) existe = true; }
-            if(!existe) sel.innerHTML += `<option value="${novaOpcao}">${novaOpcao} (Simulado)</option>`;
-            sel.value = novaOpcao;
-            document.getElementById('modal-simulador').style.display = 'none'; 
-            atualizarTotais(); 
-            salvarRascunho(); 
-        }
-
-        function copiarOfertaZap() {
-            const txt = document.getElementById('modal-simulador').getAttribute('data-copy');
-            navigator.clipboard.writeText(txt);
-            alert("Copiado! (Sem taxas visíveis)");
-        }
-
-        // --- PRE-VISUALIZAR: TÍTULO "RECIBO DE VENDA" ---
-        function preVisualizar() {
+        function preVisualizar(){
             const cli = document.getElementById('cliente-input').value;
-            if (carrinho.length === 0) return alert("Carrinho Vazio!");
-            
-            const cFull = dbClientes.find(c => c.nome === cli) || {nome: cli || "Consumidor"};
-            let itensR = carrinho.map(i => ({nome: i.modelo || i.nomeP, desc: i.cor || '', preco: i.venda, isBrinde: i.isBrinde}));
-            trocas.forEach(t => itensR.push({nome: "TROCA: " + t.modelo, desc: t.imei, preco: -t.valor, isTroca: true}));
-            let textoParcela = "";
-            if (parcelasSelecionadas > 0 && totalVendaGlobal > 0) {
-                const valorParcela = totalVendaGlobal / parcelasSelecionadas;
-                textoParcela = `(${parcelasSelecionadas}x de ${valorParcela.toLocaleString('pt-br',{style:'currency', currency:'BRL'})})`;
-            }
+            if(carrinho.length===0) return alert("Carrinho Vazio!");
+            const dados = montarDadosDoc(cli, false); // False = Título Recibo de Venda
+            dados.titulo = "RECIBO DE VENDA"; // Força título
+            dados.autoPrint = false;
+            localStorage.setItem('dadosRecibo', JSON.stringify(dados));
+            window.open('orcamento.html','_blank');
+        }
 
-            const dados = {
-                titulo: "RECIBO DE VENDA", // O segredo está aqui: Título fixo
-                numeroPedido: "PREVIEW",
-                cliente: cFull.nome,
-                cpf: cFull.cpf||'', tel: cFull.whats||'', endereco: cFull.logradouro||'',
+        async function finalizar(isOrcamento){
+            const cli=document.getElementById('cliente-input').value;
+            const pg=document.getElementById('forma-pagamento').value;
+            if(carrinho.length===0)return alert("Vazio!");
+            if(!cli)return alert("Selecione Cliente");
+            
+            // SE FOR ORÇAMENTO, NÃO VALIDA PAGAMENTO
+            if(!isOrcamento && !pg) return alert("Selecione Pagamento");
+
+            const tipo = isOrcamento ? "ORÇAMENTO" : "VENDA";
+            if(!confirm(`Confirmar ${tipo}?`)) return;
+
+            try {
+                const b = db.batch();
+                if(!isOrcamento) {
+                    carrinho.forEach(i=>{b.update(db.collection("estoque").doc(i.id),{status:"vendido",dataVenda:Date.now(),clienteVenda:cli});});
+                    trocas.forEach(t=>{const r=db.collection("estoque").doc();b.set(r,{categoria:'celular',modelo:`${t.modelo} (TROCA)`,venda:0,status:'disponível',custo:t.valor});});
+                } else {
+                    carrinho.forEach(i=>{b.update(db.collection("estoque").doc(i.id),{status:"disponível"});});
+                }
+
+                // Salva Venda
+                const snap = await db.collection("vendas").get();
+                const num = String(snap.size+1).padStart(4,'0');
+                b.set(db.collection("vendas").doc(),{numeroPedido:num, tipoRegistro:tipo, status: isOrcamento?"ORCAMENTO":"CONCRETIZADA", cliente:cli, total:totalVendaGlobal, data:new Date().toISOString()});
+                await b.commit();
+
+                // Histórico Cliente
+                let txt = `${new Date().toLocaleDateString('pt-BR')} - ${isOrcamento?"Orçamento":"Compra"}: R$ ${totalVendaGlobal.toFixed(2)}`;
+                db.collection("clientes").where("nome","==",cli).get().then(qs=>{qs.forEach(doc=>{db.collection("clientes").doc(doc.id).update({historico: txt+"\n"+(doc.data().historico||"")})})});
+
+                const dados = montarDadosDoc(cli, isOrcamento);
+                dados.numeroPedido = num;
+                dados.autoPrint = !isOrcamento; // Imprime se for venda
+                localStorage.setItem('dadosRecibo', JSON.stringify(dados));
+                window.open('orcamento.html','_blank');
+
+                if(!isOrcamento) { limparRascunho(); window.location.reload(); }
+                else { alert("Orçamento salvo! Tela mantida."); }
+
+            } catch(e) { alert("Erro: "+e.message); }
+        }
+
+        function montarDadosDoc(cli, isOrcamento){
+            const cFull = dbClientes.find(c=>c.nome===cli)||{nome:cli};
+            let itensR = carrinho.map(i=>({nome:i.modelo||i.nomeP,desc:i.cor||'',preco:i.venda,isBrinde:i.isBrinde}));
+            trocas.forEach(t=>itensR.push({nome:"TROCA: "+t.modelo,desc:t.imei,preco:-t.valor,isTroca:true}));
+            let textoParcela = "";
+            if(parcelasSelecionadas>0) textoParcela = `(${parcelasSelecionadas}x)`;
+            
+            return {
+                titulo: isOrcamento ? "ORÇAMENTO" : "RECIBO DE VENDA",
+                isOrcamento: isOrcamento,
+                numeroPedido: "0000", // Será substituido
+                cliente: cFull.nome, cpf: cFull.cpf||'', tel: cFull.whats||'', endereco: cFull.logradouro||'',
                 itens: itensR,
                 descontoManual: parseFloat(document.getElementById('valor-desconto-manual').value)||0,
                 taxaMaquininha: valorTaxaAplicada,
                 total: totalVendaGlobal,
                 pagamento: document.getElementById('forma-pagamento').value,
                 textoParcelas: textoParcela,
-                data: new Date().toLocaleDateString('pt-BR'),
-                isOrcamento: false,
-                autoPrint: false // Preview não imprime sozinho
+                data: new Date().toLocaleDateString('pt-BR')
             };
-            localStorage.setItem('dadosRecibo', JSON.stringify(dados));
-            window.open('orcamento.html', '_blank');
         }
 
-        async function finalizar(isOrcamento) { 
-            const cli=document.getElementById('cliente-input').value; 
-            const pg=document.getElementById('forma-pagamento').value; 
-            if(carrinho.length===0)return alert("Vazio!"); 
-            if(!cli)return alert("Cliente?"); 
-            if(!pg)return alert("Selecione a Forma de Pagamento!");
-            
-            const tipo = isOrcamento ? "ORÇAMENTO" : "VENDA";
-            const statusVenda = isOrcamento ? "ORCAMENTO" : "CONCRETIZADA";
-
-            if(!confirm(`Confirmar ${tipo}?`)) return; 
-            
-            try { 
-                const b=db.batch(); 
-                
-                if (!isOrcamento) {
-                    carrinho.forEach(i=>{ b.update(db.collection("estoque").doc(i.id),{status:"vendido",dataVenda:Date.now(),clienteVenda:cli,foiBrinde:i.isBrinde}); }); 
-                    trocas.forEach(t=>{ const r=db.collection("estoque").doc(); b.set(r,{categoria:'celular',modelo:`${t.modelo} (TROCA ${cli})`,nomeP:`${t.modelo} (TROCA)`,marca:'Apple',cor:t.cor,gb:t.gb,imei1:t.imei,bateria:t.bateria,custo:t.valor,venda:0,status:'disponível',fornecedor:`Cliente: ${cli}`,dataEntrada:Date.now()}); }); 
-                } else {
-                    carrinho.forEach(i=>{ b.update(db.collection("estoque").doc(i.id),{status:"disponível"}); });
-                }
-
-                const snap=await db.collection("vendas").get(); 
-                const num=String(snap.size+1).padStart(4,'0'); 
-                
-                b.set(db.collection("vendas").doc(),{ 
-                    numeroPedido: num, 
-                    tipoRegistro: tipo,
-                    status: statusVenda,
-                    cliente: cli, 
-                    data: new Date().toISOString(), 
-                    itens: carrinho.map(c=>({modelo:c.modelo||c.nomeP,isBrinde:c.isBrinde})), 
-                    trocas: trocas.map(t=>t.modelo), 
-                    desconto: parseFloat(document.getElementById('valor-desconto-manual').value)||0, 
-                    taxaMaquininha: valorTaxaAplicada, 
-                    total: totalVendaGlobal, 
-                    pagamento: pg 
-                }); 
-                
-                await b.commit(); 
-                
-                let itensCompraStr = carrinho.filter(i => !i.isBrinde).map(i => `${i.modelo || i.nomeP} (${formatMoeda(i.venda)})`).join(", ");
-                let itensBrindeStr = carrinho.filter(i => i.isBrinde).map(i => i.modelo || i.nomeP).join(", ");
-                let itensTrocaStr = trocas.map(t => `${t.modelo} (${formatMoeda(t.valor)})`).join(", ");
-                let valDesc = parseFloat(document.getElementById('valor-desconto-manual').value) || 0;
-                let descStr = valDesc > 0 ? formatMoeda(valDesc) : "Não teve";
-                let brindeStr = itensBrindeStr ? itensBrindeStr : "Não teve";
-
-                let historicoTexto = `${new Date().toLocaleDateString('pt-BR')} - ${cli} `;
-                if(isOrcamento) historicoTexto += `fez ORÇAMENTO de: ${itensCompraStr}`;
-                else historicoTexto += `comprou ${itensCompraStr}`;
-
-                if(itensTrocaStr) historicoTexto += ` | Deu na troca: ${itensTrocaStr}`;
-                historicoTexto += ` | Desconto: ${descStr} | Brinde: ${brindeStr}`;
-
-                db.collection("clientes").where("nome", "==", cli).get().then(qs => { 
-                    qs.forEach(doc => { 
-                        let histAntigo = doc.data().historico || ""; 
-                        db.collection("clientes").doc(doc.id).update({ historico: historicoTexto + "\n" + histAntigo }); 
-                    }); 
-                });
-
-                gerarDocumento(isOrcamento, num, cli, pg);
-                
-                if (!isOrcamento) {
-                    limparRascunho(); 
-                    window.location.reload(); 
-                } else {
-                    alert("Orçamento salvo!");
-                }
-
-            } catch(e){alert("Erro: "+e.message);} 
-        }
-
-        function gerarDocumento(isOrcamento, num, cli, pg) {
-            const cFull=dbClientes.find(c=>c.nome===cli)||{nome:cli};
-            let itensR=carrinho.map(i=>({nome:i.modelo||i.nomeP,desc:i.cor||'',preco:i.venda,isBrinde:i.isBrinde}));
-            trocas.forEach(t=>itensR.push({nome:"TROCA: "+t.modelo,desc:t.imei,preco:-t.valor,isTroca:true}));
-            let textoParcela = "";
-            if (parcelasSelecionadas > 0 && totalVendaGlobal > 0) { const valorParcela = totalVendaGlobal / parcelasSelecionadas; textoParcela = `(${parcelasSelecionadas}x de ${valorParcela.toLocaleString('pt-br',{style:'currency', currency:'BRL'})})`; }
-            
-            const dados={ 
-                titulo: isOrcamento ? "ORÇAMENTO" : "RECIBO DE VENDA",
-                isOrcamento: isOrcamento,
-                numeroPedido: num, 
-                cliente: cFull.nome, 
-                cpf: cFull.cpf||'', 
-                tel: cFull.whats||'', 
-                endereco: cFull.logradouro||'', 
-                itens: itensR, 
-                descontoManual: parseFloat(document.getElementById('valor-desconto-manual').value)||0, 
-                total: totalVendaGlobal, 
-                pagamento: pg, 
-                textoParcelas: textoParcela, 
-                data: new Date().toLocaleDateString('pt-BR'),
-                autoPrint: !isOrcamento // Só imprime sozinho se NÃO for orçamento
-            };
-            localStorage.setItem('dadosRecibo',JSON.stringify(dados)); 
-            window.open('orcamento.html','_blank');
-        }
-
-        function formatMoeda(v) { return parseFloat(v).toLocaleString('pt-br',{style:'currency', currency:'BRL'}); }
-
-        function abrirConfigTaxas() { const container = document.getElementById('grid-inputs-taxas'); container.innerHTML = ""; for(let i=1; i<=24; i++) { let val = taxasAtuais[i] !== undefined ? taxasAtuais[i] : (4 + (i * 1.2)); container.innerHTML += `<div class="taxa-item"><label>${i}x</label><input type="number" id="taxa-input-${i}" value="${parseFloat(val).toFixed(2)}" step="0.01"> %</div>`; } document.getElementById('modal-config-taxas').style.display = 'flex'; }
-        async function salvarConfigTaxas() { let novasTaxas = {}; for(let i=1; i<=24; i++) novasTaxas[i] = parseFloat(document.getElementById(`taxa-input-${i}`).value) || 0; try { await db.collection("config_taxas").doc("geral").set(novasTaxas); alert("Salvo!"); document.getElementById('modal-config-taxas').style.display = 'none'; } catch(e) { alert("Erro: " + e.message); } }
-        function atualizarTotais() { const dc=document.getElementById('carrinho-lista'); const dt=document.getElementById('lista-trocas'); dc.innerHTML=""; dt.innerHTML=""; let sub=0; carrinho.forEach((item,i)=>{ const val = item.isBrinde?0:parseFloat(item.venda||0); sub+=val; const cls = item.isBrinde?'brinde':''; const ico=item.isBrinde?'active':''; const txt=item.isBrinde?'<span style="color:#00e0ff;">GRÁTIS</span>':`R$ ${parseFloat(item.venda).toFixed(2)}`; dc.innerHTML+=`<div class="cart-item ${cls}"><div class="item-info"><div>${item.modelo||item.nomeP}</div><small>${txt}</small></div><div class="item-actions"><i class="btn-icon btn-gift fas fa-gift ${ico}" onclick="toggleBrinde(${i})"></i><i class="btn-icon btn-remove fas fa-trash" onclick="removerDoCarrinho(${i})"></i></div></div>`; }); let descTroca=0; trocas.forEach((t,i)=>{ descTroca+=t.valor; dt.innerHTML+=`<div class="trade-in-box"><div class="trade-in-text"><strong>ENTRADA:</strong> ${t.modelo}<br><small>${t.imei} | R$ ${t.valor}</small></div><i class="fas fa-times btn-remove" onclick="removerTroca(${i})"></i></div>`; }); let descMan = parseFloat(document.getElementById('valor-desconto-manual').value)||0; const pgto = document.getElementById('forma-pagamento').value; if(!pgto.includes("Crédito")) { valorTaxaAplicada = 0; parcelasSelecionadas = 0; } if(valorTaxaAplicada > 0) { document.getElementById('row-taxas').style.display = 'flex'; document.getElementById('valor-taxas').innerText = `+ R$ ${valorTaxaAplicada.toFixed(2)}`; } else { document.getElementById('row-taxas').style.display = 'none'; } totalVendaGlobal = sub - descTroca - descMan + valorTaxaAplicada; document.getElementById('valor-subtotal').innerText=`R$ ${sub.toFixed(2)}`; document.getElementById('valor-abatimento').innerText=`- R$ ${descTroca.toFixed(2)}`; document.getElementById('valor-total').innerText=`R$ ${totalVendaGlobal.toFixed(2)}`; const divDetalhe = document.getElementById('detalhe-parcelas'); if (parcelasSelecionadas > 0 && totalVendaGlobal > 0) { const valorParcela = totalVendaGlobal / parcelasSelecionadas; divDetalhe.style.display = 'block'; divDetalhe.innerText = `VALOR SIMULADO DE ${totalVendaGlobal.toLocaleString('pt-br',{style:'currency', currency:'BRL'})} EM ${parcelasSelecionadas}X (${valorParcela.toLocaleString('pt-br',{style:'currency', currency:'BRL'})})`; } else { divDetalhe.style.display = 'none'; } salvarRascunho(); }
-        function renderizarProdutos(){ const d=document.getElementById('lista-produtos'); d.innerHTML=""; if(dbEstoque.length===0) return d.innerHTML='<div style="color:#888;text-align:center;padding:20px;">Estoque vazio ou não encontrado.</div>'; dbEstoque.forEach(p=>{ const el=document.createElement('div'); const isReserved = p.status === 'em_negociacao'; el.className = isReserved ? 'product-card reserved' : 'product-card'; if(!isReserved) el.onclick=()=>adicionarAoCarrinho(p); let cat=(p.categoria||'').toLowerCase(); let icon=cat.includes('celular')?'📱':cat.includes('roupa')?'👕':cat.includes('perfume')?'🌸':'📦'; let reservedBadge = isReserved ? '<span class="reserved-tag">EM USO</span>' : ''; el.innerHTML=`${reservedBadge}<span class="prod-cat-tag">${icon} ${cat.toUpperCase()}</span><span class="prod-name">${p.modelo||p.nomeP||'Item'}</span><span class="prod-detail">${p.cor||''} ${p.gb||''}</span><span class="prod-price">R$ ${parseFloat(p.venda||0).toFixed(2)}</span><div style="display:none;">${cat} ${p.modelo}</div>`; d.appendChild(el); }); }
-        function salvarRascunho() { const estado = { carrinho, trocas, cliente: document.getElementById('cliente-input').value, desconto: document.getElementById('valor-desconto-manual').value, pagamento: document.getElementById('forma-pagamento').value, taxa: valorTaxaAplicada, parcelas: parcelasSelecionadas }; localStorage.setItem('pdv_rascunho', JSON.stringify(estado)); }
-        function restaurarRascunho() { const s = localStorage.getItem('pdv_rascunho'); if(s) { const e = JSON.parse(s); carrinho=e.carrinho||[]; trocas=e.trocas||[]; valorTaxaAplicada=e.taxa||0; parcelasSelecionadas=e.parcelas||0; document.getElementById('cliente-input').value=e.cliente||""; document.getElementById('valor-desconto-manual').value=e.desconto||""; setTimeout(()=>document.getElementById('forma-pagamento').value=e.pagamento||"",500); atualizarTotais(); } }
-        function limparRascunho(){ localStorage.removeItem('pdv_rascunho'); carrinho=[]; trocas=[]; valorTaxaAplicada=0; parcelasSelecionadas=0; document.getElementById('cliente-input').value=""; document.getElementById('valor-desconto-manual').value=""; atualizarTotais(); }
-        function carregarListasAuxiliares(){ db.collection("lista_modelos_cel").orderBy("nome").onSnapshot(snap=>{document.getElementById('dl-modelos-list').innerHTML="";snap.forEach(d=>document.getElementById('dl-modelos-list').innerHTML+=`<option value="${d.data().nome}">`)}); db.collection("lista_cores_cel").orderBy("nome").onSnapshot(snap=>{document.getElementById('dl-cores-list').innerHTML="";snap.forEach(d=>document.getElementById('dl-cores-list').innerHTML+=`<option value="${d.data().nome}">`)}); }
-        function filtrarProdutos(){ const t=document.getElementById('busca').value.toLowerCase(); const c=document.getElementById('filtro-cat').value; document.querySelectorAll('.product-card').forEach(el=>{const txt=el.innerText.toLowerCase();const cat=el.querySelector('.prod-cat-tag').innerText.toLowerCase(); el.style.display=(txt.includes(t)&&(c===""||cat.includes(c)))?'flex':'none'}); }
-        function renderizarDatalistClientes(){ const dl=document.getElementById('lista-clientes-db'); dl.innerHTML=""; dbClientes.forEach(c=>dl.innerHTML+=`<option value="${c.nome}">${c.cpf||c.whats||''}</option>`); }
-        async function adicionarAoCarrinho(p){ try{await db.collection("estoque").doc(p.id).update({status:"em_negociacao"});carrinho.push({...p,isBrinde:false});atualizarTotais();salvarRascunho();}catch(e){alert("Erro: Item já pego!");} }
-        async function removerDoCarrinho(i){ try{await db.collection("estoque").doc(carrinho[i].id).update({status:"disponível"});}catch(e){} carrinho.splice(i,1); atualizarTotais(); salvarRascunho(); }
-        async function cancelarVendaTotal(){ if(!confirm("Cancelar venda e liberar itens?"))return; for(const i of carrinho){try{await db.collection("estoque").doc(i.id).update({status:"disponível"});}catch(e){}} limparRascunho(); }
-        function toggleBrinde(i){ carrinho[i].isBrinde=!carrinho[i].isBrinde; atualizarTotais(); salvarRascunho(); }
-        function confirmarTroca(){ const t={modelo:document.getElementById('troca-modelo').value,gb:document.getElementById('troca-gb').value,cor:document.getElementById('troca-cor').value,imei:document.getElementById('troca-imei').value,valor:parseFloat(document.getElementById('troca-valor').value)||0,bateria:document.getElementById('troca-bateria').value}; if(!t.modelo||!t.valor||t.imei.length!==15)return alert("Erro dados"); trocas.push(t); fecharModalTroca(); atualizarTotais(); salvarRascunho(); document.querySelectorAll('#modal-troca input').forEach(i=>i.value=''); }
-        function removerTroca(i){ trocas.splice(i,1); atualizarTotais(); salvarRascunho(); }
-        function abrirModalTroca(){document.getElementById('modal-troca').style.display='flex';}
-        function fecharModalTroca(){document.getElementById('modal-troca').style.display='none';}
-        function abrirModalCliente(){document.getElementById('modal-cliente').style.display='flex';}
-        function fecharModalCliente(){document.getElementById('modal-cliente').style.display='none';}
-        function buscarCep(){ let cep=document.getElementById('novo-cep').value.replace(/\D/g,''); if(cep.length===8) fetch(`https://viacep.com.br/ws/${cep}/json/`).then(r=>r.json()).then(d=>{if(!d.erro){document.getElementById('novo-endereco').value=d.logradouro;document.getElementById('novo-bairro').value=d.bairro;document.getElementById('novo-cidade').value=`${d.localidade}-${d.uf}`;document.getElementById('novo-numero').focus();}}); }
-        async function salvarNovoCliente(){ let n=document.getElementById('novo-nome').value; if(!n)return alert("Nome?"); try{ await db.collection("clientes").add({nome:n, cpf:document.getElementById('novo-cpf').value, whats:document.getElementById('novo-zap').value, email:document.getElementById('novo-email').value, cep:document.getElementById('novo-cep').value, logradouro:document.getElementById('novo-endereco').value, numero:document.getElementById('novo-numero').value, bairro:document.getElementById('novo-bairro').value, cidade:document.getElementById('novo-cidade').value}); alert("Ok!"); document.getElementById('cliente-input').value=n; fecharModalCliente(); salvarRascunho(); }catch(e){alert("Erro");} }
-        function carregarOpcoesPagamento(){ 
-            let s=document.getElementById('forma-pagamento'); 
-            s.innerHTML=`
-                <option value="">Selecione...</option>
-                <option value="Pix">Pix</option>
-                <option value="Dinheiro">Dinheiro</option>
-                <option value="Débito">Débito</option>
-                <option value="Crédito">Crédito</option>
-            `; 
-        }
+        // Funções curtas de suporte
+        function formatMoeda(v){return parseFloat(v).toLocaleString('pt-br',{style:'currency',currency:'BRL'});}
+        function carregarTaxasDoBanco(){db.collection("config_taxas").doc("geral").onSnapshot(doc=>{if(doc.exists)taxasAtuais=doc.data();else taxasAtuais={1:4.5,12:15.5};});}
+        function abrirSimulador(){if(totalVendaGlobal<=0)return alert("Vazio!");renderizarTabelaSimulacao(totalVendaGlobal);document.getElementById('modal-simulador').style.display='flex';}
+        function renderizarTabelaSimulacao(base){const tb=document.getElementById('lista-simulacao');tb.innerHTML="";let txtCopy=`*SIMULAÇÃO*\nValor: ${formatMoeda(base)}\n`;for(let i=1;i<=24;i++){let tx=taxasAtuais[i]||(4+(i*1.2));let tot=base*(1+(tx/100));let parc=tot/i;let htmTx=mostrarTaxasNaTela?`<small>(${tx.toFixed(2)}%)</small>`:'';tb.innerHTML+=`<tr onclick="aplicarParcelamento(${i},${tot-base})"><td>${i}x ${htmTx}</td><td>${formatMoeda(parc)}</td><td class="sim-total">${formatMoeda(tot)}</td></tr>`;txtCopy+=`${i}x ${formatMoeda(parc)} (Total: ${formatMoeda(tot)})\n`;}document.getElementById('modal-simulador').setAttribute('data-copy',txtCopy);}
+        function aplicarParcelamento(p,jur){valorTaxaAplicada=jur;parcelasSelecionadas=p;let s=document.getElementById('forma-pagamento');s.innerHTML+=`<option value="Crédito ${p}x">Crédito ${p}x (Simulado)</option>`;s.value=`Crédito ${p}x`;document.getElementById('modal-simulador').style.display='none';atualizarTotais();}
+        function toggleTaxasVisuais(){mostrarTaxasNaTela=!mostrarTaxasNaTela;renderizarTabelaSimulacao(totalVendaGlobal);}
+        function copiarOfertaZap(){navigator.clipboard.writeText(document.getElementById('modal-simulador').getAttribute('data-copy'));alert("Copiado!");}
+        function carregarListasAuxiliares(){db.collection("lista_modelos_cel").onSnapshot(s=>{let d=document.getElementById('dl-modelos-list');d.innerHTML="";s.forEach(o=>d.innerHTML+=`<option value="${o.data().nome}">`)});db.collection("lista_cores_cel").onSnapshot(s=>{let d=document.getElementById('dl-cores-list');d.innerHTML="";s.forEach(o=>d.innerHTML+=`<option value="${o.data().nome}">`)});}
+        function filtrarProdutos(){const t=document.getElementById('busca').value.toLowerCase();const c=document.getElementById('filtro-cat').value;document.querySelectorAll('.product-card').forEach(el=>{const txt=el.innerText.toLowerCase();const cat=el.querySelector('.prod-cat-tag').innerText.toLowerCase();el.style.display=(txt.includes(t)&&(c===""||cat.includes(c)))?'flex':'none'});}
+        function renderizarDatalistClientes(){const dl=document.getElementById('lista-clientes-db');dl.innerHTML="";dbClientes.forEach(c=>dl.innerHTML+=`<option value="${c.nome}">${c.cpf||''}</option>`);}
+        async function adicionarAoCarrinho(p){try{await db.collection("estoque").doc(p.id).update({status:"em_negociacao"});carrinho.push({...p,isBrinde:false});atualizarTotais();salvarRascunho();}catch(e){alert("Item indisponível!");}}
+        async function removerDoCarrinho(i){try{await db.collection("estoque").doc(carrinho[i].id).update({status:"disponível"});}catch(e){}carrinho.splice(i,1);atualizarTotais();salvarRascunho();}
+        async function cancelarVendaTotal(){if(!confirm("Limpar?"))return;for(const i of carrinho){try{await db.collection("estoque").doc(i.id).update({status:"disponível"});}catch(e){}}limparRascunho();}
+        function toggleBrinde(i){carrinho[i].isBrinde=!carrinho[i].isBrinde;atualizarTotais();}
+        function confirmarTroca(){const t={modelo:document.getElementById('troca-modelo').value,imei:document.getElementById('troca-imei').value,valor:parseFloat(document.getElementById('troca-valor').value)||0};if(!t.modelo||!t.valor)return alert("Dados?");trocas.push(t);document.getElementById('modal-troca').style.display='none';atualizarTotais();}
+        function atualizarTotais(){const dc=document.getElementById('carrinho-lista');const dt=document.getElementById('lista-trocas');dc.innerHTML="";dt.innerHTML="";let sub=0;carrinho.forEach((i,idx)=>{let val=i.isBrinde?0:parseFloat(i.venda||0);sub+=val;dc.innerHTML+=`<div class="cart-item ${i.isBrinde?'brinde':''}"><div class="item-info"><div>${i.modelo||i.nomeP}</div><small>R$ ${val.toFixed(2)}</small></div><div class="item-actions"><i class="btn-icon fas fa-gift" onclick="toggleBrinde(${idx})"></i><i class="btn-icon fas fa-trash" onclick="removerDoCarrinho(${idx})"></i></div></div>`;});let dTroca=0;trocas.forEach((t,i)=>{dTroca+=t.valor;dt.innerHTML+=`<div class="trade-in-box"><span>${t.modelo} (R$ ${t.valor})</span></div>`;});let desc=parseFloat(document.getElementById('valor-desconto-manual').value)||0;totalVendaGlobal=sub-dTroca-desc+valorTaxaAplicada;document.getElementById('valor-subtotal').innerText=`R$ ${sub.toFixed(2)}`;document.getElementById('valor-total').innerText=`R$ ${totalVendaGlobal.toFixed(2)}`;salvarRascunho();}
+        function salvarRascunho(){localStorage.setItem('pdv_rascunho',JSON.stringify({carrinho,trocas,cli:document.getElementById('cliente-input').value,pg:document.getElementById('forma-pagamento').value}));}
+        function restaurarRascunho(){let d=JSON.parse(localStorage.getItem('pdv_rascunho'));if(d){carrinho=d.carrinho||[];trocas=d.trocas||[];document.getElementById('cliente-input').value=d.cli||"";atualizarTotais();}}
+        function limparRascunho(){localStorage.removeItem('pdv_rascunho');carrinho=[];trocas=[];valorTaxaAplicada=0;document.getElementById('cliente-input').value="";atualizarTotais();}
+        function carregarOpcoesPagamento(){let s=document.getElementById('forma-pagamento');s.innerHTML=`<option value="">Selecione...</option><option>Pix</option><option>Dinheiro</option><option>Débito</option><option>Crédito</option>`;}
     </script>
 </body>
 </html>
