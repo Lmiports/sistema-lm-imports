@@ -2,255 +2,216 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VÉRTICE BI | CORE</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
-    
+    <title>Imprimir Documento</title>
     <style>
-        :root { --bg: #020617; --card: #0f172a; --accent: #00e0ff; --text: #f8fafc; --border: rgba(255, 255, 255, 0.1); --success: #22c55e; --danger: #ef4444; --warning: #eab308; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; min-height: 100vh; display: flex; flex-direction: column; box-sizing: border-box; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-        .header h2 { margin: 0; color: var(--accent); letter-spacing: 2px; }
-        .version-tag { font-size: 10px; background: var(--accent); color: #000; padding: 2px 6px; border-radius: 4px; font-weight: 900; margin-left: 10px; }
-        .btn-voltar { color: #fff; text-decoration: none; font-size: 20px; padding: 10px; transition: 0.3s; }
-        .btn-voltar:hover { color: var(--accent); }
-        .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; flex: 1; }
-        .products-section { display: flex; flex-direction: column; gap: 15px; }
-        .search-box { display: flex; gap: 10px; }
-        .search-box input, .search-box select { width: 100%; padding: 12px; background: var(--card); border: 1px solid var(--border); color: #fff; border-radius: 8px; outline: none; }
-        .products-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; max-height: 75vh; overflow-y: auto; }
-        .product-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 15px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between; }
-        .product-card:hover { border-color: var(--accent); transform: translateY(-3px); }
-        .product-card.reserved { opacity: 0.6; border-color: var(--warning); filter: grayscale(0.5); pointer-events: none; }
-        .prod-cat-tag { font-size: 10px; background: rgba(0,224,255,0.1); color: var(--accent); padding: 4px 8px; border-radius: 4px; width: fit-content; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
-        .prod-name { font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-        .prod-detail { font-size: 11px; color: #94a3b8; margin-bottom: 5px; }
-        .prod-price { color: var(--success); font-weight: bold; font-size: 16px; margin-top: auto; }
-        .cart-section { background: var(--card); border-radius: 15px; border: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; height: fit-content; }
-        .client-area { margin-bottom: 15px; }
-        .client-row { display: flex; gap: 5px; }
-        .client-input-wrapper { width: 100%; }
-        .client-row input { width: 100%; padding: 10px; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 5px; box-sizing: border-box; }
-        .btn-add-client { background: var(--success); color: #000; border: none; width: 40px; border-radius: 5px; cursor: pointer; font-size: 18px; }
-        .cart-items { max-height: 300px; overflow-y: auto; margin-bottom: 15px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 0; }
-        .cart-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin-bottom: 8px; }
-        .cart-item.brinde { border: 1px solid var(--accent); background: rgba(0, 224, 255, 0.1); }
-        .item-actions { display: flex; gap: 10px; align-items: center; }
-        .btn-icon { cursor: pointer; padding: 5px; }
-        .btn-remove { color: var(--danger); }
-        .btn-gift { color: #94a3b8; }
-        .btn-gift.active { color: var(--accent); text-shadow: 0 0 5px var(--accent); }
-        .trade-in-box { background: rgba(234, 179, 8, 0.1); border: 1px solid var(--warning); padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .totals { margin-bottom: 15px; font-size: 14px; }
-        .row { display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .total-final { font-size: 24px; font-weight: 900; color: var(--success); border-top: 1px solid var(--border); padding-top: 10px; }
-        .input-desconto { width: 100px; padding: 5px; text-align: right; background: #0f172a; border: 1px solid #334155; color: var(--danger); font-weight: bold; }
-        .parcela-info { text-align: right; color: var(--accent); font-size: 12px; font-weight: bold; display: none; padding-bottom: 5px; border-bottom: 1px dashed var(--accent); }
-        .action-buttons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .btn-vender { background: var(--success); color: #000; padding: 15px; width: 100%; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .btn-orcamento { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .btn-troca { background: transparent; border: 1px solid var(--warning); color: var(--warning); padding: 10px; width: 100%; border-radius: 8px; margin-bottom: 10px; cursor: pointer; }
-        .btn-limpar { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px; width: 100%; border-radius: 5px; margin-bottom: 10px; cursor: pointer; font-size: 11px; }
-        .btn-simular { background: #334155; color: #fff; border: 1px solid var(--border); width: 100%; padding: 8px; border-radius: 5px; margin-bottom: 10px; cursor: pointer; }
-        .btn-preview { width:100%; background:transparent; border:1px solid #666; color:#aaa; padding:5px; border-radius:5px; cursor:pointer; font-size:11px; margin-bottom:10px; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal { background: var(--card); padding: 25px; border-radius: 15px; width: 400px; max-width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--accent); }
-        .modal input, .modal select { width: 100%; padding: 10px; margin: 5px 0; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 5px; }
-        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn-cancel { flex: 1; padding: 10px; background: #334155; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
-        .btn-confirm { flex: 1; padding: 10px; background: var(--success); color: #000; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .btn-dashboard-link { display: none; text-decoration: none; background: var(--accent); color: #000; padding: 5px 15px; border-radius: 5px; font-weight: bold; font-size: 12px; align-items: center; gap: 5px; }
-        .marca-registrada { position: fixed; bottom: 5px; right: 10px; font-size: 10px; color: rgba(255, 255, 255, 0.2); pointer-events: none; z-index: 999; }
-        @media (max-width: 800px) { .main-grid { grid-template-columns: 1fr; display: flex; flex-direction: column; } .products-list { max-height: 300px; } .cart-section { margin-top: 20px; margin-bottom: 50px; } body { height: auto; display: block; } }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        /* LIMPA CABEÇALHO/RODAPÉ DO NAVEGADOR */
+        @page { size: A4; margin: 0; }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #555; 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            justify-content: center; 
+        }
+
+        /* FOLHA A4 */
+        .page {
+            background: #fff;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 15mm;
+            padding-bottom: 15mm;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            position: relative;
+            box-sizing: border-box;
+            margin: 0 auto;
+        }
+
+        /* ESCONDER BOTÕES NA IMPRESSÃO */
+        .screen-btns { position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 999; }
+        .btn { padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: #fff; text-decoration: none; font-size: 13px; }
+        .btn-print { background: #22c55e; }
+        .btn-close { background: #ef4444; }
+
+        /* HEADER */
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
+        .logo-area img { max-height: 100px; max-width: 250px; }
+        .company-info { text-align: right; font-size: 11px; line-height: 1.3; }
+        .company-info h2 { margin: 0; font-size: 18px; text-transform: uppercase; font-weight: 800; }
+
+        /* TÍTULO DO DOC */
+        .doc-title { text-align: center; font-size: 22px; font-weight: 800; margin: 20px 0; text-transform: uppercase; background: #f0f0f0; padding: 10px; border: 1px solid #ddd; }
+
+        /* DADOS */
+        .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; font-size: 12px; }
+        .box { border: 1px solid #ccc; padding: 10px; border-radius: 4px; }
+        .box-title { font-weight: bold; font-size: 10px; color: #666; text-transform: uppercase; margin-bottom: 5px; border-bottom: 1px solid #eee; }
+
+        /* INPUTS EDITÁVEIS */
+        .input-editable { border: none; border-bottom: 1px dashed #999; font-family: inherit; font-size: inherit; width: 100%; background: transparent; font-weight: bold; text-transform: uppercase; }
+        .input-pedido { width: 80px; text-align: right; }
+
+        /* TABELA */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11px; }
+        th { background: #000; color: #fff; padding: 6px; text-align: left; text-transform: uppercase; }
+        td { border-bottom: 1px solid #ddd; padding: 6px; }
+        .col-val { text-align: right; font-weight: bold; }
+
+        /* TOTAIS */
+        .totals-area { display: flex; justify-content: flex-end; }
+        .totals-box { width: 250px; text-align: right; font-size: 12px; }
+        .t-row { display: flex; justify-content: space-between; padding: 2px 0; }
+        .t-total { font-size: 16px; font-weight: 800; border-top: 2px solid #000; margin-top: 5px; padding-top: 5px; }
+
+        /* CONTRATO EDITÁVEL */
+        .legal-terms { margin-top: 30px; font-size: 9px; text-align: justify; color: #333; border: 1px solid transparent; padding: 5px; line-height: 1.4; outline: none; }
+        .legal-terms:hover { border: 1px dashed #ccc; background: #fffde7; cursor: text; } /* Mostra que é editável */
+
+        .signatures { margin-top: 50px; display: flex; justify-content: space-between; padding: 0 30px; }
+        .sig-line { width: 40%; border-top: 1px solid #000; text-align: center; font-size: 10px; padding-top: 5px; text-transform: uppercase; }
+
+        /* ORÇAMENTO SUAVE */
+        .orcamento-msg { display: none; margin-top: 40px; text-align: center; font-size: 12px; color: #555; border-top: 1px solid #ddd; padding-top: 10px; }
+
+        /* RODAPÉ VERTICE */
+        .system-footer { position: absolute; bottom: 5mm; left: 0; width: 100%; text-align: center; font-size: 8px; color: #ccc; text-transform: uppercase; letter-spacing: 2px; }
+
+        @media print {
+            body { background: #fff; padding: 0; }
+            .page { box-shadow: none; width: 100%; height: 100%; padding: 15mm; margin: 0; }
+            .screen-btns { display: none; }
+            .input-editable { border-bottom: none; }
+            .legal-terms:hover { background: transparent; border: none; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div style="display:flex; gap:15px; align-items:center;">
-            <a href="#" id="btn-voltar-main" class="btn-voltar" title="Voltar"><i class="fas fa-home"></i></a>
-            <a href="admin.html" id="btn-bi-admin" class="btn-dashboard-link"><i class="fas fa-chart-pie"></i> PAINEL BI</a>
-        </div>
-        <h2>VÉRTICE BI <span class="version-tag">CORE</span></h2>
-        <div></div>
+    <div class="screen-btns">
+        <a href="#" onclick="window.close()" class="btn btn-close">FECHAR</a>
+        <a href="#" onclick="window.print()" class="btn btn-print">IMPRIMIR / PDF</a>
     </div>
 
-    <div class="main-grid">
-        <div class="products-section">
-            <div class="search-box">
-                <input type="text" id="busca" placeholder="Buscar..." onkeyup="filtrarProdutos()">
-                <select id="filtro-cat" onchange="filtrarProdutos()" style="width: 150px;">
-                    <option value="">Todas</option>
-                    <option value="celular">📱 Celulares</option>
-                    <option value="roupa">👕 Roupas</option>
-                    <option value="perfume">🌸 Perfumes</option>
-                    <option value="acessorio">🎧 Acessórios</option>
-                </select>
+    <div class="page">
+        <div class="header">
+            <div class="logo-area">
+                <img src="logo.png" alt="LM IMPORTS" onerror="this.style.display='none'; document.getElementById('logo-txt').style.display='block'">
+                <h1 id="logo-txt" style="display:none; margin:0;">LM IMPORTS</h1>
             </div>
-            <div class="products-list" id="lista-produtos">
-                <div style="padding:20px; text-align:center; color:#888;"><i class="fas fa-circle-notch fa-spin"></i> Carregando...</div>
+            <div class="company-info">
+                <h2>LM IMPORTS</h2>
+                <p>CNPJ: 00.000.000/0001-00</p>
+                <p>Rua Exemplo, 123 - Centro</p>
+                <p>Tel/WhatsApp: (11) 99999-9999</p>
+                <p>Instagram: @lmimports</p>
             </div>
         </div>
 
-        <div class="cart-section">
-            <div class="client-area">
-                <label style="font-size: 12px; color: #94a3b8;">Cliente:</label>
-                <div class="client-row">
-                    <div class="client-input-wrapper">
-                        <input list="lista-clientes-db" id="cliente-input" placeholder="Buscar..." autocomplete="off" onchange="salvarRascunho()">
-                        <datalist id="lista-clientes-db"></datalist>
-                    </div>
-                    <button class="btn-add-client" onclick="document.getElementById('modal-cliente').style.display='flex'">+</button>
-                </div>
+        <div class="doc-title" id="titulo-doc">RECIBO DE VENDA</div>
+
+        <div class="meta-grid">
+            <div class="box">
+                <div class="box-title">CLIENTE</div>
+                <div id="cli-nome" style="font-weight:bold; text-transform:uppercase;">NOME</div>
+                <div id="cli-cpf">CPF: ---</div>
+                <div id="cli-tel">Tel: ---</div>
+                <div id="cli-end">End: ---</div>
             </div>
-
-            <div class="cart-items" id="carrinho-lista"><div style="text-align: center; color: #64748b; margin-top: 20px;">Carrinho vazio</div></div>
-            <button class="btn-limpar" onclick="cancelarVendaTotal()"><i class="fas fa-trash-alt"></i> LIMPAR TELA / DESTRAVAR</button>
-            <div id="lista-trocas"></div>
-
-            <div class="totals">
-                <div class="row"><span>Subtotal:</span><span id="valor-subtotal">R$ 0,00</span></div>
-                <div class="row" style="color: var(--danger);"><span>Desconto (R$):</span><input type="number" class="input-desconto" id="valor-desconto-manual" value="" placeholder="0,00" oninput="atualizarTotais()"></div>
-                <div class="row" style="color: var(--accent); display:none;" id="row-taxas"><span>Taxa Maquininha:</span><span id="valor-taxas">+ R$ 0,00</span></div>
-                <div class="row" style="color: var(--warning);"><span>Troca/Abatimento:</span><span id="valor-abatimento">- R$ 0,00</span></div>
-                <div class="row total-final"><span>TOTAL:</span><span id="valor-total">R$ 0,00</span></div>
-                <div id="detalhe-parcelas" class="parcela-info"></div>
-            </div>
-
-            <button class="btn-simular" onclick="abrirSimulador()"><i class="fas fa-calculator"></i> Simular Parcelas</button>
-            <div style="margin-bottom: 10px;"><label style="font-size: 12px;">Pagamento:</label><select id="forma-pagamento" style="width: 100%; padding: 8px; background: #1e293b; color: #fff; border: 1px solid var(--border); border-radius: 5px;" onchange="salvarRascunho()"></select></div>
-            <button class="btn-troca" onclick="document.getElementById('modal-troca').style.display='flex'"><i class="fas fa-exchange-alt"></i> Entrada de Troca</button>
-            <button class="btn-preview" onclick="preVisualizar()"><i class="fas fa-eye"></i> Visualizar Recibo (Sem Salvar)</button>
-
-            <div class="action-buttons-grid">
-                <button class="btn-orcamento" onclick="finalizar(true)">ORÇAMENTO</button>
-                <button class="btn-vender" onclick="finalizar(false)">VENDER</button>
+            <div class="box">
+                <div class="box-title">PEDIDO</div>
+                <div class="t-row"><span>Nº PEDIDO:</span> <input type="text" id="ped-num" class="input-editable input-pedido" value="0000"></div>
+                <div class="t-row"><span>DATA:</span> <span id="ped-data">--/--/----</span></div>
+                <div class="t-row" style="margin-top:10px;"><span>VENDEDOR:</span> <input type="text" id="ped-vend" class="input-editable" value="VENDEDOR" style="text-align:right;"></div>
             </div>
         </div>
+
+        <table>
+            <thead><tr><th>PRODUTO / SERVIÇO</th><th>DETALHES</th><th class="col-val">VALOR</th></tr></thead>
+            <tbody id="lista-itens"></tbody>
+        </table>
+
+        <div class="totals-area">
+            <div class="totals-box">
+                <div class="t-row" style="color:#666;">SUBTOTAL: <span id="val-sub">R$ ...</span></div>
+                <div class="t-row" style="color:red;">DESCONTO: <span id="val-desc">R$ 0,00</span></div>
+                <div class="t-row" style="font-size:10px;">TAXAS: <span id="val-taxa">R$ 0,00</span></div>
+                <div class="t-row t-total">TOTAL: <span id="val-total">R$ 0,00</span></div>
+                <div style="margin-top:5px; font-size:10px; font-weight:bold;" id="txt-pgto">Pagamento: Pix</div>
+            </div>
+        </div>
+
+        <div id="area-contrato">
+            <div class="legal-terms" contenteditable="true" title="Clique para editar">
+                <strong>TERMOS DE GARANTIA E CONDIÇÕES</strong><br>
+                1. A LM Imports oferece garantia de 90 dias para defeitos de fabricação (Art. 26 CDC).<br>
+                2. A garantia <strong>NÃO COBRE:</strong> Danos por líquidos, quedas, mau uso, telas quebradas ou violação de selos.<br>
+                3. Trocas exigem as mesmas condições estéticas da venda.<br>
+                4. O cliente declara ter testado todas as funções (câmeras, face ID, áudio, rede) e estar ciente de que é um produto seminovo (se aplicável).
+            </div>
+            <div class="signatures">
+                <div class="sig-line">LM IMPORTS</div>
+                <div class="sig-line"><span id="sig-cli">CLIENTE</span></div>
+            </div>
+        </div>
+
+        <div id="area-orcamento" class="orcamento-msg">
+            <strong>ESTE DOCUMENTO É UM ORÇAMENTO</strong><br>
+            Validade: 10 Dias • Sujeito a disponibilidade de estoque e alteração de valores.
+        </div>
+
+        <div class="system-footer">VÉRTICE BI CORE • RODRIGO N CARVALHO 2026</div>
     </div>
-
-    <div class="modal-overlay" id="modal-simulador"><div class="modal"><div style="display:flex; justify-content:space-between;"><h3>Simulação</h3><div><button onclick="toggleTaxasVisuais()" style="background:none;border:none;color:#fff;font-size:18px;margin-right:10px;"><i class="fas fa-eye" id="icon-eye"></i></button><button onclick="abrirConfigTaxas()" style="background:none;border:none;color:var(--accent);font-size:18px;"><i class="fas fa-cog"></i></button></div></div><table class="sim-table"><thead><tr><th>Parc.</th><th>Valor</th><th>Total</th></tr></thead><tbody id="lista-simulacao"></tbody></table><button onclick="copiarOfertaZap()" style="margin-top:15px;width:100%;background:#25D366;color:#fff;padding:10px;border:none;border-radius:5px;font-weight:bold;">Copiar</button><button onclick="document.getElementById('modal-simulador').style.display='none'" class="btn-cancel" style="margin-top:5px;width:100%;">Fechar</button></div></div>
-    <div class="modal-overlay" id="modal-config-taxas"><div class="modal"><h3>Configurar Taxas</h3><div class="taxas-grid" id="grid-inputs-taxas"></div><div style="display:flex;gap:10px;margin-top:20px;"><button onclick="document.getElementById('modal-config-taxas').style.display='none'" class="btn-cancel">Cancelar</button><button onclick="salvarConfigTaxas()" class="btn-confirm">Salvar</button></div></div></div>
-    <div class="modal-overlay" id="modal-troca"><div class="modal" style="border-color:var(--warning);"><h3 style="color:var(--warning);">Troca</h3><label style="font-size:11px;color:#999;">Modelo:</label><input list="dl-modelos-list" id="troca-modelo"><datalist id="dl-modelos-list"></datalist><div class="modal-grid"><div><label style="font-size:11px;color:#999;">GB:</label><select id="troca-gb"><option value="">-</option><option value="64GB">64GB</option><option value="128GB">128GB</option><option value="256GB">256GB</option><option value="512GB">512GB</option></select></div><div><label style="font-size:11px;color:#999;">Cor:</label><input list="dl-cores-list" id="troca-cor"><datalist id="dl-cores-list"></datalist></div></div><label style="font-size:11px;color:#999;">IMEI:</label><input type="text" id="troca-imei" maxlength="15"><div class="modal-grid"><div><label style="font-size:11px;color:#999;">Valor:</label><input type="number" id="troca-valor"></div><div><label style="font-size:11px;color:#999;">Bat %:</label><input type="number" id="troca-bateria"></div></div><div style="display:flex;gap:10px;margin-top:10px;"><button onclick="document.getElementById('modal-troca').style.display='none'" class="btn-cancel">Cancelar</button><button onclick="confirmarTroca()" class="btn-confirm" style="background:var(--warning);">Confirmar</button></div></div></div>
-    <div class="modal-overlay" id="modal-cliente"><div class="modal"><h3>Novo Cliente</h3><input type="text" id="novo-nome" placeholder="Nome"><div class="modal-grid"><input type="text" id="novo-zap" placeholder="Zap"><input type="text" id="novo-cpf" placeholder="CPF"></div><input type="email" id="novo-email" placeholder="Email"><div class="modal-grid"><input type="text" id="novo-cep" placeholder="CEP" onblur="buscarCep()"><input type="text" id="novo-numero" placeholder="Nº"></div><input type="text" id="novo-endereco" placeholder="Endereço"><div class="modal-grid"><input type="text" id="novo-bairro" placeholder="Bairro"><input type="text" id="novo-cidade" placeholder="Cidade"></div><div style="display:flex;gap:10px;margin-top:20px;"><button onclick="document.getElementById('modal-cliente').style.display='none'" class="btn-cancel">Cancelar</button><button onclick="salvarNovoCliente()" class="btn-confirm">Salvar</button></div></div></div>
-    
-    <div class="marca-registrada">VÉRTICE BI CORE v11.0 © Rodrigo N Carvalho 2026</div>
 
     <script>
-        const DATA_LIMITE = new Date('2030-01-01'); if(new Date()>DATA_LIMITE)throw new Error("Bloqueado");
-        let dbEstoque=[],dbClientes=[],carrinho=[],trocas=[],totalVendaGlobal=0,valorTaxaAplicada=0,parcelasSelecionadas=0,taxasAtuais={},mostrarTaxasNaTela=true;
+        const dados = JSON.parse(localStorage.getItem('dadosRecibo'));
+        const usuarioLogado = localStorage.getItem('usuarioLogado') || "VENDEDOR";
+        document.getElementById('ped-vend').value = usuarioLogado.toUpperCase();
 
-        window.onload=function(){
-            const cargo=localStorage.getItem('cargoUsuario');
-            const btnVoltar=document.getElementById('btn-voltar-main');
-            const btnBI=document.getElementById('btn-bi-admin');
-            if(cargo==='admin'){btnVoltar.href="menu.html";btnBI.style.display='inline-flex';}else{btnVoltar.href="index.html";btnBI.style.display='none';}
-            carregarOpcoesPagamento(); restaurarRascunho(); carregarTaxasDoBanco();
-            db.collection("estoque").onSnapshot(snap=>{if(snap.empty)return;dbEstoque=[];snap.forEach(doc=>{const data=doc.data();if(!data.status||data.status.toLowerCase()!=="vendido")dbEstoque.push({id:doc.id,...data});});renderizarProdutos();});
-            db.collection("clientes").orderBy("nome").onSnapshot(snap=>{dbClientes=[];snap.forEach(doc=>dbClientes.push({id:doc.id,...doc.data()}));renderizarDatalistClientes();});
-            carregarListasAuxiliares();
-        };
-
-        function preVisualizar(){
-            const cli = document.getElementById('cliente-input').value;
-            if(carrinho.length===0) return alert("Carrinho Vazio!");
-            const dados = montarDadosDoc(cli, false); // False = Título Recibo de Venda
-            dados.titulo = "RECIBO DE VENDA"; // Força título
-            dados.autoPrint = false;
-            localStorage.setItem('dadosRecibo', JSON.stringify(dados));
-            window.open('orcamento.html','_blank');
-        }
-
-        async function finalizar(isOrcamento){
-            const cli=document.getElementById('cliente-input').value;
-            const pg=document.getElementById('forma-pagamento').value;
-            if(carrinho.length===0)return alert("Vazio!");
-            if(!cli)return alert("Selecione Cliente");
+        if(dados) {
+            // TÍTULO CORRETO
+            let titulo = "RECIBO DE VENDA";
+            if(dados.isOrcamento) titulo = "ORÇAMENTO";
             
-            // SE FOR ORÇAMENTO, NÃO VALIDA PAGAMENTO
-            if(!isOrcamento && !pg) return alert("Selecione Pagamento");
+            document.getElementById('titulo-doc').innerText = titulo;
+            document.getElementById('ped-num').value = dados.numeroPedido; // Input
+            document.getElementById('ped-data').innerText = dados.data;
+            document.getElementById('cli-nome').innerText = dados.cliente;
+            document.getElementById('cli-cpf').innerText = "CPF: " + dados.cpf;
+            document.getElementById('cli-tel').innerText = "Tel: " + dados.tel;
+            document.getElementById('cli-end').innerText = dados.endereco;
+            document.getElementById('sig-cli').innerText = dados.cliente;
 
-            const tipo = isOrcamento ? "ORÇAMENTO" : "VENDA";
-            if(!confirm(`Confirmar ${tipo}?`)) return;
+            const tbody = document.getElementById('lista-itens');
+            dados.itens.forEach(i => {
+                let valor = parseFloat(i.preco);
+                let nome = i.nome;
+                if(i.isBrinde) { valor = 0; nome += " (BRINDE)"; }
+                tbody.innerHTML += `<tr><td>${nome}</td><td>${i.desc}</td><td class="col-val">${valor.toLocaleString('pt-br',{style:'currency', currency:'BRL'})}</td></tr>`;
+            });
 
-            try {
-                const b = db.batch();
-                if(!isOrcamento) {
-                    carrinho.forEach(i=>{b.update(db.collection("estoque").doc(i.id),{status:"vendido",dataVenda:Date.now(),clienteVenda:cli});});
-                    trocas.forEach(t=>{const r=db.collection("estoque").doc();b.set(r,{categoria:'celular',modelo:`${t.modelo} (TROCA)`,venda:0,status:'disponível',custo:t.valor});});
-                } else {
-                    carrinho.forEach(i=>{b.update(db.collection("estoque").doc(i.id),{status:"disponível"});});
-                }
+            document.getElementById('val-desc').innerText = "- " + dados.descontoManual.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+            document.getElementById('val-taxa').innerText = "+ " + (dados.taxaMaquininha||0).toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+            document.getElementById('val-total').innerText = dados.total.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+            document.getElementById('txt-pgto').innerText = `Forma: ${dados.pagamento} ${dados.textoParcelas||''}`;
 
-                // Salva Venda
-                const snap = await db.collection("vendas").get();
-                const num = String(snap.size+1).padStart(4,'0');
-                b.set(db.collection("vendas").doc(),{numeroPedido:num, tipoRegistro:tipo, status: isOrcamento?"ORCAMENTO":"CONCRETIZADA", cliente:cli, total:totalVendaGlobal, data:new Date().toISOString()});
-                await b.commit();
+            // ESCONDE/MOSTRA CONTRATO
+            if(dados.isOrcamento) {
+                document.getElementById('area-contrato').style.display = 'none';
+                document.getElementById('area-orcamento').style.display = 'block';
+            } else {
+                document.getElementById('area-contrato').style.display = 'block';
+                document.getElementById('area-orcamento').style.display = 'none';
+            }
 
-                // Histórico Cliente
-                let txt = `${new Date().toLocaleDateString('pt-BR')} - ${isOrcamento?"Orçamento":"Compra"}: R$ ${totalVendaGlobal.toFixed(2)}`;
-                db.collection("clientes").where("nome","==",cli).get().then(qs=>{qs.forEach(doc=>{db.collection("clientes").doc(doc.id).update({historico: txt+"\n"+(doc.data().historico||"")})})});
-
-                const dados = montarDadosDoc(cli, isOrcamento);
-                dados.numeroPedido = num;
-                dados.autoPrint = !isOrcamento; // Imprime se for venda
-                localStorage.setItem('dadosRecibo', JSON.stringify(dados));
-                window.open('orcamento.html','_blank');
-
-                if(!isOrcamento) { limparRascunho(); window.location.reload(); }
-                else { alert("Orçamento salvo! Tela mantida."); }
-
-            } catch(e) { alert("Erro: "+e.message); }
+            // AUTO PRINT SÓ SE NÃO FOR PREVIEW
+            if(dados.autoPrint) {
+                setTimeout(() => window.print(), 800);
+            }
         }
-
-        function montarDadosDoc(cli, isOrcamento){
-            const cFull = dbClientes.find(c=>c.nome===cli)||{nome:cli};
-            let itensR = carrinho.map(i=>({nome:i.modelo||i.nomeP,desc:i.cor||'',preco:i.venda,isBrinde:i.isBrinde}));
-            trocas.forEach(t=>itensR.push({nome:"TROCA: "+t.modelo,desc:t.imei,preco:-t.valor,isTroca:true}));
-            let textoParcela = "";
-            if(parcelasSelecionadas>0) textoParcela = `(${parcelasSelecionadas}x)`;
-            
-            return {
-                titulo: isOrcamento ? "ORÇAMENTO" : "RECIBO DE VENDA",
-                isOrcamento: isOrcamento,
-                numeroPedido: "0000", // Será substituido
-                cliente: cFull.nome, cpf: cFull.cpf||'', tel: cFull.whats||'', endereco: cFull.logradouro||'',
-                itens: itensR,
-                descontoManual: parseFloat(document.getElementById('valor-desconto-manual').value)||0,
-                taxaMaquininha: valorTaxaAplicada,
-                total: totalVendaGlobal,
-                pagamento: document.getElementById('forma-pagamento').value,
-                textoParcelas: textoParcela,
-                data: new Date().toLocaleDateString('pt-BR')
-            };
-        }
-
-        // Funções curtas de suporte
-        function formatMoeda(v){return parseFloat(v).toLocaleString('pt-br',{style:'currency',currency:'BRL'});}
-        function carregarTaxasDoBanco(){db.collection("config_taxas").doc("geral").onSnapshot(doc=>{if(doc.exists)taxasAtuais=doc.data();else taxasAtuais={1:4.5,12:15.5};});}
-        function abrirSimulador(){if(totalVendaGlobal<=0)return alert("Vazio!");renderizarTabelaSimulacao(totalVendaGlobal);document.getElementById('modal-simulador').style.display='flex';}
-        function renderizarTabelaSimulacao(base){const tb=document.getElementById('lista-simulacao');tb.innerHTML="";let txtCopy=`*SIMULAÇÃO*\nValor: ${formatMoeda(base)}\n`;for(let i=1;i<=24;i++){let tx=taxasAtuais[i]||(4+(i*1.2));let tot=base*(1+(tx/100));let parc=tot/i;let htmTx=mostrarTaxasNaTela?`<small>(${tx.toFixed(2)}%)</small>`:'';tb.innerHTML+=`<tr onclick="aplicarParcelamento(${i},${tot-base})"><td>${i}x ${htmTx}</td><td>${formatMoeda(parc)}</td><td class="sim-total">${formatMoeda(tot)}</td></tr>`;txtCopy+=`${i}x ${formatMoeda(parc)} (Total: ${formatMoeda(tot)})\n`;}document.getElementById('modal-simulador').setAttribute('data-copy',txtCopy);}
-        function aplicarParcelamento(p,jur){valorTaxaAplicada=jur;parcelasSelecionadas=p;let s=document.getElementById('forma-pagamento');s.innerHTML+=`<option value="Crédito ${p}x">Crédito ${p}x (Simulado)</option>`;s.value=`Crédito ${p}x`;document.getElementById('modal-simulador').style.display='none';atualizarTotais();}
-        function toggleTaxasVisuais(){mostrarTaxasNaTela=!mostrarTaxasNaTela;renderizarTabelaSimulacao(totalVendaGlobal);}
-        function copiarOfertaZap(){navigator.clipboard.writeText(document.getElementById('modal-simulador').getAttribute('data-copy'));alert("Copiado!");}
-        function carregarListasAuxiliares(){db.collection("lista_modelos_cel").onSnapshot(s=>{let d=document.getElementById('dl-modelos-list');d.innerHTML="";s.forEach(o=>d.innerHTML+=`<option value="${o.data().nome}">`)});db.collection("lista_cores_cel").onSnapshot(s=>{let d=document.getElementById('dl-cores-list');d.innerHTML="";s.forEach(o=>d.innerHTML+=`<option value="${o.data().nome}">`)});}
-        function filtrarProdutos(){const t=document.getElementById('busca').value.toLowerCase();const c=document.getElementById('filtro-cat').value;document.querySelectorAll('.product-card').forEach(el=>{const txt=el.innerText.toLowerCase();const cat=el.querySelector('.prod-cat-tag').innerText.toLowerCase();el.style.display=(txt.includes(t)&&(c===""||cat.includes(c)))?'flex':'none'});}
-        function renderizarDatalistClientes(){const dl=document.getElementById('lista-clientes-db');dl.innerHTML="";dbClientes.forEach(c=>dl.innerHTML+=`<option value="${c.nome}">${c.cpf||''}</option>`);}
-        async function adicionarAoCarrinho(p){try{await db.collection("estoque").doc(p.id).update({status:"em_negociacao"});carrinho.push({...p,isBrinde:false});atualizarTotais();salvarRascunho();}catch(e){alert("Item indisponível!");}}
-        async function removerDoCarrinho(i){try{await db.collection("estoque").doc(carrinho[i].id).update({status:"disponível"});}catch(e){}carrinho.splice(i,1);atualizarTotais();salvarRascunho();}
-        async function cancelarVendaTotal(){if(!confirm("Limpar?"))return;for(const i of carrinho){try{await db.collection("estoque").doc(i.id).update({status:"disponível"});}catch(e){}}limparRascunho();}
-        function toggleBrinde(i){carrinho[i].isBrinde=!carrinho[i].isBrinde;atualizarTotais();}
-        function confirmarTroca(){const t={modelo:document.getElementById('troca-modelo').value,imei:document.getElementById('troca-imei').value,valor:parseFloat(document.getElementById('troca-valor').value)||0};if(!t.modelo||!t.valor)return alert("Dados?");trocas.push(t);document.getElementById('modal-troca').style.display='none';atualizarTotais();}
-        function atualizarTotais(){const dc=document.getElementById('carrinho-lista');const dt=document.getElementById('lista-trocas');dc.innerHTML="";dt.innerHTML="";let sub=0;carrinho.forEach((i,idx)=>{let val=i.isBrinde?0:parseFloat(i.venda||0);sub+=val;dc.innerHTML+=`<div class="cart-item ${i.isBrinde?'brinde':''}"><div class="item-info"><div>${i.modelo||i.nomeP}</div><small>R$ ${val.toFixed(2)}</small></div><div class="item-actions"><i class="btn-icon fas fa-gift" onclick="toggleBrinde(${idx})"></i><i class="btn-icon fas fa-trash" onclick="removerDoCarrinho(${idx})"></i></div></div>`;});let dTroca=0;trocas.forEach((t,i)=>{dTroca+=t.valor;dt.innerHTML+=`<div class="trade-in-box"><span>${t.modelo} (R$ ${t.valor})</span></div>`;});let desc=parseFloat(document.getElementById('valor-desconto-manual').value)||0;totalVendaGlobal=sub-dTroca-desc+valorTaxaAplicada;document.getElementById('valor-subtotal').innerText=`R$ ${sub.toFixed(2)}`;document.getElementById('valor-total').innerText=`R$ ${totalVendaGlobal.toFixed(2)}`;salvarRascunho();}
-        function salvarRascunho(){localStorage.setItem('pdv_rascunho',JSON.stringify({carrinho,trocas,cli:document.getElementById('cliente-input').value,pg:document.getElementById('forma-pagamento').value}));}
-        function restaurarRascunho(){let d=JSON.parse(localStorage.getItem('pdv_rascunho'));if(d){carrinho=d.carrinho||[];trocas=d.trocas||[];document.getElementById('cliente-input').value=d.cli||"";atualizarTotais();}}
-        function limparRascunho(){localStorage.removeItem('pdv_rascunho');carrinho=[];trocas=[];valorTaxaAplicada=0;document.getElementById('cliente-input').value="";atualizarTotais();}
-        function carregarOpcoesPagamento(){let s=document.getElementById('forma-pagamento');s.innerHTML=`<option value="">Selecione...</option><option>Pix</option><option>Dinheiro</option><option>Débito</option><option>Crédito</option>`;}
     </script>
 </body>
 </html>
