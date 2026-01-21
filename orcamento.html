@@ -6,10 +6,10 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 
-        /* CONFIGURAÇÃO PARA REMOVER URL E DATA DO NAVEGADOR */
+        /* TIRA CABEÇALHO E RODAPÉ DO NAVEGADOR (URL, DATA, ETC) */
         @page {
             size: A4;
-            margin: 0; /* Isso remove o cabeçalho e rodapé padrão do navegador */
+            margin: 0; 
         }
 
         body { 
@@ -26,7 +26,7 @@
             background: #fff;
             width: 210mm;
             min-height: 297mm;
-            padding: 15mm; /* Margem interna do papel */
+            padding: 15mm;
             padding-bottom: 20mm;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             position: relative;
@@ -34,10 +34,10 @@
             margin: 0 auto;
         }
 
-        /* RODAPÉ DO SISTEMA (VÉRTICE BI) */
+        /* RODAPÉ DO SISTEMA FIXO NA IMPRESSÃO */
         .system-footer {
             position: absolute;
-            bottom: 10mm;
+            bottom: 5mm;
             left: 0;
             width: 100%;
             text-align: center;
@@ -57,8 +57,8 @@
             margin-bottom: 20px;
         }
         .logo-area img {
-            max-height: 110px; /* AUMENTEI O LOGO AQUI */
-            max-width: 250px;
+            max-height: 120px; /* LOGO MAIOR */
+            max-width: 280px;
         }
         .company-info {
             text-align: right;
@@ -102,7 +102,7 @@
             padding-bottom: 2px;
         }
 
-        /* INPUTS EDITÁVEIS */
+        /* INPUTS EDITÁVEIS (INVISIBLE MODE) */
         .input-editable {
             border: none;
             border-bottom: 1px dashed #999;
@@ -129,7 +129,7 @@
         .t-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 13px; }
         .t-total { font-size: 18px; font-weight: bold; border-top: 2px solid #000; margin-top: 5px; padding-top: 5px; }
 
-        /* CONTRATO */
+        /* CONTRATO EDITÁVEL */
         .legal-terms {
             margin-top: 40px;
             font-size: 10px;
@@ -138,7 +138,11 @@
             border: 1px solid #eee;
             padding: 10px;
             background: #fafafa;
+            outline: none; /* Remove borda azul ao clicar */
+            cursor: text;
         }
+        /* Efeito ao passar o mouse para mostrar que é editável */
+        .legal-terms:hover { background: #fffde7; border: 1px dashed #ccc; }
         
         .signatures {
             margin-top: 50px;
@@ -171,12 +175,12 @@
         .btn-print { background: #000; }
         .btn-close { background: #666; }
 
-        /* IMPRESSÃO LIMPA */
         @media print {
             body { background: #fff; padding: 0; }
             .page { box-shadow: none; width: 100%; height: 100%; padding: 15mm; margin: 0; }
             .screen-btns { display: none; }
             .input-editable { border-bottom: none; }
+            .legal-terms { background: transparent; border: none; } /* Remove fundo e borda na impressão */
         }
     </style>
 </head>
@@ -184,7 +188,7 @@
 
     <div class="screen-btns">
         <a href="#" onclick="window.close()" class="btn btn-close">FECHAR</a>
-        <a href="#" onclick="window.print()" class="btn btn-print">IMPRIMIR</a>
+        <a href="#" onclick="window.print()" class="btn btn-print">IMPRIMIR / SALVAR PDF</a>
     </div>
 
     <div class="page">
@@ -249,8 +253,8 @@
         </div>
 
         <div id="area-contrato">
-            <div class="legal-terms">
-                <strong>TERMOS DE GARANTIA E CONDIÇÕES</strong><br>
+            <div class="legal-terms" contenteditable="true">
+                <strong>TERMOS DE GARANTIA E CONDIÇÕES (EDITÁVEL - CLIQUE PARA ALTERAR)</strong><br><br>
                 1. A LM Imports oferece garantia de 90 (noventa) dias para defeitos de fabricação, conforme Art. 26 do CDC.<br>
                 2. A garantia <strong>NÃO COBRE:</strong> Danos causados por líquidos, quedas, mau uso, telas quebradas ou violação do selo de garantia.<br>
                 3. Em caso de troca, o produto deve estar nas mesmas condições estéticas do ato da venda.<br>
@@ -269,7 +273,7 @@
         </div>
 
         <div class="system-footer">
-            VÉRTICE BI CORE • SISTEMA DE GESTÃO INTELIGENTE
+            VÉRTICE BI CORE • GESTÃO INTELIGENTE
         </div>
 
     </div>
@@ -280,10 +284,8 @@
         document.getElementById('vendedor-input').value = usuarioLogado;
 
         if(dados) {
-            // CORREÇÃO: Garante que o título venha do PDV ou define padrão
+            // LÓGICA DO TÍTULO: Se for pré-visualização, mostra RECIBO DE VENDA mas sem validade
             let tituloFinal = dados.titulo;
-            
-            // Se veio vazio, calcula de novo
             if(!tituloFinal || tituloFinal === "UNDEFINED") {
                 tituloFinal = dados.isOrcamento ? "ORÇAMENTO" : "RECIBO DE VENDA";
             }
@@ -302,14 +304,7 @@
                 let nome = item.nome;
                 let valor = parseFloat(item.preco);
                 if(item.isBrinde) { valor = 0; nome += " (BRINDE)"; }
-                
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${nome}</td>
-                        <td>${item.desc}</td>
-                        <td class="col-valor">${valor.toLocaleString('pt-br',{style:'currency', currency:'BRL'})}</td>
-                    </tr>
-                `;
+                tbody.innerHTML += `<tr><td>${nome}</td><td>${item.desc}</td><td class="col-valor">${valor.toLocaleString('pt-br',{style:'currency', currency:'BRL'})}</td></tr>`;
             });
 
             document.getElementById('val-desc').innerText = "- " + dados.descontoManual.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
@@ -327,8 +322,9 @@
             }
         }
 
+        // AUTO IMPRESSÃO COM PEQUENO DELAY PARA CARREGAR A IMAGEM
         setTimeout(() => {
-            // window.print(); // Descomente para imprimir automático
+            window.print();
         }, 800);
     </script>
 </body>
