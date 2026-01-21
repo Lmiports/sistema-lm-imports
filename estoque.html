@@ -3,40 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VÉRTICE - ESTOQUE PRO SETORIZADO</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>VÉRTICE | ESTOQUE PRO</title>
     
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
 
     <style>
-        :root { --bg: #020617; --card: #0f172a; --accent: #3b82f6; --border: #1e293b; --text: #f8fafc; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        /* --- PADRÃO VISUAL VÉRTICE (Igual ao seu original) --- */
+        :root { 
+            --bg: #020617; 
+            --card: #0f172a; 
+            --accent: #3b82f6; /* Azul Padrão */
+            --border: #1e293b; 
+            --text: #f8fafc; 
+            --success: #10b981; 
+            --warning: #f59e0b; 
+            --danger: #ef4444; 
+        }
         
-        /* SIDEBAR */
-        .sidebar { width: 250px; background: #000; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; transition: 0.3s; }
-        .logo { color: var(--accent); text-align: center; font-weight: bold; font-size: 20px; margin-bottom: 40px; letter-spacing: 2px; }
-        .nav-item { padding: 15px; color: #94a3b8; text-decoration: none; border-radius: 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
-        .nav-item:hover, .nav-item.active { background: var(--accent); color: #fff; }
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', sans-serif; 
+            margin: 0; 
+            /* Ajuste para rolagem funcionar sem sidebar */
+            display: block; 
+            min-height: 100vh;
+            overflow-y: auto; 
+        }
+        
+        /* HEADER COM MENU (Sem Sidebar) */
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-        /* CONTENT */
-        .content { flex: 1; padding: 20px; display: grid; grid-template-columns: 1fr 1.3fr; gap: 20px; position: relative; overflow-y: auto; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
         
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
+        .btn-home {
+            text-decoration: none;
+            color: #fff;
+            background: #1e293b;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-home:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+        .page-title { font-size: 18px; font-weight: bold; color: var(--accent); letter-spacing: 1px; margin: 0; }
+        
+        /* CONTENT (Agora ocupa tudo) */
+        .content { 
+            padding: 20px; 
+            display: grid; 
+            grid-template-columns: 1fr 1.3fr; 
+            gap: 20px; 
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; height: fit-content; }
         .card-header { padding: 15px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: center; }
         .card-title { font-size: 14px; font-weight: bold; color: var(--accent); text-transform: uppercase; margin: 0; }
 
-        /* UI */
+        /* FILTROS E BUSCA */
         .filter-tabs { display: flex; gap: 5px; padding: 10px 15px; border-bottom: 1px solid var(--border); overflow-x: auto; white-space: nowrap; }
-        .f-tab { padding: 6px 12px; background: #1e293b; border-radius: 15px; font-size: 11px; cursor: pointer; color: #94a3b8; border: 1px solid transparent; }
+        .f-tab { padding: 6px 12px; background: #1e293b; border-radius: 15px; font-size: 11px; cursor: pointer; color: #94a3b8; border: 1px solid transparent; transition:0.2s; }
+        .f-tab:hover { color: #fff; }
         .f-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
         .search-box { padding: 10px 15px; border-bottom: 1px solid var(--border); }
         input, select { width: 100%; padding: 12px; background: #020617; border: 1px solid var(--border); border-radius: 8px; color: #fff; box-sizing: border-box; outline: none; transition: 0.3s; font-size: 13px; }
         input:focus, select:focus { border-color: var(--accent); }
 
-        .item-list { overflow-y: auto; flex: 1; }
+        /* LISTA DE ITENS */
+        .item-list { max-height: 600px; overflow-y: auto; flex: 1; }
         .item-row { padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
         .item-row:hover { background: rgba(59, 130, 246, 0.1); }
         .item-row.active { background: var(--accent); color: #fff; }
@@ -47,7 +103,8 @@
         .badge-acessorio { background: #8b5cf6; color: #fff; }
         .badge-perfume { background: #f59e0b; color: #fff; }
 
-        .form-body { padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 15px; }
+        /* FORMULÁRIO */
+        .form-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .label { font-size: 11px; color: #64748b; margin-bottom: 5px; display: block; text-transform: uppercase; }
         .req { color: var(--danger); margin-left: 2px; }
@@ -62,6 +119,9 @@
 
         .hidden { display: none !important; }
 
+        /* RODAPÉ */
+        .footer { text-align: center; padding: 20px; color: #64748b; font-size: 11px; border-top: 1px solid var(--border); margin-top: 20px; width: 100%; }
+
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; justify-content: center; align-items: center; }
         .modal-box { background: var(--card); border: 1px solid var(--accent); padding: 20px; border-radius: 12px; width: 400px; max-height: 80vh; display: flex; flex-direction: column; }
@@ -71,46 +131,13 @@
         .btn-mini-del { color: var(--danger); cursor: pointer; }
         optgroup { color: var(--accent); font-weight: bold; background: #000; }
 
-        /* MENU MOBILE ICON */
-        .menu-toggle { display: none; position: fixed; top: 15px; left: 15px; z-index: 1001; background: var(--accent); color: white; border: none; padding: 8px; border-radius: 5px; }
-
-        /* --- RESPONSIVIDADE MOBILE --- */
-        @media (max-width: 768px) {
-            body { flex-direction: column; overflow: auto; height: auto; padding-top: 50px; }
-            
-            .menu-toggle { display: block; }
-            .sidebar { 
-                position: fixed; top: 0; left: -250px; height: 100vh; z-index: 1000; 
-                background: rgba(0,0,0,0.95); width: 250px; 
-            }
-            .sidebar.active { left: 0; }
-
-            .content { 
-                display: flex; 
-                flex-direction: column; 
-                height: auto; 
-                overflow: visible;
-                padding: 10px;
-            }
-
-            /* Lista de Estoque menor no topo */
-            .card:first-child {
-                max-height: 350px; /* Limita altura da lista */
-                flex: none;
-            }
-            .item-list { max-height: 250px; }
-
-            /* Formulário vira coluna única */
+        /* RESPONSIVIDADE MOBILE */
+        @media (max-width: 900px) {
+            .content { display: flex; flex-direction: column; padding: 10px; }
+            .card:first-child { max-height: 400px; } /* Limita a lista no mobile */
             .form-grid { grid-template-columns: 1fr; }
-            
-            .form-body { overflow: visible; height: auto; }
-            
-            /* Botões Mobile */
-            .btn { width: 100%; }
             .btn-group { flex-direction: column-reverse; }
-            
-            /* Ajuste Modal Mobile */
-            .modal-box { width: 90%; max-height: 90vh; }
+            .btn { width: 100%; }
         }
 
         /* SCROLLBAR */
@@ -121,20 +148,14 @@
 </head>
 <body>
 
-    <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('active')">
-        <i class="fas fa-bars"></i>
-    </button>
-
-    <aside class="sidebar">
-        <div class="logo">VÉRTICE</div>
-        <nav>
-            <a href="index.html" class="nav-item"><i class="fas fa-home"></i> Início</a>
-            <a href="clientes.html" class="nav-item"><i class="fas fa-users"></i> Clientes</a>
-            <a href="estoque.html" class="nav-item active"><i class="fas fa-box"></i> Estoque</a>
-            <a href="fornecedores.html" class="nav-item"><i class="fas fa-truck"></i> Fornecedores</a>
-            <a href="vendas.html" class="nav-item"><i class="fas fa-cash-register"></i> PDV Vendas</a>
-        </nav>
-    </aside>
+    <div class="header-top">
+        <div class="header-left">
+            <a href="menu.html" class="btn-home"><i class="fas fa-home"></i> MENU</a>
+            <h1 class="page-title">VÉRTICE ESTOQUE</h1>
+        </div>
+        <div>
+            </div>
+    </div>
 
     <main class="content">
         
@@ -153,7 +174,7 @@
             </div>
 
             <div class="search-box">
-                <input type="text" id="busca" placeholder="🔍 Buscar..." onkeyup="filtrarLista()">
+                <input type="text" id="busca" placeholder="🔍 Buscar modelo, imei..." onkeyup="filtrarLista()">
             </div>
             
             <div class="item-list" id="lista-estoque">
@@ -305,6 +326,10 @@
             </div>
         </section>
 
+        <div class="footer" style="grid-column: 1 / -1;">
+            VÉRTICE BI CORE v11.0 © Rodrigo N Carvalho 2026
+        </div>
+
         <datalist id="dlMarcas"></datalist>
         <datalist id="dlFornecedores"></datalist>
         <datalist id="dlModelosCelular"></datalist>
@@ -359,6 +384,10 @@
 
         // 1. INICIALIZAÇÃO
         window.onload = () => {
+            // Verifica Login Básico
+            const cargo = localStorage.getItem('cargoUsuario');
+            if(!cargo) window.location.href='index.html';
+
             db.collection("estoque").orderBy("modelo").onSnapshot(snap => {
                 dbEstoque = [];
                 snap.forEach(doc => dbEstoque.push({ id: doc.id, ...doc.data() }));
@@ -379,25 +408,15 @@
 
         // 2. FUNÇÃO LIMPAR VENDIDOS
         async function limparVendidos() {
-            if(!confirm("ATENÇÃO: Você tem certeza que deseja excluir PERMANENTEMENTE todos os itens já vendidos?\n\nEssa ação limpará a lista, mas manterá o registro histórico nas Vendas. Deseja continuar?")) return;
-
+            if(!confirm("ATENÇÃO: Deseja limpar os itens vendidos da visualização?")) return;
             try {
                 const snap = await db.collection("estoque").where("status", "==", "vendido").get();
-                if(snap.empty) return alert("Nenhum item vendido encontrado para limpar.");
-
+                if(snap.empty) return alert("Nada para limpar.");
                 const batch = db.batch();
-                let contador = 0;
-
-                snap.docs.forEach(doc => {
-                    batch.delete(doc.ref);
-                    contador++;
-                });
-
+                snap.docs.forEach(doc => batch.delete(doc.ref));
                 await batch.commit();
-                alert(`Limpeza realizada! ${contador} itens vendidos foram removidos do estoque.`);
-            } catch(e) {
-                alert("Erro ao limpar: " + e.message);
-            }
+                alert("Limpeza concluída!");
+            } catch(e) { alert("Erro: " + e.message); }
         }
 
         // 3. RENDERIZAÇÃO
@@ -456,7 +475,7 @@
 
         function filtrarLista() { renderizarLista(); }
 
-        // --- INTEGRAÇÃO SETORIZADA ---
+        // --- LÓGICA DE FORMULÁRIO ---
         function ajustarCampos() {
             const cat = document.getElementById('categoria').value;
             const inputModelo = document.getElementById('modelo');
@@ -501,7 +520,6 @@
             
             ajustarCampos();
 
-            // Celular
             document.getElementById('gb').value = p.gb || '128GB';
             document.getElementById('cor').value = p.cor || '';
             document.getElementById('serial').value = p.serial || '';
@@ -509,18 +527,15 @@
             document.getElementById('imei1').value = p.imei1 || '';
             document.getElementById('imei2').value = p.imei2 || '';
             
-            // Roupa
             document.getElementById('tamanho').value = p.tamanho || '';
             document.getElementById('corRoupa').value = p.cor || '';
             
-            // Perfume
             document.getElementById('ml').value = p.ml || '';
             document.getElementById('tipoPerfume').value = p.fragrancia || '';
 
             renderizarLista();
             
-            // No mobile, rola para o formulário
-            if(window.innerWidth <= 768) {
+            if(window.innerWidth <= 900) {
                 document.querySelector('.form-body').scrollIntoView({behavior: "smooth"});
             }
         }
@@ -544,10 +559,6 @@
             
             document.getElementById('modelo').focus();
             renderizarLista();
-            
-            if(window.innerWidth <= 768) {
-                document.querySelector('.form-body').scrollIntoView({behavior: "smooth"});
-            }
         }
 
         async function salvarItem() {
@@ -566,20 +577,12 @@
             };
 
             if (cat === 'celular') {
-                const imei1 = document.getElementById('imei1').value;
-                const serial = document.getElementById('serial').value;
-                const bat = document.getElementById('bateria').value;
-
-                if(imei1.length < 15) return alert("IMEI 1 inválido (Mínimo 15 dígitos)");
-                if(!serial) return alert("Informe o Serial Number");
-                if(!bat) return alert("Informe a Saúde da Bateria");
-
                 dados.gb = document.getElementById('gb').value;
                 dados.cor = document.getElementById('cor').value;
-                dados.imei1 = imei1;
+                dados.imei1 = document.getElementById('imei1').value;
                 dados.imei2 = document.getElementById('imei2').value;
-                dados.serial = serial.toUpperCase();
-                dados.bateria = bat;
+                dados.serial = document.getElementById('serial').value.toUpperCase();
+                dados.bateria = document.getElementById('bateria').value;
             } 
             else if (cat === 'roupa') {
                 dados.tamanho = document.getElementById('tamanho').value;
@@ -615,14 +618,9 @@
             }
         }
 
-        // --- GESTÃO DE LISTAS DINÂMICA ---
-        function abrirModalGestao() {
-            document.getElementById('modalListas').style.display = 'flex';
-            carregarItensLista();
-        }
-        function fecharModalGestao() {
-            document.getElementById('modalListas').style.display = 'none';
-        }
+        // --- GESTÃO DE LISTAS ---
+        function abrirModalGestao() { document.getElementById('modalListas').style.display = 'flex'; carregarItensLista(); }
+        function fecharModalGestao() { document.getElementById('modalListas').style.display = 'none'; }
 
         async function carregarItensLista() {
             const colecao = document.getElementById('selListaGerenciar').value;
