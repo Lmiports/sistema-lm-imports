@@ -6,6 +6,12 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 
+        /* CONFIGURAÇÃO PARA REMOVER URL E DATA DO NAVEGADOR */
+        @page {
+            size: A4;
+            margin: 0; /* Isso remove o cabeçalho e rodapé padrão do navegador */
+        }
+
         body { 
             font-family: 'Inter', sans-serif; 
             background: #eee; 
@@ -20,24 +26,25 @@
             background: #fff;
             width: 210mm;
             min-height: 297mm;
-            padding: 15mm;
-            padding-bottom: 20mm; /* Espaço extra para o rodapé */
+            padding: 15mm; /* Margem interna do papel */
+            padding-bottom: 20mm;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             position: relative;
             box-sizing: border-box;
+            margin: 0 auto;
         }
 
-        /* RODAPÉ DO SISTEMA (NOVO) */
+        /* RODAPÉ DO SISTEMA (VÉRTICE BI) */
         .system-footer {
             position: absolute;
             bottom: 10mm;
             left: 0;
             width: 100%;
             text-align: center;
-            font-size: 9px;
-            color: #bbb;
+            font-size: 8px;
+            color: #999;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
         }
 
         /* CABEÇALHO */
@@ -50,26 +57,27 @@
             margin-bottom: 20px;
         }
         .logo-area img {
-            max-height: 80px; 
-            max-width: 200px;
+            max-height: 110px; /* AUMENTEI O LOGO AQUI */
+            max-width: 250px;
         }
         .company-info {
             text-align: right;
             font-size: 12px;
             line-height: 1.4;
         }
-        .company-info h2 { margin: 0; font-size: 18px; text-transform: uppercase; }
+        .company-info h2 { margin: 0; font-size: 20px; text-transform: uppercase; }
 
-        /* TÍTULO E DADOS */
+        /* TÍTULO */
         .doc-title {
             text-align: center;
-            font-size: 22px;
+            font-size: 24px;
             font-weight: bold;
             margin: 20px 0;
             text-transform: uppercase;
-            background: #f8f8f8;
+            background: #f4f4f4;
             padding: 10px;
             border: 1px solid #ddd;
+            border-radius: 4px;
         }
 
         .meta-grid {
@@ -94,7 +102,7 @@
             padding-bottom: 2px;
         }
 
-        /* CAMPOS EDITÁVEIS */
+        /* INPUTS EDITÁVEIS */
         .input-editable {
             border: none;
             border-bottom: 1px dashed #999;
@@ -116,18 +124,12 @@
         .col-valor { text-align: right; white-space: nowrap; font-weight: bold; }
         
         /* TOTAIS */
-        .totals-area {
-            display: flex;
-            justify-content: flex-end;
-        }
-        .totals-box {
-            width: 250px;
-            text-align: right;
-        }
+        .totals-area { display: flex; justify-content: flex-end; }
+        .totals-box { width: 250px; text-align: right; }
         .t-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 13px; }
         .t-total { font-size: 18px; font-weight: bold; border-top: 2px solid #000; margin-top: 5px; padding-top: 5px; }
 
-        /* CONTRATO E RODAPÉ */
+        /* CONTRATO */
         .legal-terms {
             margin-top: 40px;
             font-size: 10px;
@@ -139,7 +141,7 @@
         }
         
         .signatures {
-            margin-top: 60px;
+            margin-top: 50px;
             display: flex;
             justify-content: space-between;
             padding: 0 20px;
@@ -152,7 +154,7 @@
             padding-top: 5px;
         }
 
-        /* AVISO DE ORÇAMENTO */
+        /* ORÇAMENTO */
         .orcamento-alert {
             display: none;
             margin-top: 50px;
@@ -163,17 +165,18 @@
             font-weight: bold;
         }
 
-        /* TELA VS IMPRESSÃO */
-        .screen-btns { position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; }
+        /* BOTÕES DE TELA */
+        .screen-btns { position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 999; }
         .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; text-decoration: none; color: #fff; }
         .btn-print { background: #000; }
         .btn-close { background: #666; }
 
+        /* IMPRESSÃO LIMPA */
         @media print {
             body { background: #fff; padding: 0; }
-            .page { box-shadow: none; width: 100%; height: auto; padding: 0; }
+            .page { box-shadow: none; width: 100%; height: 100%; padding: 15mm; margin: 0; }
             .screen-btns { display: none; }
-            .input-editable { border-bottom: none; } 
+            .input-editable { border-bottom: none; }
         }
     </style>
 </head>
@@ -273,21 +276,19 @@
 
     <script>
         const dados = JSON.parse(localStorage.getItem('dadosRecibo'));
-        
-        // Puxa vendedor do login ou usa padrão
         const usuarioLogado = localStorage.getItem('usuarioLogado') || "Vendedor";
         document.getElementById('vendedor-input').value = usuarioLogado;
 
         if(dados) {
-            // CORREÇÃO DO UNDEFINED:
-            // Se 'dados.titulo' não existir, cria baseado no 'isOrcamento'
+            // CORREÇÃO: Garante que o título venha do PDV ou define padrão
             let tituloFinal = dados.titulo;
-            if(!tituloFinal) {
+            
+            // Se veio vazio, calcula de novo
+            if(!tituloFinal || tituloFinal === "UNDEFINED") {
                 tituloFinal = dados.isOrcamento ? "ORÇAMENTO" : "RECIBO DE VENDA";
             }
             document.getElementById('titulo-doc').innerText = tituloFinal;
             
-            // Resto dos dados
             document.getElementById('ped-num-input').value = dados.numeroPedido;
             document.getElementById('ped-data').innerText = dados.data;
             document.getElementById('cli-nome').innerText = dados.cliente;
@@ -300,7 +301,6 @@
             dados.itens.forEach(item => {
                 let nome = item.nome;
                 let valor = parseFloat(item.preco);
-                
                 if(item.isBrinde) { valor = 0; nome += " (BRINDE)"; }
                 
                 tbody.innerHTML += `
@@ -328,7 +328,7 @@
         }
 
         setTimeout(() => {
-            // window.print(); // Descomente para auto-imprimir
+            // window.print(); // Descomente para imprimir automático
         }, 800);
     </script>
 </body>
