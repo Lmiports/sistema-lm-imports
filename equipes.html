@@ -3,77 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VÉRTICE | Gestão de Equipe</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>VÉRTICE BI | CORE</title>
     
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
 
     <style>
-        :root { --bg: #020617; --card: #0f172a; --accent: #00e0ff; --text: #f8fafc; --border: #1e293b; --danger: #ef4444; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        /* --- PADRÃO VISUAL VÉRTICE BI CORE --- */
+        :root { 
+            --bg: #020617; 
+            --card: #0f172a; 
+            --accent: #00e0ff; /* AZUL NEON */
+            --border: #1e293b; 
+            --text: #f8fafc; 
+            --success: #10b981; 
+            --danger: #ef4444; 
+            --warning: #f59e0b;
+        }
+        
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', sans-serif; 
+            margin: 0; 
+            display: block; 
+            min-height: 100vh;
+            overflow-y: auto; 
+        }
+        
+        /* HEADER FIXO */
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-        .sidebar { width: 250px; background: #000; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
-        .logo { color: var(--accent); text-align: center; font-weight: bold; font-size: 24px; margin-bottom: 40px; letter-spacing: 2px; }
-        .nav-item { padding: 15px; color: #94a3b8; text-decoration: none; border-radius: 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; transition: 0.3s; cursor: pointer; }
-        .nav-item:hover, .nav-item.active { background: var(--accent); color: #000; font-weight: bold; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        
+        .btn-home {
+            text-decoration: none;
+            color: #fff;
+            background: #1e293b;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-home:hover { background: var(--accent); border-color: var(--accent); color: #000; }
 
-        .content { flex: 1; padding: 30px; overflow-y: auto; }
-        h2 { border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-top: 0; }
+        .page-title { font-size: 18px; font-weight: bold; color: var(--accent); letter-spacing: 1px; margin: 0; }
+        .version-tag { font-size: 10px; color: #000; background: var(--accent); padding: 2px 6px; border-radius: 4px; margin-left: 10px; font-weight: 900; letter-spacing: 1px; vertical-align: middle; }
 
-        .form-card { background: var(--card); padding: 25px; border-radius: 12px; border: 1px solid var(--border); max-width: 600px; margin-bottom: 30px; border-left: 5px solid var(--accent); }
+        /* CONTENT */
+        .content { 
+            padding: 30px; 
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        h2 { border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-top: 0; color: var(--text); }
+
+        /* FORMULÁRIO */
+        .form-card { 
+            background: var(--card); 
+            padding: 25px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border); 
+            max-width: 600px; 
+            margin: 0 auto 30px auto; 
+            border-left: 5px solid var(--accent); 
+        }
+        
         .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 5px; }
-        input[type="text"] { width: 100%; padding: 12px; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 6px; outline: none; box-sizing: border-box; }
+        label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
+        
+        input[type="text"] { 
+            width: 100%; 
+            padding: 12px; 
+            background: #020617; 
+            border: 1px solid var(--border); 
+            color: #fff; 
+            border-radius: 6px; 
+            outline: none; 
+            box-sizing: border-box; 
+            transition: 0.3s;
+        }
         input[type="text"]:focus { border-color: var(--accent); }
 
-        /* MUDANÇA VISUAL NA EDIÇÃO */
-        .editing { border-color: #f59e0b; border-left-color: #f59e0b; }
+        /* EDIÇÃO */
+        .editing { border-color: var(--warning); border-left-color: var(--warning); }
         
-        /* CHECKBOXES DE PERMISSÃO */
+        /* CHECKBOXES */
         .perms-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 5px; }
-        .perm-item { background: #1e293b; padding: 10px; border-radius: 5px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 1px solid var(--border); }
-        .perm-item:hover { border-color: var(--accent); }
-        .perm-item input { cursor: pointer; transform: scale(1.2); }
-        .perm-item span { font-size: 12px; color: #fff; }
+        .perm-item { 
+            background: rgba(255,255,255,0.05); 
+            padding: 10px; 
+            border-radius: 5px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            cursor: pointer; 
+            border: 1px solid var(--border); 
+            transition: 0.2s;
+        }
+        .perm-item:hover { border-color: var(--accent); background: rgba(0, 224, 255, 0.1); }
+        .perm-item input { cursor: pointer; transform: scale(1.2); accent-color: var(--accent); }
+        .perm-item span { font-size: 11px; color: #fff; }
 
-        .btn-salvar { width: 100%; padding: 12px; background: var(--accent); border: none; font-weight: bold; cursor: pointer; border-radius: 6px; color: #000; margin-top: 20px; transition: 0.3s; }
-        .btn-salvar:hover { opacity: 0.9; transform: scale(1.01); }
+        .btn-salvar { 
+            width: 100%; 
+            padding: 12px; 
+            background: var(--accent); 
+            border: none; 
+            font-weight: bold; 
+            cursor: pointer; 
+            border-radius: 6px; 
+            color: #000; 
+            margin-top: 20px; 
+            transition: 0.3s; 
+        }
+        .btn-salvar:hover { filter: brightness(1.1); }
         
+        /* GRID DE USUÁRIOS */
         .user-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .user-card { background: var(--card); padding: 20px; border-radius: 10px; border: 1px solid var(--border); position: relative; transition: 0.3s; }
-        .user-card:hover { transform: translateY(-2px); border-color: #333; }
+        
+        .user-card { 
+            background: var(--card); 
+            padding: 20px; 
+            border-radius: 10px; 
+            border: 1px solid var(--border); 
+            position: relative; 
+            transition: 0.3s; 
+        }
+        .user-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+        
         .user-login { font-size: 18px; font-weight: bold; color: #fff; }
-        .role-badge { display: inline-block; font-size: 10px; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; background: rgba(0,224,255,0.1); color: var(--accent); }
+        .role-badge { 
+            display: inline-block; 
+            font-size: 10px; 
+            text-transform: uppercase; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            margin-bottom: 10px; 
+            background: rgba(0,224,255,0.1); 
+            color: var(--accent); 
+        }
         
         .actions { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; }
         .action-btn { cursor: pointer; background: none; border: none; color: #666; transition: 0.2s; font-size: 14px; }
         .action-btn:hover { color: var(--accent); transform: scale(1.2); }
         .btn-del:hover { color: var(--danger); }
 
-        @media (max-width: 768px) { .sidebar { display: none; } body { flex-direction: column; overflow: auto; height: auto; } }
+        /* RODAPÉ */
+        .footer { text-align: center; padding: 20px; color: #64748b; font-size: 11px; border-top: 1px solid var(--border); margin-top: 40px; width: 100%; }
+
+        /* RESPONSIVIDADE */
+        @media (max-width: 768px) { 
+            .perms-grid { grid-template-columns: 1fr 1fr; }
+            .content { padding: 15px; }
+        }
     </style>
 </head>
 <body>
-    <aside class="sidebar">
-        <div class="logo">VÉRTICE</div>
-        <nav>
-            <a href="admin.html" class="nav-item"><i class="fas fa-chart-pie"></i> Dashboard</a>
-            <a href="menu.html" class="nav-item active"><i class="fas fa-arrow-left"></i> Voltar Menu</a>
-        </nav>
-    </aside>
+
+    <div class="header-top">
+        <div class="header-left">
+            <a href="menu.html" class="btn-home"><i class="fas fa-home"></i> MENU</a>
+            <h1 class="page-title">VÉRTICE BI <span class="version-tag">CORE</span></h1>
+        </div>
+        <div></div>
+    </div>
 
     <main class="content">
         <h2>Gestão de Equipe & Permissões</h2>
 
         <div class="form-card" id="cardForm">
-            <h3 style="margin-top:0;" id="tituloForm">Novo Usuário</h3>
+            <h3 style="margin-top:0; color:var(--text);" id="tituloForm">Novo Usuário</h3>
             <form onsubmit="salvarUsuario(event)">
                 <input type="hidden" id="editId">
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
                     <div class="form-group">
-                        <label>Login (Nome de acesso)</label>
+                        <label>Login (Acesso)</label>
                         <input type="text" id="login" placeholder="Ex: joao" required>
                     </div>
                     <div class="form-group">
@@ -83,7 +207,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label style="color: var(--accent); font-weight: bold; margin-bottom: 10px;">O QUE ELE PODE ACESSAR?</label>
+                    <label style="color: var(--accent); margin-bottom: 10px;">PERMISSÕES DE ACESSO</label>
                     <div class="perms-grid">
                         <label class="perm-item"><input type="checkbox" name="perm" value="pdv"> <span>PDV / Vendas</span></label>
                         <label class="perm-item"><input type="checkbox" name="perm" value="clientes"> <span>Clientes</span></label>
@@ -95,16 +219,33 @@
                 </div>
 
                 <button type="submit" class="btn-salvar" id="btnSalvar">CADASTRAR</button>
-                <button type="button" onclick="limparForm()" style="width:100%; background:none; border:none; color:#666; margin-top:10px; cursor:pointer;">Cancelar / Limpar</button>
+                <button type="button" onclick="limparForm()" style="width:100%; background:none; border:none; color:#666; margin-top:10px; cursor:pointer; font-size:12px;">Cancelar / Limpar</button>
             </form>
         </div>
 
-        <h3>Equipe Ativa</h3>
-        <div class="user-grid" id="lista-usuarios">Carregando...</div>
+        <h3 style="color:var(--text); margin-bottom:20px;">Equipe Ativa</h3>
+        <div class="user-grid" id="lista-usuarios">
+            <div style="color:#666;">Carregando equipe...</div>
+        </div>
+
+        <div class="footer">
+            VÉRTICE BI CORE v11.0 © Rodrigo N Carvalho 2026
+        </div>
     </main>
 
     <script>
-        if(localStorage.getItem('cargoUsuario') !== 'admin') window.location.href = 'index.html';
+        // --- 🔒 KILL SWITCH (TRAVA DE SEGURANÇA) ---
+        const DATA_LIMITE = new Date('2030-01-01'); 
+        if(new Date() > DATA_LIMITE) { 
+            document.body.innerHTML = '<div style="height:100vh;display:flex;justify-content:center;align-items:center;background:#000;color:red;flex-direction:column;"><h1>ACESSO SUSPENSO</h1><p>Contate o suporte.</p></div>'; 
+            throw new Error("Bloqueado"); 
+        }
+
+        // --- 🔒 SEGURANÇA DE LOGIN ---
+        if(localStorage.getItem('cargoUsuario') !== 'admin') {
+            alert("Acesso restrito.");
+            window.location.href = 'index.html';
+        }
 
         // 1. CARREGAR LISTA
         db.collection("equipe").onSnapshot(snap => {
@@ -117,14 +258,14 @@
                 div.innerHTML += `
                     <div class="user-card">
                         <div class="actions">
-                            <button class="action-btn" onclick="editar('${doc.id}', '${u.login}', '${u.pass}', '${u.permissoes}')"><i class="fas fa-pencil-alt"></i></button>
-                            <button class="action-btn btn-del" onclick="deletar('${doc.id}', '${u.login}')"><i class="fas fa-trash"></i></button>
+                            <button class="action-btn" onclick="editar('${doc.id}', '${u.login}', '${u.pass}', '${u.permissoes}')" title="Editar"><i class="fas fa-pencil-alt"></i></button>
+                            <button class="action-btn btn-del" onclick="deletar('${doc.id}', '${u.login}')" title="Excluir"><i class="fas fa-trash"></i></button>
                         </div>
                         <span class="role-badge">${u.role || 'Vendedor'}</span>
                         <div class="user-login">${u.login}</div>
                         <div style="font-size:12px; color:#999; margin-top:5px;">Senha: ${u.pass}</div>
-                        <div style="font-size:10px; color:var(--accent); margin-top:10px; border-top:1px solid #333; padding-top:5px;">
-                            ${perms.toUpperCase()}
+                        <div style="font-size:10px; color:var(--accent); margin-top:10px; border-top:1px solid #333; padding-top:8px;">
+                            <i class="fas fa-lock"></i> ${perms.toUpperCase()}
                         </div>
                     </div>
                 `;
@@ -146,19 +287,15 @@
 
             try {
                 // VERIFICAÇÃO INTELIGENTE DE DUPLICIDADE
-                // Procura se já existe ALGUÉM com esse login
                 const check = await db.collection("equipe").where("login", "==", login).get();
 
                 if(!check.empty) {
-                    // Se achou alguém, verifica: É outra pessoa? ou sou eu mesmo editando?
                     const usuarioEncontrado = check.docs[0];
                     if (id) {
-                        // Estou editando. Se o ID do usuário encontrado for DIFERENTE do meu ID, então o nome já é de outro.
-                        if (usuarioEncontrado.id !== id) {
-                            return alert(`Erro: O login "${login}" já está sendo usado por outra pessoa!`);
-                        }
+                        // Editando: Se o ID encontrado for diferente do meu, o nome já é de outro.
+                        if (usuarioEncontrado.id !== id) return alert(`Erro: O login "${login}" já existe!`);
                     } else {
-                        // Estou criando. Se achou qualquer um, já era.
+                        // Criando: Se achou qualquer um, erro.
                         return alert(`Erro: O login "${login}" já existe!`);
                     }
                 }
@@ -174,19 +311,17 @@
             } catch(err) { alert("Erro: " + err.message); }
         }
 
-        // 3. EDITAR (AGORA SEM TRAVA NO NOME)
+        // 3. EDITAR
         function editar(id, login, pass, permsStr) {
             document.getElementById('editId').value = id;
             document.getElementById('login').value = login;
-            
-            // REMOVIDO: document.getElementById('login').setAttribute('readonly', true);
-            // AGORA VOCÊ PODE EDITAR O NOME!
-            
             document.getElementById('pass').value = pass;
             
             document.getElementById('btnSalvar').innerText = "SALVAR ALTERAÇÕES";
-            document.getElementById('btnSalvar').style.background = "#f59e0b"; // Amarelo para indicar edição
+            document.getElementById('btnSalvar').style.background = "#f59e0b"; // Amarelo
+            document.getElementById('btnSalvar').style.color = "#000";
             document.getElementById('tituloForm').innerText = "Editando: " + login.toUpperCase();
+            document.getElementById('tituloForm').style.color = "#f59e0b";
             document.getElementById('cardForm').classList.add('editing');
 
             // Checkboxes
@@ -211,12 +346,13 @@
             document.getElementById('btnSalvar').innerText = "CADASTRAR";
             document.getElementById('btnSalvar').style.background = "var(--accent)";
             document.getElementById('tituloForm').innerText = "Novo Usuário";
+            document.getElementById('tituloForm').style.color = "var(--text)";
             document.getElementById('cardForm').classList.remove('editing');
         }
 
         async function deletar(id, login) {
             if(login==='admin') return alert("Não pode apagar o admin principal!");
-            if(confirm("Apagar?")) await db.collection("equipe").doc(id).delete();
+            if(confirm("Tem certeza que deseja apagar este usuário?")) await db.collection("equipe").doc(id).delete();
         }
     </script>
 </body>
