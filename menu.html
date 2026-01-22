@@ -30,14 +30,13 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            box-sizing: border-box;
+            user-select: none; /* Evita seleção de texto no celular */
         }
 
-        /* LOGO E CABEÇALHO */
+        /* LOGO */
         .brand-area {
             text-align: center;
             margin-bottom: 40px;
-            animation: fadeIn 1s ease-in;
         }
         
         .brand-title {
@@ -57,52 +56,55 @@
             margin-top: 5px;
         }
 
-        /* GRID DE BOTÕES (HUB) */
+        /* GRID (HUB) */
         .menu-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 por linha no celular */
-            gap: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
             width: 100%;
-            max-width: 800px;
+            max-width: 600px;
         }
 
+        /* BOTÃO TIPO APP (DIV clicável) */
+        /* Isso impede o "Abrir em nova guia" */
         .menu-card {
             background: var(--card);
             border: 1px solid var(--border);
             border-radius: 15px;
-            padding: 25px;
+            padding: 20px;
             text-align: center;
-            text-decoration: none;
             color: var(--text);
-            transition: 0.3s;
+            transition: 0.2s;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 120px;
+            height: 110px;
+            cursor: pointer; /* Mãozinha no PC */
             position: relative;
-            overflow: hidden;
+            -webkit-tap-highlight-color: transparent; /* Remove flash no celular */
         }
 
         .menu-card i {
-            font-size: 32px;
+            font-size: 28px;
             margin-bottom: 10px;
             color: #94a3b8;
             transition: 0.3s;
         }
 
         .menu-card span {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        /* EFEITOS DE HOVER E NEON */
+        /* HOVER E ATIVO */
+        .menu-card:active { transform: scale(0.95); } /* Efeito de clique */
+        
         .menu-card:hover {
-            transform: translateY(-5px);
             border-color: var(--accent);
-            box-shadow: 0 5px 20px rgba(0, 224, 255, 0.15);
+            box-shadow: 0 0 15px rgba(0, 224, 255, 0.1);
         }
         
         .menu-card:hover i {
@@ -110,32 +112,24 @@
             text-shadow: 0 0 10px var(--accent);
         }
 
-        /* CARD ESPECIAL DE SAIR */
-        .menu-card.logout {
-            border-color: rgba(239, 68, 68, 0.3);
-        }
+        /* BOTÃO SAIR */
         .menu-card.logout:hover {
             border-color: var(--danger);
-            box-shadow: 0 5px 20px rgba(239, 68, 68, 0.2);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
         }
         .menu-card.logout:hover i { color: var(--danger); text-shadow: 0 0 10px var(--danger); }
 
-        /* RODAPÉ */
         .footer-info {
-            margin-top: 50px;
+            margin-top: 40px;
             text-align: center;
-            font-size: 11px;
+            font-size: 10px;
             color: #475569;
         }
 
-        /* RESPONSIVIDADE PC */
+        /* RESPONSIVIDADE */
         @media (min-width: 768px) {
-            .menu-grid {
-                grid-template-columns: repeat(3, 1fr); /* 3 por linha no PC */
-            }
+            .menu-grid { grid-template-columns: repeat(3, 1fr); max-width: 800px; }
         }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -146,40 +140,40 @@
     </div>
 
     <div class="menu-grid">
-        <a href="vendas.html" class="menu-card" target="_self">
+        <div class="menu-card" onclick="navegar('vendas.html')">
             <i class="fas fa-cash-register"></i>
             <span>PDV / Caixa</span>
-        </a>
+        </div>
 
-        <a href="estoque.html" class="menu-card" target="_self">
+        <div class="menu-card" onclick="navegar('estoque.html')">
             <i class="fas fa-boxes"></i>
             <span>Estoque</span>
-        </a>
+        </div>
 
-        <a href="clientes.html" class="menu-card" target="_self">
+        <div class="menu-card" onclick="navegar('clientes.html')">
             <i class="fas fa-users"></i>
             <span>Clientes</span>
-        </a>
+        </div>
 
-        <a href="fornecedores.html" class="menu-card" target="_self">
+        <div class="menu-card" onclick="navegar('fornecedores.html')">
             <i class="fas fa-truck"></i>
             <span>Fornecedores</span>
-        </a>
+        </div>
 
-        <a href="admin.html" class="menu-card" target="_self" id="btn-admin" style="display:none;">
+        <div class="menu-card" onclick="navegar('admin.html')" id="btn-admin" style="display:none;">
             <i class="fas fa-chart-pie"></i>
             <span>Painel BI</span>
-        </a>
+        </div>
 
-        <a href="equipes.html" class="menu-card" target="_self" id="btn-equipe" style="display:none;">
+        <div class="menu-card" onclick="navegar('equipes.html')" id="btn-equipe" style="display:none;">
             <i class="fas fa-user-shield"></i>
             <span>Equipe</span>
-        </a>
+        </div>
 
-        <a href="#" onclick="fazerLogout()" class="menu-card logout">
+        <div class="menu-card logout" onclick="fazerLogout()">
             <i class="fas fa-sign-out-alt"></i>
             <span>Sair</span>
-        </a>
+        </div>
     </div>
 
     <div class="footer-info">
@@ -188,7 +182,7 @@
     </div>
 
     <script>
-        // 1. VERIFICAÇÃO DE LOGIN
+        // 1. SEGURANÇA DE LOGIN
         const usuario = localStorage.getItem('usuarioLogado');
         const cargo = localStorage.getItem('cargoUsuario');
 
@@ -196,42 +190,40 @@
             window.location.href = 'index.html';
         } else {
             document.getElementById('usuario-display').innerText = `Olá, ${usuario.toUpperCase()}`;
-            
-            // Libera botões restritos para Admin
             if (cargo === 'admin') {
                 document.getElementById('btn-admin').style.display = 'flex';
                 document.getElementById('btn-equipe').style.display = 'flex';
             }
         }
 
-        // 2. FUNÇÃO DE LOGOUT SEGURA
+        // 2. NAVEGAÇÃO SEGURA (Substitui links)
+        function navegar(destino) {
+            // Isso força a troca na MESMA janela
+            window.location.href = destino;
+        }
+
+        // 3. LOGOUT
         function fazerLogout() {
             if(confirm("Deseja sair do sistema?")) {
-                localStorage.clear(); // Limpa tudo
+                localStorage.clear();
                 window.location.href = 'index.html';
             }
         }
 
-        // 3. SEGURANÇA AVANÇADA (O PULO DO GATO) 😼
-        
-        // A. Se alguém fizer logout em OUTRA aba, esta aba sai também
+        // 4. SINCRONIA DE ABAS (Segurança Extra)
+        // Se sair em uma aba, todas as outras do sistema fecham/vão pro login
         window.addEventListener('storage', function(e) {
             if (!localStorage.getItem('usuarioLogado')) {
                 window.location.href = 'index.html';
             }
         });
 
-        // B. Se a pessoa voltar para esta aba depois de um tempo, checa se ainda está logado
+        // Checa se ainda está logado ao voltar pra aba
         document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-                // Aba ficou visível de novo
-                if (!localStorage.getItem('usuarioLogado')) {
-                    alert("Sessão expirada ou encerrada em outra janela.");
-                    window.location.href = 'index.html';
-                }
+            if (!document.hidden && !localStorage.getItem('usuarioLogado')) {
+                window.location.href = 'index.html';
             }
         });
-
     </script>
 </body>
 </html>
