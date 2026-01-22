@@ -3,151 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VÉRTICE - CENTRAL DE COMANDO</title>
+    <title>VÉRTICE BI | MENU</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="js/firebase-config.js"></script>
 
     <style>
-        :root { --bg: #020617; --card: #0f172a; --accent: #3b82f6; --text: #f8fafc; --danger: #ef4444; --success: #10b981; --warning: #f59e0b; }
-        
-        body { 
-            background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; 
-            margin: 0; display: flex; flex-direction: column; min-height: 100vh; 
-            align-items: center; justify-content: center; padding: 20px; 
-        }
-        
-        .header { text-align: center; margin-bottom: 30px; animation: fadeIn 1s; }
-        .brand { font-size: 50px; font-weight: 900; letter-spacing: 5px; color: var(--accent); margin: 0; }
-        .subtitle { font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 2px; }
-
-        .menu-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 900px; width: 100%; }
-        
-        .card { 
-            background: var(--card); border: 1px solid #1e293b; border-radius: 15px; 
-            padding: 30px 20px; text-align: center; cursor: pointer; transition: 0.3s; 
-            text-decoration: none; color: var(--text); position: relative; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 140px;
-        }
-        
-        .card:hover { transform: translateY(-5px); border-color: var(--accent); background: #1e293b; }
-        .icon-box { font-size: 32px; margin-bottom: 15px; color: var(--accent); }
-        .card-title { font-size: 16px; font-weight: bold; text-transform: uppercase; }
-        .card-desc { font-size: 11px; color: #64748b; margin-top: 5px; }
-
-        /* --- O CADEADO (BLOQUEIO) --- */
-        .locked {
-            filter: grayscale(100%); /* Fica preto e branco */
-            opacity: 0.4;            /* Fica meio apagado */
-            cursor: not-allowed;     /* Mouse de bloqueio */
-            pointer-events: none;    /* Não dá pra clicar */
-            border-color: #333 !important;
+        /* --- PADRÃO VÉRTICE BI CORE --- */
+        :root {
+            --bg: #020617; 
+            --card: #0f172a; 
+            --accent: #00e0ff; /* AZUL NEON */
+            --border: #1e293b; 
+            --text: #f8fafc;
+            --danger: #ef4444;
         }
 
-        .locked::after {
-            content: '\f023'; /* Ícone de cadeado FontAwesome */
-            font-family: 'Font Awesome 5 Free';
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* LOGO E CABEÇALHO */
+        .brand-area {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeIn 1s ease-in;
+        }
+        
+        .brand-title {
+            font-size: 32px;
             font-weight: 900;
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 50px;
-            color: #fff;
-            opacity: 0.8;
-            text-shadow: 0 0 10px #000;
+            color: var(--accent);
+            letter-spacing: 3px;
+            margin: 0;
+            text-shadow: 0 0 15px rgba(0, 224, 255, 0.4);
+        }
+        
+        .brand-sub {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-top: 5px;
         }
 
-        .footer-bar { margin-top: 40px; display: flex; justify-content: space-between; width: 100%; max-width: 900px; border-top: 1px solid #1e293b; padding-top: 20px; }
-        .btn-logout { color: #94a3b8; text-decoration: none; border: 1px solid #334155; padding: 8px 15px; border-radius: 20px; font-size: 12px; }
-        .btn-logout:hover { color: var(--danger); border-color: var(--danger); }
+        /* GRID DE BOTÕES (HUB) */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 por linha no celular */
+            gap: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .menu-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text);
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-card i {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #94a3b8;
+            transition: 0.3s;
+        }
+
+        .menu-card span {
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* EFEITOS DE HOVER E NEON */
+        .menu-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 5px 20px rgba(0, 224, 255, 0.15);
+        }
         
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 768px) { .menu-container { grid-template-columns: 1fr; } .card { flex-direction: row; height: auto; justify-content: start; gap: 20px; padding: 20px; } }
+        .menu-card:hover i {
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--accent);
+        }
+
+        /* CARD ESPECIAL DE SAIR */
+        .menu-card.logout {
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        .menu-card.logout:hover {
+            border-color: var(--danger);
+            box-shadow: 0 5px 20px rgba(239, 68, 68, 0.2);
+        }
+        .menu-card.logout:hover i { color: var(--danger); text-shadow: 0 0 10px var(--danger); }
+
+        /* RODAPÉ */
+        .footer-info {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 11px;
+            color: #475569;
+        }
+
+        /* RESPONSIVIDADE PC */
+        @media (min-width: 768px) {
+            .menu-grid {
+                grid-template-columns: repeat(3, 1fr); /* 3 por linha no PC */
+            }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1 class="brand">VÉRTICE</h1>
-        <div class="subtitle" id="msg-bemvindo">Central de Comando</div>
+
+    <div class="brand-area">
+        <h1 class="brand-title">VÉRTICE</h1>
+        <div class="brand-sub">BI CORE SYSTEM</div>
     </div>
 
-    <div class="menu-container">
-        <a href="vendas.html" class="card" data-perm="pdv">
-            <i class="fas fa-cash-register icon-box"></i>
-            <div><h2 class="card-title">PDV / Caixa</h2><p class="card-desc">Vendas e Trocas</p></div>
+    <div class="menu-grid">
+        <a href="vendas.html" class="menu-card" target="_self">
+            <i class="fas fa-cash-register"></i>
+            <span>PDV / Caixa</span>
         </a>
 
-        <a href="clientes.html" class="card" data-perm="clientes">
-            <i class="fas fa-users icon-box"></i>
-            <div><h2 class="card-title">Clientes</h2><p class="card-desc">CRM e Histórico</p></div>
+        <a href="estoque.html" class="menu-card" target="_self">
+            <i class="fas fa-boxes"></i>
+            <span>Estoque</span>
         </a>
 
-        <a href="estoque.html" class="card" data-perm="estoque">
-            <i class="fas fa-boxes icon-box"></i>
-            <div><h2 class="card-title">Estoque</h2><p class="card-desc">Produtos e Preços</p></div>
+        <a href="clientes.html" class="menu-card" target="_self">
+            <i class="fas fa-users"></i>
+            <span>Clientes</span>
         </a>
 
-        <a href="fornecedores.html" class="card" data-perm="fornecedores">
-            <i class="fas fa-truck icon-box"></i>
-            <div><h2 class="card-title">Fornecedores</h2><p class="card-desc">Compras e Parceiros</p></div>
+        <a href="fornecedores.html" class="menu-card" target="_self">
+            <i class="fas fa-truck"></i>
+            <span>Fornecedores</span>
         </a>
 
-        <a href="admin.html" class="card" data-perm="financeiro">
-            <i class="fas fa-chart-pie icon-box" style="color:#ef4444;"></i>
-            <div><h2 class="card-title">Financeiro</h2><p class="card-desc">Relatórios e Lucro</p></div>
+        <a href="admin.html" class="menu-card" target="_self" id="btn-admin" style="display:none;">
+            <i class="fas fa-chart-pie"></i>
+            <span>Painel BI</span>
         </a>
 
-        <a href="equipes.html" class="card" data-perm="equipe">
-            <i class="fas fa-user-shield icon-box" style="color:#f59e0b;"></i>
-            <div><h2 class="card-title">Equipe</h2><p class="card-desc">Gestão de Acessos</p></div>
+        <a href="equipes.html" class="menu-card" target="_self" id="btn-equipe" style="display:none;">
+            <i class="fas fa-user-shield"></i>
+            <span>Equipe</span>
+        </a>
+
+        <a href="#" onclick="fazerLogout()" class="menu-card logout">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Sair</span>
         </a>
     </div>
 
-    <div class="footer-bar">
-        <a href="#" onclick="logout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Sair do Sistema</a>
-        <div style="color:#fff;" id="clock">00:00</div>
+    <div class="footer-info">
+        <div id="usuario-display" style="color: var(--accent); margin-bottom: 5px; font-weight: bold;"></div>
+        VÉRTICE BI CORE v11.0 © Rodrigo N Carvalho 2026
     </div>
 
     <script>
-        function updateClock() { document.getElementById('clock').innerText = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}); }
-        setInterval(updateClock, 1000); updateClock();
+        // 1. VERIFICAÇÃO DE LOGIN
+        const usuario = localStorage.getItem('usuarioLogado');
+        const cargo = localStorage.getItem('cargoUsuario');
 
-        window.onload = function() {
-            const usuario = localStorage.getItem('usuarioLogado');
+        if (!usuario || !cargo) {
+            window.location.href = 'index.html';
+        } else {
+            document.getElementById('usuario-display').innerText = `Olá, ${usuario.toUpperCase()}`;
             
-            // 1. RECUPERA AS PERMISSÕES SALVAS NO LOGIN
-            let perms = [];
-            try {
-                perms = JSON.parse(localStorage.getItem('permissoesUsuario') || '[]');
-            } catch(e) { perms = []; }
-
-            // SE FOR ADMIN PRINCIPAL, LIBERA TUDO AUTOMATICAMENTE
-            // (Para você nunca ficar trancado pra fora)
-            if(usuario === 'admin') {
-                perms = ['pdv', 'clientes', 'estoque', 'fornecedores', 'financeiro', 'equipe'];
+            // Libera botões restritos para Admin
+            if (cargo === 'admin') {
+                document.getElementById('btn-admin').style.display = 'flex';
+                document.getElementById('btn-equipe').style.display = 'flex';
             }
+        }
 
-            if (!usuario) { window.location.href = 'index.html'; return; }
-            document.getElementById('msg-bemvindo').innerText = `Bem-vindo, ${usuario.toUpperCase()}`;
+        // 2. FUNÇÃO DE LOGOUT SEGURA
+        function fazerLogout() {
+            if(confirm("Deseja sair do sistema?")) {
+                localStorage.clear(); // Limpa tudo
+                window.location.href = 'index.html';
+            }
+        }
 
-            // 2. VERIFICA CADA CARTÃO
-            const cards = document.querySelectorAll('.card[data-perm]');
-            
-            cards.forEach(card => {
-                const permissaoNecessaria = card.getAttribute('data-perm');
-                
-                // Se o usuário NÃO tiver essa permissão na lista dele...
-                if (!perms.includes(permissaoNecessaria)) {
-                    // ... ADICIONA O CADEADO E BLOQUEIA
-                    card.classList.add('locked');
-                    card.removeAttribute('href'); // Remove o link
-                    card.title = "Acesso Bloqueado pelo Administrador";
+        // 3. SEGURANÇA AVANÇADA (O PULO DO GATO) 😼
+        
+        // A. Se alguém fizer logout em OUTRA aba, esta aba sai também
+        window.addEventListener('storage', function(e) {
+            if (!localStorage.getItem('usuarioLogado')) {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // B. Se a pessoa voltar para esta aba depois de um tempo, checa se ainda está logado
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // Aba ficou visível de novo
+                if (!localStorage.getItem('usuarioLogado')) {
+                    alert("Sessão expirada ou encerrada em outra janela.");
+                    window.location.href = 'index.html';
                 }
-            });
-        };
+            }
+        });
 
-        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
     </script>
 </body>
 </html>
