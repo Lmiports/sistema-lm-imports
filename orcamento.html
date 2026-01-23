@@ -3,141 +3,230 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recibo / Orçamento</title>
+    <title>Recibo de Venda</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        /* ESTILO PARA IMPRESSORA TÉRMICA (80mm ou 58mm) */
-        body { font-family: 'Courier New', Courier, monospace; margin: 0; padding: 10px; color: #000; font-size: 12px; max-width: 300px; /* Largura típica térmica */ margin: 0 auto; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #525252; /* Fundo cinza escuro do sistema */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* FOLHA A4 */
+        .page {
+            background: #fff;
+            width: 21cm;
+            min-height: 29.7cm;
+            padding: 1.5cm;
+            box-sizing: border-box;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        /* HEADER */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .logo-box { width: 120px; height: 120px; background: #000; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; }
+        .logo-box img { max-width: 100%; max-height: 100%; }
         
-        .header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
-        .logo { font-size: 20px; font-weight: bold; margin-bottom: 5px; }
-        .sub-header { font-size: 10px; margin-bottom: 15px; }
-        
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 3px; font-size: 11px; }
-        
-        .table-items { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
-        .table-items th { text-align: left; border-bottom: 1px solid #000; padding: 2px 0; }
-        .table-items td { padding: 4px 0; border-bottom: 1px dashed #ccc; vertical-align: top; }
-        .td-qtd { width: 30px; text-align: center; }
-        .td-valor { text-align: right; white-space: nowrap; }
-        
-        .totals { margin-top: 15px; border-top: 1px solid #000; padding-top: 5px; font-size: 12px; }
-        .total-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
-        .grand-total { font-size: 16px; font-weight: bold; margin-top: 5px; }
-        
-        .footer { text-align: center; margin-top: 20px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
-        
-        .troca-item { color: #555; font-style: italic; }
+        .company-info { text-align: right; font-size: 12px; line-height: 1.5; color: #333; }
+        .company-info h1 { margin: 0; font-size: 22px; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* TÍTULO */
+        .doc-title {
+            background: #f3f4f6;
+            color: #000;
+            padding: 10px;
+            text-align: center;
+            font-weight: 900;
+            font-size: 18px;
+            letter-spacing: 1px;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        /* DADOS CLIENTE / PEDIDO */
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .info-box { border: 1px solid #e5e7eb; padding: 15px; border-radius: 4px; }
+        .info-label { font-size: 10px; color: #9ca3af; text-transform: uppercase; font-weight: bold; margin-bottom: 5px; display: block; }
+        .info-value { font-size: 14px; font-weight: bold; color: #000; display: block; margin-bottom: 5px; }
+
+        /* TABELA */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+        th { background: #000; color: #fff; text-align: left; padding: 10px; text-transform: uppercase; font-size: 11px; }
+        td { padding: 10px; border-bottom: 1px solid #e5e7eb; color: #374151; }
+        .col-valor { text-align: right; font-weight: bold; }
+        .col-qtd { text-align: center; width: 50px; font-weight: bold; } /* COLUNA NOVA */
+
+        /* TOTAIS */
+        .totals-area { display: flex; justify-content: flex-end; margin-top: 20px; }
+        .totals-table { width: 300px; text-align: right; }
+        .total-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; }
+        .total-final { font-size: 18px; font-weight: 900; border-top: 2px solid #000; padding-top: 10px; margin-top: 5px; }
+
+        /* RODAPÉ */
+        .footer-legal { margin-top: 50px; font-size: 10px; color: #6b7280; line-height: 1.4; text-align: justify; border-top: 1px solid #e5e7eb; padding-top: 10px; }
+        .signature-area { margin-top: 50px; display: flex; justify-content: space-between; gap: 50px; }
+        .sign-line { border-top: 1px solid #000; flex: 1; text-align: center; padding-top: 10px; font-size: 11px; font-weight: bold; }
+
+        /* BOTÕES DE AÇÃO (NÃO IMPRIMEM) */
+        .actions { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .btn { padding: 12px 20px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; color: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-print { background: #10b981; }
+        .btn-close { background: #ef4444; }
 
         @media print {
-            .no-print { display: none; }
-            body { max-width: 100%; }
+            body { background: #fff; padding: 0; }
+            .page { box-shadow: none; width: 100%; height: auto; padding: 0; }
+            .actions { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <button onclick="window.print()" class="no-print" style="width:100%; padding:10px; background:#000; color:#fff; font-weight:bold; margin-bottom:10px; cursor:pointer;">IMPRIMIR</button>
-
-    <div class="header">
-        <div class="logo">LM IMPORTS</div>
-        <div style="font-size:10px;">Rua Exemplo, 123 - Centro</div>
-        <div style="font-size:10px;">(11) 99999-9999</div>
-        <div style="font-size:10px; margin-top:5px;" id="lbl-tipo-doc">RECIBO DE VENDA</div>
-        <div style="font-size:12px; font-weight:bold;" id="lbl-num-pedido">#0000</div>
+    <div class="actions">
+        <button class="btn btn-print" onclick="window.print()"><i class="fas fa-print"></i> IMPRIMIR / PDF</button>
+        <button class="btn btn-close" onclick="window.close()">FECHAR</button>
     </div>
 
-    <div class="sub-header">
-        <div class="info-row"><span>Data:</span> <span id="lbl-data"></span></div>
-        <div class="info-row"><span>Cliente:</span> <span id="lbl-cliente" style="font-weight:bold;"></span></div>
-        <div class="info-row" id="row-cpf"><span>CPF:</span> <span id="lbl-cpf"></span></div>
-    </div>
-
-    <table class="table-items">
-        <thead>
-            <tr>
-                <th class="td-qtd">QTD</th>
-                <th>ITEM</th>
-                <th class="td-valor">TOTAL</th>
-            </tr>
-        </thead>
-        <tbody id="lista-itens">
-            </tbody>
-    </table>
-
-    <div class="totals">
-        <div class="total-row" id="row-desconto" style="display:none;">
-            <span>Desconto:</span>
-            <span id="lbl-desconto">R$ 0,00</span>
+    <div class="page">
+        <div class="header">
+            <div class="logo-box">
+                <img src="logo.png" alt="LM IMPORTS" onerror="this.style.display='none'; this.parentNode.innerHTML='LM IMPORTS'">
+            </div>
+            <div class="company-info">
+                <h1>LM IMPORTS</h1>
+                <div>CNPJ: 57.554.129/0001-69</div>
+                <div>Tel/WhatsApp: (11) 93305-0117</div>
+                <div>Instagram: @marcelo.lmimportss</div>
+            </div>
         </div>
-        <div class="total-row grand-total">
-            <span>TOTAL:</span>
-            <span id="lbl-total">R$ 0,00</span>
-        </div>
-        <div style="text-align:right; font-size:11px; margin-top:5px;">
-            Pagamento: <span id="lbl-pagamento" style="font-weight:bold;"></span>
-        </div>
-        <div id="lbl-parcelas" style="text-align:right; font-size:10px; margin-top:2px;"></div>
-    </div>
 
-    <div class="footer">
-        <p>Obrigado pela preferência!</p>
-        <p>Garantia de 90 dias (Lei 8.078/90)</p>
-        <p style="margin-top:10px; font-size:9px;">Sistema VÉRTICE BI CORE</p>
+        <div class="doc-title" id="lbl-titulo">RECIBO DE VENDA</div>
+
+        <div class="info-grid">
+            <div class="info-box">
+                <span class="info-label">DADOS DO CLIENTE</span>
+                <span class="info-value" id="lbl-cliente">Consumidor</span>
+                <div style="font-size:12px;">CPF: <span id="lbl-cpf"></span></div>
+                <div style="font-size:12px;">Tel: <span id="lbl-tel"></span></div>
+                <div style="font-size:12px;">End: <span id="lbl-end"></span></div>
+            </div>
+            <div class="info-box">
+                <span class="info-label">DADOS DO PEDIDO</span>
+                <span class="info-value">Data Emissão: <span id="lbl-data" style="font-weight:400;"></span></span>
+                <div style="font-size:12px; margin-top:5px;">Nº Pedido: <strong id="lbl-pedido"></strong></div>
+                <div style="font-size:12px;">Vendedor: <strong id="lbl-vendedor">RODRIGO</strong></div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-qtd">QTD</th> <th>PRODUTO / SERVIÇO</th>
+                    <th>DETALHES</th>
+                    <th class="col-valor">VALOR (UN)</th> <th class="col-valor">TOTAL</th>
+                </tr>
+            </thead>
+            <tbody id="lista-itens">
+                </tbody>
+        </table>
+
+        <div class="totals-area">
+            <div class="totals-table">
+                <div class="total-row"><span>SUBTOTAL:</span> <span id="lbl-subtotal">R$ 0,00</span></div>
+                <div class="total-row" style="color:#ef4444;"><span>DESCONTO:</span> <span id="lbl-desconto">R$ 0,00</span></div>
+                <div class="total-row" style="color:#6b7280; font-size:11px;"><span>TAXAS/JUROS:</span> <span id="lbl-taxas">R$ 0,00</span></div>
+                <div class="total-row total-final"><span>TOTAL:</span> <span id="lbl-total">R$ 0,00</span></div>
+                <div style="font-size:11px; margin-top:5px; font-weight:bold;">Forma de Pagamento: <span id="lbl-pagamento"></span></div>
+                <div id="lbl-parcelas" style="font-size:10px; color:#6b7280; margin-top:2px;"></div>
+            </div>
+        </div>
+
+        <div class="footer-legal">
+            <strong>TERMOS DE GARANTIA E CONDIÇÕES</strong><br>
+            1. A LM Imports oferece garantia de 90 (noventa) dias para defeitos de fabricação, conforme Art. 26 do CDC.<br>
+            2. A garantia <strong>NÃO COBRE:</strong> Danos causados por líquidos, quedas, mau uso, telas quebradas ou violação do selo de garantia.<br>
+            3. Em caso de troca, o produto deve estar nas mesmas condições estéticas do ato da venda.<br>
+            4. O cliente declara ter testado todas as funções do aparelho e estar ciente de que se trata de um produto seminovo (se aplicável).
+        </div>
+
+        <div class="signature-area">
+            <div class="sign-line">LM IMPORTS</div>
+            <div class="sign-line">CLIENTE / CONSUMIDOR</div>
+        </div>
     </div>
 
     <script>
         window.onload = function() {
             const dadosStr = localStorage.getItem('dadosRecibo');
-            if(!dadosStr) {
-                document.body.innerHTML = "<h3>Erro: Nenhum dado de venda encontrado.</h3>";
-                return;
-            }
-
+            if(!dadosStr) return alert("Nenhum dado encontrado.");
+            
             const dados = JSON.parse(dadosStr);
 
-            document.getElementById('lbl-tipo-doc').innerText = dados.titulo || "RECIBO";
-            document.getElementById('lbl-num-pedido').innerText = "#" + (dados.numeroPedido || "---");
+            // PREENCHE CABEÇALHO
+            document.getElementById('lbl-titulo').innerText = dados.titulo + " Nº " + (dados.numeroPedido || "---");
             document.getElementById('lbl-data').innerText = dados.data;
+            document.getElementById('lbl-pedido').innerText = dados.numeroPedido;
             document.getElementById('lbl-cliente').innerText = dados.cliente;
-            
-            if(dados.cpf) document.getElementById('lbl-cpf').innerText = dados.cpf;
-            else document.getElementById('row-cpf').style.display = 'none';
+            document.getElementById('lbl-cpf').innerText = dados.cpf;
+            document.getElementById('lbl-tel').innerText = dados.tel;
+            document.getElementById('lbl-end').innerText = dados.endereco;
 
+            // PREENCHE TABELA
             const tbody = document.getElementById('lista-itens');
             tbody.innerHTML = "";
+            let subtotalCalculado = 0;
 
             dados.itens.forEach(item => {
-                const tr = document.createElement('tr');
+                // Lógica de agrupamento (vem do vendas.html v12.3)
+                let qtd = item.qtd || 1;
+                let valorUnit = item.preco;
                 
-                let desc = item.nome;
-                if(item.desc) desc += " " + item.desc; // Adiciona cor/detalhe
-                if(item.isBrinde) desc += " (BRINDE)";
-                if(item.isTroca) {
-                    tr.className = "troca-item";
-                    desc = item.nome; // Nome já vem com "TROCA:"
-                }
+                // Se for troca, valor é negativo
+                if(item.isTroca) valorUnit = -Math.abs(valorUnit);
+                if(item.isBrinde) valorUnit = 0;
 
-                // Preço Total da Linha (Unitário x Qtd)
-                let valTotalItem = item.total || (item.preco * (item.qtd || 1));
+                let valorTotalLinha = valorUnit * qtd;
+                subtotalCalculado += valorTotalLinha;
+
+                // Formatação do nome
+                let nomeProd = item.nome;
+                let detalhe = item.desc || "-";
                 
-                // Formatação
-                let valTexto = valTotalItem.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
-                if(item.isBrinde) valTexto = "Grátis";
+                if(item.isBrinde) nomeProd += " (BRINDE)";
+                
+                let valUnitStr = item.isBrinde ? "Grátis" : valorUnit.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+                let valTotalStr = item.isBrinde ? "Grátis" : valorTotalLinha.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
 
-                tr.innerHTML = `
-                    <td class="td-qtd">${item.qtd || 1}</td>
-                    <td>${desc}</td>
-                    <td class="td-valor">${valTexto}</td>
+                // Style para Troca (destaque negativo)
+                let styleRow = item.isTroca ? 'style="color:#eab308; font-style:italic;"' : '';
+
+                tbody.innerHTML += `
+                    <tr ${styleRow}>
+                        <td class="col-qtd">${qtd}</td>
+                        <td>${nomeProd}</td>
+                        <td>${detalhe}</td>
+                        <td class="col-valor">${valUnitStr}</td>
+                        <td class="col-valor">${valTotalStr}</td>
+                    </tr>
                 `;
-                tbody.appendChild(tr);
             });
 
-            // Totais
-            if(dados.descontoManual > 0) {
-                document.getElementById('row-desconto').style.display = 'flex';
-                document.getElementById('lbl-desconto').innerText = "- " + dados.descontoManual.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
-            }
-
+            // PREENCHE TOTAIS
+            // Nota: O subtotal aqui é a soma bruta das linhas.
+            // O total final vem do PDV já calculado com desconto e taxas.
+            
+            document.getElementById('lbl-subtotal').innerText = subtotalCalculado.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+            document.getElementById('lbl-desconto').innerText = "- " + (dados.descontoManual||0).toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+            document.getElementById('lbl-taxas').innerText = "+ " + (dados.taxaMaquininha||0).toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+            
             document.getElementById('lbl-total').innerText = dados.total.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
             document.getElementById('lbl-pagamento').innerText = dados.pagamento;
             
@@ -145,9 +234,9 @@
                 document.getElementById('lbl-parcelas').innerText = dados.textoParcelas;
             }
 
-            // Auto Print se for Venda
+            // AUTO PRINT
             if(dados.autoPrint) {
-                setTimeout(() => window.print(), 500);
+                setTimeout(() => window.print(), 800);
             }
         };
     </script>
