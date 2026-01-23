@@ -40,10 +40,12 @@
         .btn-avulso { background: var(--purple); color: #fff; border: none; border-radius: 8px; padding: 0 15px; height: 45px; font-weight: bold; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 5px; box-shadow: 0 0 10px rgba(139, 92, 246, 0.2); }
         
         .products-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; overflow: visible; }
+        
         .product-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 15px; cursor: pointer; transition: 0.2s; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
         .product-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,224,255,0.1); }
-        .product-card.locked { opacity: 0.7; border: 1px solid var(--danger); background: rgba(239, 68, 68, 0.1); pointer-events: none; }
         
+        /* CARD TRAVADO / EM USO */
+        .product-card.locked { opacity: 0.7; border: 1px solid var(--danger); background: rgba(239, 68, 68, 0.1); pointer-events: none; }
         .tag-locked { position: absolute; top: 10px; right: 10px; background: var(--danger); color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
         .tag-qty { position: absolute; top: 10px; right: 10px; background: #334155; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; border: 1px solid #475569; font-weight: bold; }
         
@@ -115,7 +117,7 @@
     <div class="header-top">
         <div class="header-left">
             <div onclick="window.location.href='menu.html'" class="btn-home"><i class="fas fa-home"></i> MENU</div>
-            <h1 class="page-title">VÉRTICE BI <span class="version-tag">CORE</span></h1>
+            <h1 class="page-title">VÉRTICE BI <span class="version-tag">CORE v12.4</span></h1>
         </div>
         <div></div>
     </div>
@@ -177,7 +179,25 @@
     <div class="modal-overlay" id="modal-simulador"> <div class="modal"> <div style="display:flex; justify-content:space-between; align-items:center;"> <h3>Simulação</h3> <div style="display:flex; gap:10px;"> <button onclick="toggleTaxasVisuais()" title="Ocultar/Mostrar Taxas" style="background:none; border:none; color:#fff; cursor:pointer; font-size:18px;"><i class="fas fa-eye" id="icon-eye"></i></button> <button onclick="abrirConfigTaxas()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:18px;"><i class="fas fa-cog"></i></button> </div> </div> <table class="sim-table"> <thead><tr><th>Parc.</th><th>Valor Parc.</th><th>Total</th></tr></thead> <tbody id="lista-simulacao"></tbody> </table> <button onclick="copiarOfertaZap()" style="margin-top:15px; width:100%; background:#25D366; color:#fff; padding:10px; border:none; border-radius:5px; cursor:pointer; font-weight:bold;"><i class="fab fa-whatsapp"></i> Copiar (Sem Taxas)</button> <button onclick="document.getElementById('modal-simulador').style.display='none'" class="btn-cancel" style="margin-top:5px; width:100%;">Fechar</button> </div> </div>
     <div class="modal-overlay" id="modal-config-taxas"> <div class="modal"> <h3>Configurar Taxas (%)</h3> <div id="grid-inputs-taxas" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; max-height:300px; overflow-y:auto;"></div> <div style="display: flex; gap: 10px; margin-top: 20px;"> <button onclick="document.getElementById('modal-config-taxas').style.display='none'" class="btn-cancel">Cancelar</button> <button onclick="salvarConfigTaxas()" class="btn-confirm">Salvar</button> </div> </div> </div>
     <div class="modal-overlay" id="modal-troca"> <div class="modal" style="border-color: var(--warning);"> <h3 style="color: var(--warning);">Entrada de Troca</h3> <label style="font-size: 11px; color: #999;">Modelo:</label><input list="dl-modelos-list" id="troca-modelo" placeholder="Selecione..."><datalist id="dl-modelos-list"></datalist> <div class="modal-grid"><div><label style="font-size: 11px; color: #999;">GB:</label><select id="troca-gb"><option value="">-</option><option value="64GB">64GB</option><option value="128GB">128GB</option><option value="256GB">256GB</option><option value="512GB">512GB</option></select></div><div><label style="font-size: 11px; color: #999;">Cor:</label><input list="dl-cores-list" id="troca-cor" placeholder="Cor"><datalist id="dl-cores-list"></datalist></div></div> <label style="font-size: 11px; color: #999;">IMEI:</label><input type="text" id="troca-imei" placeholder="15 dígitos" maxlength="15"> <div class="modal-grid"><div><label style="font-size: 11px; color: #999;">Valor (R$):</label><input type="number" id="troca-valor"></div><div><label style="font-size: 11px; color: #999;">Bateria (%):</label><input type="number" id="troca-bateria"></div></div> <div style="display: flex; gap: 10px; margin-top: 10px;"> <button onclick="fecharModalTroca()" class="btn-cancel">Cancelar</button> <button onclick="confirmarTroca()" class="btn-confirm" style="background: var(--warning);">Confirmar</button> </div> </div> </div>
-    <div class="modal-overlay" id="modal-cliente"> <div class="modal"> <h3>Novo Cliente</h3> <input type="text" id="novo-nome" placeholder="Nome Completo"> <div class="modal-grid"><input type="text" id="novo-zap" placeholder="Zap"><input type="text" id="novo-cpf" placeholder="CPF"></div> <input type="email" id="novo-email" placeholder="Email"> <div class="modal-grid"><input type="text" id="novo-cep" placeholder="CEP" onblur="buscarCep()"><input type="text" id="novo-numero" placeholder="Nº"></div> <input type="text" id="novo-endereco" placeholder="Endereço"> <div class="modal-grid"><input type="text" id="novo-bairro" placeholder="Bairro"><input type="text" id="novo-cidade" placeholder="Cidade"></div> <div style="display: flex; gap: 10px; margin-top: 20px;"> <button onclick="fecharModalCliente()" class="btn-cancel">Cancelar</button> <button onclick="salvarNovoCliente()" class="btn-confirm">Salvar</button> </div> </div> </div>
+    
+    <div class="modal-overlay" id="modal-cliente"> 
+        <div class="modal"> 
+            <h3>Novo Cliente</h3> 
+            <input type="text" id="novo-nome" placeholder="Nome Completo"> 
+            <div class="modal-grid">
+                <input type="text" id="novo-telefone" placeholder="Telefone">
+                <input type="text" id="novo-cpf" placeholder="CPF">
+            </div> 
+            <input type="email" id="novo-email" placeholder="Email"> 
+            <div class="modal-grid"><input type="text" id="novo-cep" placeholder="CEP" onblur="buscarCep()"><input type="text" id="novo-numero" placeholder="Nº"></div> 
+            <input type="text" id="novo-endereco" placeholder="Endereço"> 
+            <div class="modal-grid"><input type="text" id="novo-bairro" placeholder="Bairro"><input type="text" id="novo-cidade" placeholder="Cidade"></div> 
+            <div style="display: flex; gap: 10px; margin-top: 20px;"> 
+                <button onclick="fecharModalCliente()" class="btn-cancel">Cancelar</button> 
+                <button onclick="salvarNovoCliente()" class="btn-confirm">Salvar</button> 
+            </div> 
+        </div> 
+    </div>
 
     <script>
         const DATA_LIMITE = new Date('2030-01-01'); if(new Date() > DATA_LIMITE) throw new Error("Bloqueado");
@@ -223,70 +243,23 @@
         function preVisualizar(){const c=document.getElementById('cliente-input').value;if(carrinho.length===0)return alert("Vazio!");const cf=dbClientes.find(x=>x.nome===c)||{nome:c||"Consumidor"};gerarDocumento(false, "PREVIEW", cf.nome, "PREVIEW-MODE");}
         async function finalizar(isOrc){const c=document.getElementById('cliente-input').value;const pg=document.getElementById('forma-pagamento').value;if(carrinho.length===0)return alert("Vazio!");if(!c)return alert("Cliente?");if(!pg)return alert("Pagamento?");const tp=isOrc?"ORÇAMENTO":"VENDA";const st=isOrc?"ORCAMENTO":"CONCRETIZADA";if(!confirm(`Confirmar ${tp}?`))return;document.getElementById('loader').style.display='flex';try{const b=db.batch();if(!isOrc){carrinho.forEach(i=>{if(!i.isAvulso&&i.id){b.update(db.collection("estoque").doc(i.id),{status:"vendido",dataVenda:Date.now(),clienteVenda:c,foiBrinde:i.isBrinde});}});trocas.forEach(t=>{const r=db.collection("estoque").doc();b.set(r,{categoria:'celular',modelo:`${t.modelo} (TROCA ${c})`,nomeP:`${t.modelo} (TROCA)`,marca:'Apple',cor:t.cor,gb:t.gb,imei1:t.imei,bateria:t.bateria,custo:t.valor,venda:0,status:'disponível',fornecedor:`Cliente: ${c}`,dataEntrada:Date.now()});});}else{carrinho.forEach(i=>{if(!i.isAvulso&&i.id){b.update(db.collection("estoque").doc(i.id),{status:"disponível"});}});}const s=await db.collection("vendas").get();const num=String(s.size+1).padStart(4,'0');b.set(db.collection("vendas").doc(),{numeroPedido:num,tipoRegistro:tp,status:st,cliente:c,data:new Date().toISOString(),itens:carrinho.map(x=>({modelo:x.modelo||x.nomeP,isBrinde:x.isBrinde,isAvulso:!!x.isAvulso,custo:x.custo||0})),trocas:trocas.map(x=>x.modelo),desconto:parseFloat(document.getElementById('valor-desconto-manual').value)||0,taxaMaquininha:valorTaxaAplicada,total:totalVendaGlobal,pagamento:pg});await b.commit();let hist=`${new Date().toLocaleDateString('pt-BR')} - ${c} ${isOrc?'fez ORÇAMENTO':'comprou'} ${carrinho.length} itens. Total: ${formatMoeda(totalVendaGlobal)}`;db.collection("clientes").where("nome","==",c).get().then(q=>{q.forEach(d=>{db.collection("clientes").doc(d.id).update({historico:hist+"\n"+(d.data().historico||"")});});});gerarDocumento(isOrc,num,c,pg);if(!isOrc){limparRascunho();window.location.reload();}else{alert("Orçamento salvo!");document.getElementById('loader').style.display='none';}}catch(e){alert("Erro: "+e.message);document.getElementById('loader').style.display='none';}}
         
-        // --- GERADOR DE DOCUMENTO COM AGRUPAMENTO NA IMPRESSÃO ---
         function gerarDocumento(isO, n, c, pg) {
             const cf = dbClientes.find(x => x.nome === c) || { nome: c };
-            
-            // AGRUPAMENTO DE ITENS
             const grupos = {};
             const listaImprimir = [];
-
-            // 1. Agrupar Itens Iguais
             carrinho.forEach(i => {
-                // Chave única para agrupar (Nome + Preço + se é Brinde)
                 const chave = `${i.modelo||i.nomeP}|${i.venda}|${i.isBrinde}`;
-                
-                if(!grupos[chave]) {
-                    grupos[chave] = {
-                        nome: i.modelo || i.nomeP,
-                        desc: i.cor || '',
-                        preco: parseFloat(i.venda || 0),
-                        isBrinde: i.isBrinde,
-                        qtd: 0,
-                        total: 0
-                    };
-                    listaImprimir.push(grupos[chave]); // Adiciona a referência na lista
-                }
-                
+                if(!grupos[chave]) { grupos[chave] = { nome: i.modelo || i.nomeP, desc: i.cor || '', preco: parseFloat(i.venda || 0), isBrinde: i.isBrinde, qtd: 0, total: 0 }; listaImprimir.push(grupos[chave]); }
                 grupos[chave].qtd++;
                 grupos[chave].total += parseFloat(i.venda || 0);
             });
-
-            // 2. Adicionar Trocas (Trocas não agrupam pois cada aparelho é único)
-            trocas.forEach(t => {
-                listaImprimir.push({
-                    nome: "TROCA: " + t.modelo,
-                    desc: t.imei,
-                    preco: -t.valor,
-                    isTroca: true,
-                    qtd: 1,
-                    total: -t.valor
-                });
-            });
-
+            trocas.forEach(t => { listaImprimir.push({ nome: "TROCA: " + t.modelo, desc: t.imei, preco: -t.valor, isTroca: true, qtd: 1, total: -t.valor }); });
             let tp = "";
             if (parcelasSelecionadas > 0 && totalVendaGlobal > 0) {
                 const vp = totalVendaGlobal / parcelasSelecionadas;
                 tp = `(${parcelasSelecionadas}x de ${vp.toLocaleString('pt-br',{style:'currency',currency:'BRL'})})`;
             }
-
-            const d = {
-                titulo: isO ? "ORÇAMENTO" : "RECIBO DE VENDA",
-                isOrcamento: isO,
-                numeroPedido: n,
-                cliente: cf.nome,
-                cpf: cf.cpf || '',
-                tel: cf.whats || '',
-                endereco: cf.logradouro || '',
-                itens: listaImprimir, // Agora enviamos a lista já agrupada com QTD
-                descontoManual: parseFloat(document.getElementById('valor-desconto-manual').value) || 0,
-                total: totalVendaGlobal,
-                pagamento: pg,
-                textoParcelas: tp,
-                data: new Date().toLocaleDateString('pt-BR'),
-                autoPrint: !isO && n !== "PREVIEW"
-            };
-
+            const d = { titulo: isO ? "ORÇAMENTO" : "RECIBO DE VENDA", isOrcamento: isO, numeroPedido: n, cliente: cf.nome, cpf: cf.cpf || '', tel: cf.whats || '', endereco: cf.logradouro || '', itens: listaImprimir, descontoManual: parseFloat(document.getElementById('valor-desconto-manual').value) || 0, total: totalVendaGlobal, pagamento: pg, textoParcelas: tp, data: new Date().toLocaleDateString('pt-BR'), autoPrint: !isO && n !== "PREVIEW" };
             localStorage.setItem('dadosRecibo', JSON.stringify(d));
             window.open('orcamento.html', '_blank');
         }
@@ -308,10 +281,31 @@
         function abrirModalCliente(){document.getElementById('modal-cliente').style.display='flex';}
         function fecharModalCliente(){document.getElementById('modal-cliente').style.display='none';}
         function buscarCep(){let c=document.getElementById('novo-cep').value.replace(/\D/g,'');if(c.length===8)fetch(`https://viacep.com.br/ws/${c}/json/`).then(r=>r.json()).then(d=>{if(!d.erro){document.getElementById('novo-endereco').value=d.logradouro;document.getElementById('novo-bairro').value=d.bairro;document.getElementById('novo-cidade').value=`${d.localidade}-${d.uf}`;document.getElementById('novo-numero').focus();}});}
-        async function salvarNovoCliente(){let n=document.getElementById('novo-nome').value;if(!n)return alert("Nome?");try{await db.collection("clientes").add({nome:n,cpf:document.getElementById('novo-cpf').value,whats:document.getElementById('novo-telefone').value,email:document.getElementById('novo-email').value,cep:document.getElementById('novo-cep').value,logradouro:document.getElementById('novo-endereco').value,numero:document.getElementById('novo-numero').value,bairro:document.getElementById('novo-bairro').value,cidade:document.getElementById('novo-cidade').value});alert("Ok!");document.getElementById('cliente-input').value=n;fecharModalCliente();salvarRascunho();}catch(e){alert("Erro");}}
+        
+        // --- FUNÇÃO CORRIGIDA AQUI: ID do telefone alterado para 'novo-telefone' ---
+        async function salvarNovoCliente(){
+            let n=document.getElementById('novo-nome').value;
+            if(!n)return alert("Nome?");
+            try{
+                await db.collection("clientes").add({
+                    nome:n,
+                    cpf:document.getElementById('novo-cpf').value,
+                    whats:document.getElementById('novo-telefone').value, // <--- CORRIGIDO
+                    email:document.getElementById('novo-email').value,
+                    cep:document.getElementById('novo-cep').value,
+                    logradouro:document.getElementById('novo-endereco').value,
+                    numero:document.getElementById('novo-numero').value,
+                    bairro:document.getElementById('novo-bairro').value,
+                    cidade:document.getElementById('novo-cidade').value
+                });
+                alert("Ok!");
+                document.getElementById('cliente-input').value=n;
+                fecharModalCliente();
+                salvarRascunho();
+            }catch(e){alert("Erro");}
+        }
+
         function carregarOpcoesPagamento(){let s=document.getElementById('forma-pagamento');s.innerHTML=`<option value="">Selecione...</option><option value="Pix">Pix</option><option value="Dinheiro">Dinheiro</option><option value="Débito">Débito</option><option value="Crédito">Crédito</option>`;}
     </script>
 </body>
 </html>
-
-
