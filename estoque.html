@@ -7,8 +7,6 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="shortcut icon" href="logo.png" type="image/png">
-    <link rel="icon" href="logo.png" type="image/png">
-    <link rel="apple-touch-icon" href="logo.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
@@ -19,88 +17,31 @@
     <style>
         /* --- PADRÃO VISUAL VÉRTICE BI CORE --- */
         :root { 
-            --bg: #020617; 
-            --card: #0f172a; 
-            --accent: #00e0ff; /* AZUL NEON CORE */
-            --border: #1e293b; 
-            --text: #f8fafc; 
-            --success: #10b981; 
-            --warning: #f59e0b; 
-            --danger: #ef4444; 
+            --bg: #020617; --card: #0f172a; --accent: #00e0ff; --border: #1e293b; 
+            --text: #f8fafc; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; 
         }
         
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0; 
-            display: block; 
-            min-height: 100vh; 
-            overflow-y: auto; 
-            user-select: none; /* Evita seleção no touch */
-        }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; min-height: 100vh; overflow-y: auto; user-select: none; }
         
-        /* HEADER */
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: var(--bg);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
+        .header-top { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
         .header-left { display: flex; align-items: center; gap: 15px; }
-        
-        /* Botão Menu estilo APP */
-        .btn-home {
-            background: #1e293b;
-            color: #fff;
-            padding: 8px 15px;
-            border-radius: 6px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid var(--border);
-            font-weight: bold;
-            transition: 0.3s;
-            cursor: pointer;
-        }
-        .btn-home:hover { background: var(--accent); border-color: var(--accent); color: #000; }
-
-        /* TÍTULO PADRÃO CORE */
+        .btn-home { background: #1e293b; color: #fff; padding: 8px 15px; border-radius: 6px; font-size: 14px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); font-weight: bold; transition: 0.3s; cursor: pointer; }
         .page-title { font-size: 18px; font-weight: bold; color: var(--accent); letter-spacing: 1px; margin: 0; }
-        .version-tag { font-size: 10px; color: #000; background: var(--accent); padding: 2px 6px; border-radius: 4px; margin-left: 10px; font-weight: 900; letter-spacing: 1px; vertical-align: middle; }
+        .version-tag { font-size: 10px; color: #000; background: var(--accent); padding: 2px 6px; border-radius: 4px; margin-left: 10px; font-weight: 900; vertical-align: middle; }
         
-        /* CONTENT */
-        .content { 
-            padding: 20px; 
-            display: grid; 
-            grid-template-columns: 1fr 1.3fr; 
-            gap: 20px; 
-            max-width: 1400px; 
-            margin: 0 auto; 
-        }
+        .content { padding: 20px; display: grid; grid-template-columns: 1fr 1.3fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
         
         .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; height: fit-content; }
         .card-header { padding: 15px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: center; }
         .card-title { font-size: 14px; font-weight: bold; color: var(--accent); text-transform: uppercase; margin: 0; }
 
-        /* FILTROS E BUSCA */
         .filter-tabs { display: flex; gap: 5px; padding: 10px 15px; border-bottom: 1px solid var(--border); overflow-x: auto; white-space: nowrap; }
         .f-tab { padding: 6px 12px; background: #1e293b; border-radius: 15px; font-size: 11px; cursor: pointer; color: #94a3b8; border: 1px solid transparent; transition:0.2s; }
-        .f-tab:hover { color: #fff; }
         .f-tab.active { background: var(--accent); color: #000; border-color: var(--accent); }
 
         .search-box { padding: 10px 15px; border-bottom: 1px solid var(--border); }
         input, select { width: 100%; padding: 12px; background: #020617; border: 1px solid var(--border); border-radius: 8px; color: #fff; box-sizing: border-box; outline: none; transition: 0.3s; font-size: 13px; }
-        input:focus, select:focus { border-color: var(--accent); }
-
-        /* LISTA */
+        
         .item-list { max-height: 600px; overflow-y: auto; flex: 1; }
         .item-row { padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
         .item-row:hover { background: rgba(0, 224, 255, 0.1); }
@@ -111,13 +52,12 @@
         .badge-roupa { background: #ec4899; color: #fff; }
         .badge-acessorio { background: #8b5cf6; color: #fff; }
         .badge-perfume { background: #f59e0b; color: #fff; }
+        .badge-qtd { background: #334155; color: #fff; border: 1px solid #475569; margin-left: 5px; }
 
-        /* FORMULÁRIO */
         .form-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .label { font-size: 11px; color: #64748b; margin-bottom: 5px; display: block; text-transform: uppercase; }
-        .req { color: var(--danger); margin-left: 2px; }
-
+        
         .btn-group { padding: 15px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; background: var(--card); }
         .btn { padding: 10px 20px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; justify-content: center; }
         .btn-save { background: var(--success); color: #000; }
@@ -127,31 +67,21 @@
         .btn-clean { background: rgba(239, 68, 68, 0.2); color: var(--danger); font-size: 10px; padding: 8px; border: 1px solid var(--danger); flex: 1; }
 
         .hidden { display: none !important; }
-
-        /* RODAPÉ */
         .footer { text-align: center; padding: 20px; color: #64748b; font-size: 11px; border-top: 1px solid var(--border); margin-top: 20px; width: 100%; }
 
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; justify-content: center; align-items: center; }
         .modal-box { background: var(--card); border: 1px solid var(--accent); padding: 20px; border-radius: 12px; width: 400px; max-height: 80vh; display: flex; flex-direction: column; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .modal-body { overflow-y: auto; flex: 1; }
         .list-manage-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid var(--border); }
         .btn-mini-del { color: var(--danger); cursor: pointer; }
         optgroup { color: var(--accent); font-weight: bold; background: #000; }
 
-        /* RESPONSIVIDADE MOBILE */
         @media (max-width: 900px) {
             .content { display: flex; flex-direction: column; padding: 10px; }
             .card:first-child { max-height: 400px; }
             .form-grid { grid-template-columns: 1fr; }
             .btn-group { flex-direction: column-reverse; }
-            .btn { width: 100%; }
         }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #020617; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
     </style>
 </head>
 <body>
@@ -159,13 +89,12 @@
     <div class="header-top">
         <div class="header-left">
             <div onclick="window.location.href='menu.html'" class="btn-home"><i class="fas fa-home"></i> MENU</div>
-            <h1 class="page-title">VÉRTICE BI <span class="version-tag">CORE</span></h1>
+            <h1 class="page-title">VÉRTICE BI <span class="version-tag">CORE v11.8</span></h1>
         </div>
         <div></div>
     </div>
 
     <main class="content">
-        
         <section class="card">
             <div class="card-header">
                 <h3 class="card-title">Inventário</h3>
@@ -204,7 +133,6 @@
             </div>
             
             <div class="form-body">
-                
                 <div class="form-grid">
                     <div>
                         <label class="label">Categoria</label>
@@ -228,7 +156,7 @@
                 </div>
 
                 <div>
-                    <label class="label" id="labelModelo">Modelo / Nome <span class="req">*</span></label>
+                    <label class="label" id="labelModelo">Modelo / Nome <span style="color:red">*</span></label>
                     <input type="text" id="modelo" placeholder="Ex: iPhone 14 Pro Max">
                 </div>
 
@@ -264,22 +192,22 @@
                     </div>
                     <div class="form-grid">
                         <div>
-                            <label class="label">Serial Number <span class="req">*</span></label>
+                            <label class="label">Serial Number</label>
                             <input type="text" id="serial" style="text-transform:uppercase;">
                         </div>
                         <div>
-                            <label class="label">Bateria (%) <span class="req">*</span></label>
+                            <label class="label">Bateria (%)</label>
                             <input type="number" id="bateria" placeholder="100">
                         </div>
                     </div>
                     <div class="form-grid">
                         <div>
-                            <label class="label">IMEI 1 <span class="req">*</span></label>
-                            <input type="text" id="imei1" maxlength="15" oninput="numeros(this)" placeholder="15 dígitos">
+                            <label class="label">IMEI 1</label>
+                            <input type="text" id="imei1" maxlength="15" oninput="numeros(this)">
                         </div>
                         <div>
                             <label class="label">IMEI 2</label>
-                            <input type="text" id="imei2" maxlength="15" oninput="numeros(this)" placeholder="Opcional">
+                            <input type="text" id="imei2" maxlength="15" oninput="numeros(this)">
                         </div>
                     </div>
                 </div>
@@ -331,7 +259,6 @@
                         <input type="number" id="qtd" min="1" value="1" placeholder="1" style="font-weight:bold; border-color:var(--accent);">
                     </div>
                 </div>
-
             </div>
 
             <div class="btn-group">
@@ -341,7 +268,7 @@
         </section>
 
         <div class="footer" style="grid-column: 1 / -1;">
-            VÉRTICE BI CORE v11.0 © Rodrigo N Carvalho 2026
+            VÉRTICE BI CORE v11.8 © Rodrigo N Carvalho 2026
         </div>
 
         <datalist id="dlMarcas"></datalist>
@@ -352,7 +279,6 @@
         <datalist id="dlTiposRoupa"></datalist>
         <datalist id="dlNomesPerfume"></datalist>
         <datalist id="dlFragrancias"></datalist>
-
     </main>
 
     <div id="modalListas" class="modal-overlay">
@@ -361,7 +287,6 @@
                 <h3>Gerenciar Listas</h3>
                 <button onclick="fecharModalGestao()" style="background:none; border:none; color:white; cursor:pointer;">X</button>
             </div>
-            
             <div style="display:flex; gap:10px; margin-bottom:15px;">
                 <select id="selListaGerenciar" onchange="carregarItensLista()" style="flex:1;">
                     <optgroup label="GERAL">
@@ -381,21 +306,18 @@
                     </optgroup>
                 </select>
             </div>
-            
             <div style="display:flex; gap:10px; margin-bottom:15px;">
                 <input type="text" id="novoItemLista" placeholder="Novo Item...">
                 <button class="btn btn-save" style="width:auto;" onclick="adicionarItemLista()">+</button>
             </div>
-
             <div id="containerItensLista" class="modal-body"></div>
         </div>
     </div>
 
     <script>
-        // --- 🔒 KILL SWITCH (TRAVA DE SEGURANÇA) ---
+        // --- 🔒 KILL SWITCH ---
         const DATA_LIMITE = new Date('2030-01-01'); 
         if(new Date() > DATA_LIMITE) { 
-            document.body.innerHTML = '<div style="height:100vh;display:flex;justify-content:center;align-items:center;background:#000;color:red;flex-direction:column;"><h1>ACESSO SUSPENSO</h1><p>Contate o suporte.</p></div>'; 
             throw new Error("Bloqueado"); 
         }
 
@@ -403,11 +325,8 @@
         let itemSelecionadoId = null;
         let filtroCatAtual = 'todos';
 
-        // 1. INICIALIZAÇÃO
         window.onload = () => {
             const cargo = localStorage.getItem('cargoUsuario');
-            const permissoes = localStorage.getItem('permissoesUsuario'); // Pegar permissões do localStorage também se precisar
-            
             if(!cargo) window.location.href='index.html';
 
             db.collection("estoque").orderBy("modelo").onSnapshot(snap => {
@@ -424,29 +343,16 @@
             carregarDatalist('lista_tipos_roupa', 'dlTiposRoupa');
             carregarDatalist('lista_nomes_perfume', 'dlNomesPerfume');
             carregarDatalist('lista_fragrancias', 'dlFragrancias');
-
             ajustarCampos(); 
         };
 
-        // 2. FUNÇÃO LIMPAR VENDIDOS
-        async function limparVendidos() {
-            if(!confirm("ATENÇÃO: Deseja limpar os itens vendidos da visualização?")) return;
-            try {
-                const snap = await db.collection("estoque").where("status", "==", "vendido").get();
-                if(snap.empty) return alert("Nada para limpar.");
-                const batch = db.batch();
-                snap.docs.forEach(doc => batch.delete(doc.ref));
-                await batch.commit();
-                alert("Limpeza concluída!");
-            } catch(e) { alert("Erro: " + e.message); }
-        }
-
-        // 3. RENDERIZAÇÃO
+        // --- FUNÇÃO DE RENDERIZAÇÃO COM AGRUPAMENTO INTELIGENTE ---
         function renderizarLista() {
             const div = document.getElementById('lista-estoque');
             div.innerHTML = "";
             const termo = document.getElementById('busca').value.toLowerCase();
             
+            // 1. FILTRAR
             const filtrados = dbEstoque.filter(p => {
                 const texto = (p.modelo + (p.imei1 || '') + (p.serial || '')).toLowerCase();
                 const matchTexto = texto.includes(termo);
@@ -456,11 +362,47 @@
 
             document.getElementById('total-itens').innerText = `${filtrados.length} itens`;
 
+            // 2. LÓGICA DE AGRUPAMENTO
+            const listaFinal = [];
+            const grupos = {}; // Objeto para armazenar grupos
+
             filtrados.forEach(p => {
-                const el = document.createElement('div');
-                el.className = `item-row ${itemSelecionadoId === p.id ? 'active' : ''}`;
-                el.onclick = () => carregarItem(p);
+                const cat = (p.categoria || '').toLowerCase();
                 
+                // SE FOR CELULAR OU SE ESTIVER VENDIDO/RESERVADO -> NÃO AGRUPA (MOSTRA INDIVIDUAL)
+                if(cat.includes('celular') || p.status !== 'disponível') {
+                    listaFinal.push({ tipo: 'individual', dados: p });
+                } 
+                else {
+                    // SE FOR OUTROS (Perfume, Roupa, Capa) -> TENTA AGRUPAR
+                    // Chave única: Modelo + Valor + Cor + Tamanho
+                    const chave = `${p.modelo}-${p.venda}-${p.cor||''}-${p.tamanho||''}`;
+                    
+                    if(!grupos[chave]) {
+                        grupos[chave] = { tipo: 'grupo', count: 0, dados: p, ids: [] };
+                        listaFinal.push(grupos[chave]); // Adiciona referência na lista
+                    }
+                    grupos[chave].count++;
+                    grupos[chave].ids.push(p.id); // Guarda os IDs do grupo
+                }
+            });
+
+            // 3. DESENHAR NA TELA
+            listaFinal.forEach(item => {
+                const el = document.createElement('div');
+                const p = item.dados;
+                
+                // Se for grupo, usa o ID do primeiro item para carregar ao clicar
+                const clickId = item.tipo === 'grupo' ? item.ids[0] : p.id;
+                // Se item selecionado for um dos itens do grupo, marca o grupo como ativo
+                const isActive = itemSelecionadoId === p.id || (item.tipo === 'grupo' && item.ids.includes(itemSelecionadoId));
+
+                el.className = `item-row ${isActive ? 'active' : ''}`;
+                
+                // Ao clicar no grupo, carrega o PRIMEIRO item individualmente (para editar/reservar)
+                // Se salvar como "reservado", ele sai do grupo na próxima renderização. Genial!
+                el.onclick = () => carregarItem(item.tipo === 'grupo' ? buscarPorId(item.ids[0]) : p);
+
                 const cat = (p.categoria || 'outros').toLowerCase();
                 let badgeClass = 'badge-acessorio';
                 if(cat.includes('celular')) badgeClass = 'badge-celular';
@@ -470,15 +412,21 @@
                 let nome = p.modelo || p.nomeP || 'Sem nome';
                 if(p.gb) nome += ` ${p.gb}`;
 
+                // BADGE DE QUANTIDADE SE FOR GRUPO
+                let badgeQtd = item.tipo === 'grupo' && item.count > 1 
+                    ? `<span class="badge badge-qtd">${item.count} UNIDADES</span>` 
+                    : '';
+
                 el.innerHTML = `
                     <div>
                         <div style="display:flex; gap:5px; margin-bottom:4px;">
                             <span class="badge ${badgeClass}">${cat.toUpperCase()}</span>
+                            ${badgeQtd}
                             ${p.status === 'vendido' ? '<span class="badge" style="background:#ef4444;color:#fff;">VENDIDO</span>' : ''}
                             ${p.status === 'reservado' ? '<span class="badge" style="background:#f59e0b;color:#fff;">RESERVADO</span>' : ''}
                         </div>
                         <div style="font-weight:600;">${nome}</div>
-                        <div style="font-size:11px; opacity:0.7;">${p.cor || ''}</div>
+                        <div style="font-size:11px; opacity:0.7;">${p.cor || p.tamanho || p.ml || ''}</div>
                     </div>
                     <div style="text-align:right;">
                         <div style="font-weight:bold;">R$ ${parseFloat(p.venda||0).toFixed(2)}</div>
@@ -488,16 +436,19 @@
             });
         }
 
+        function buscarPorId(id) {
+            return dbEstoque.find(i => i.id === id);
+        }
+
         function filtrarCategoria(cat, el) {
             filtroCatAtual = cat;
             document.querySelectorAll('.f-tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
             renderizarLista();
         }
-
         function filtrarLista() { renderizarLista(); }
 
-        // --- LÓGICA DE FORMULÁRIO ---
+        // --- RESTO DAS FUNÇÕES (IGUAIS) ---
         function ajustarCampos() {
             const cat = document.getElementById('categoria').value;
             const inputModelo = document.getElementById('modelo');
@@ -512,24 +463,21 @@
                 document.getElementById('campos-celular').classList.remove('hidden');
                 inputModelo.setAttribute('list', 'dlModelosCelular');
                 labelModelo.innerText = "Modelo (iPhone)";
-            } 
-            else if(cat === 'roupa') {
+            } else if(cat === 'roupa') {
                 document.getElementById('campos-roupa').classList.remove('hidden');
                 inputModelo.setAttribute('list', 'dlModelosRoupa');
                 labelModelo.innerText = "Modelo (Calça, Camisa...)";
-            }
-            else if(cat === 'perfume') {
+            } else if(cat === 'perfume') {
                 document.getElementById('campos-perfume').classList.remove('hidden');
                 inputModelo.setAttribute('list', 'dlNomesPerfume');
                 labelModelo.innerText = "Nome do Perfume";
-            }
-            else {
+            } else {
                 labelModelo.innerText = "Descrição do Item";
             }
         }
 
         function carregarItem(p) {
-            itemSelecionadoId = p.id;
+            itemSelecionadoId = p.id; // Marca o ID específico que foi carregado
             document.getElementById('itemId').value = p.id;
             
             document.getElementById('categoria').value = p.categoria || 'celular';
@@ -539,7 +487,7 @@
             document.getElementById('custo').value = formatMoney(p.custo);
             document.getElementById('venda').value = formatMoney(p.venda);
             document.getElementById('status').value = p.status || 'disponível';
-            document.getElementById('qtd').value = 1; // Ao carregar existente, qtd é 1
+            document.getElementById('qtd').value = 1; 
             
             ajustarCampos();
 
@@ -549,14 +497,12 @@
             document.getElementById('bateria').value = p.bateria || '';
             document.getElementById('imei1').value = p.imei1 || '';
             document.getElementById('imei2').value = p.imei2 || '';
-            
             document.getElementById('tamanho').value = p.tamanho || '';
             document.getElementById('corRoupa').value = p.cor || '';
-            
             document.getElementById('ml').value = p.ml || '';
             document.getElementById('tipoPerfume').value = p.fragrancia || '';
 
-            renderizarLista();
+            renderizarLista(); // Re-renderiza para atualizar a classe .active
             
             if(window.innerWidth <= 900) {
                 document.querySelector('.form-body').scrollIntoView({behavior: "smooth"});
@@ -577,10 +523,9 @@
             document.getElementById('imei2').value = "";
             document.getElementById('tipoPerfume').value = "";
             document.getElementById('status').value = "disponível";
-            document.getElementById('qtd').value = "1"; // Reset QTD
+            document.getElementById('qtd').value = "1";
             document.getElementById('cor').value = "";
             document.getElementById('corRoupa').value = "";
-            
             document.getElementById('modelo').focus();
             renderizarLista();
         }
@@ -588,7 +533,7 @@
         async function salvarItem() {
             const id = document.getElementById('itemId').value;
             const cat = document.getElementById('categoria').value;
-            const qtd = parseInt(document.getElementById('qtd').value) || 1; // PEGA A QUANTIDADE
+            const qtd = parseInt(document.getElementById('qtd').value) || 1;
             
             const dados = {
                 categoria: cat,
@@ -608,12 +553,10 @@
                 dados.imei2 = document.getElementById('imei2').value;
                 dados.serial = document.getElementById('serial').value.toUpperCase();
                 dados.bateria = document.getElementById('bateria').value;
-            } 
-            else if (cat === 'roupa') {
+            } else if (cat === 'roupa') {
                 dados.tamanho = document.getElementById('tamanho').value;
                 dados.cor = document.getElementById('corRoupa').value;
-            }
-            else if (cat === 'perfume') {
+            } else if (cat === 'perfume') {
                 dados.ml = document.getElementById('ml').value;
                 dados.fragrancia = document.getElementById('tipoPerfume').value;
             }
@@ -622,11 +565,9 @@
 
             try {
                 if(id) {
-                    // SE FOR EDIÇÃO: ATUALIZA SÓ 1
                     await db.collection("estoque").doc(id).update(dados);
-                    alert("Atualizado com sucesso!");
+                    alert("Item atualizado!");
                 } else {
-                    // SE FOR NOVO: LOOP DA QUANTIDADE
                     dados.dataEntrada = Date.now();
                     const promessas = [];
                     for(let i = 0; i < qtd; i++) {
@@ -649,15 +590,19 @@
             }
         }
 
-        // --- GESTÃO DE LISTAS DINÂMICA ---
-        function abrirModalGestao() {
-            document.getElementById('modalListas').style.display = 'flex';
-            carregarItensLista();
-        }
-        function fecharModalGestao() {
-            document.getElementById('modalListas').style.display = 'none';
+        async function limparVendidos() {
+            if(!confirm("Deseja limpar itens vendidos?")) return;
+            const snap = await db.collection("estoque").where("status", "==", "vendido").get();
+            const batch = db.batch();
+            snap.docs.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+            alert("Limpeza concluída!");
         }
 
+        // Listas e Auxiliares
+        function abrirModalGestao() { document.getElementById('modalListas').style.display = 'flex'; carregarItensLista(); }
+        function fecharModalGestao() { document.getElementById('modalListas').style.display = 'none'; }
+        
         async function carregarItensLista() {
             const colecao = document.getElementById('selListaGerenciar').value;
             const container = document.getElementById('containerItensLista');
@@ -665,45 +610,25 @@
             const snap = await db.collection(colecao).orderBy('nome').get();
             container.innerHTML = "";
             snap.forEach(doc => {
-                const div = document.createElement('div');
-                div.className = 'list-manage-item';
-                div.innerHTML = `<span>${doc.data().nome}</span><span class="btn-mini-del" onclick="removerItemLista('${colecao}', '${doc.id}')"><i class="fas fa-trash"></i></span>`;
-                container.appendChild(div);
+                container.innerHTML += `<div class="list-manage-item"><span>${doc.data().nome}</span><span class="btn-mini-del" onclick="removerItemLista('${colecao}', '${doc.id}')"><i class="fas fa-trash"></i></span></div>`;
             });
         }
-
         async function adicionarItemLista() {
-            const colecao = document.getElementById('selListaGerenciar').value;
-            const valor = document.getElementById('novoItemLista').value.trim();
-            if(!valor) return;
-            await db.collection(colecao).add({ nome: valor });
-            document.getElementById('novoItemLista').value = "";
-            carregarItensLista();
+            const col = document.getElementById('selListaGerenciar').value;
+            const val = document.getElementById('novoItemLista').value.trim();
+            if(val) { await db.collection(col).add({nome:val}); document.getElementById('novoItemLista').value=""; carregarItensLista(); }
         }
-
-        async function removerItemLista(colecao, id) {
-            if(confirm("Remover?")) {
-                await db.collection(colecao).doc(id).delete();
-                carregarItensLista();
-            }
-        }
-
-        function carregarDatalist(colecao, datalistId) {
-            db.collection(colecao).orderBy('nome').onSnapshot(snap => {
-                const dl = document.getElementById(datalistId);
-                dl.innerHTML = "";
-                snap.forEach(doc => { dl.innerHTML += `<option value="${doc.data().nome}">`; });
+        async function removerItemLista(col, id) { if(confirm("Remover?")) { await db.collection(col).doc(id).delete(); carregarItensLista(); } }
+        function carregarDatalist(col, id) {
+            db.collection(col).orderBy('nome').onSnapshot(s => {
+                document.getElementById(id).innerHTML = "";
+                s.forEach(d => document.getElementById(id).innerHTML += `<option value="${d.data().nome}">`);
             });
         }
-
-        // Auxiliares
-        function moeda(i) {
-            let v = i.value.replace(/\D/g,''); v = (v/100).toFixed(2) + ''; v = v.replace(".", ",");
-            v = v.replace(/(\d)(\d{3}),/g, "$1.$2,"); i.value = "R$ " + v;
-        }
+        function moeda(i) { let v = i.value.replace(/\D/g,''); v = (v/100).toFixed(2)+''; v = v.replace(".",",").replace(/(\d)(\d{3}),/g,"$1.$2,"); i.value = "R$ "+v; }
         function numeros(i) { i.value = i.value.replace(/\D/g,''); }
-        function formatMoney(val) { return val ? "R$ " + parseFloat(val).toFixed(2).replace('.',',') : ""; }
-        function parseMoney(val) { return parseFloat(val.replace(/[R$\s.]/g, '').replace(',', '.')) || 0; }
+        function formatMoney(val) { return val ? "R$ "+parseFloat(val).toFixed(2).replace('.',',') : ""; }
+        function parseMoney(val) { return parseFloat(val.replace(/[R$\s.]/g,'').replace(',','.')) || 0; }
     </script>
 </body>
 </html>
