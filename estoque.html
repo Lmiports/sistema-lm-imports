@@ -46,13 +46,16 @@
         .item-row { padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
         .item-row:hover { background: rgba(0, 224, 255, 0.1); }
         .item-row.active { background: var(--accent); color: #000; }
+        /* Estilo especial para grupos */
+        .item-row.group-row { background: rgba(255, 255, 255, 0.02); border-left: 3px solid var(--accent); }
+        .item-row.group-row:hover { background: rgba(0, 224, 255, 0.15); }
         
         .badge { padding: 3px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; text-transform: uppercase; }
         .badge-celular { background: var(--accent); color: #000; }
         .badge-roupa { background: #ec4899; color: #fff; }
         .badge-acessorio { background: #8b5cf6; color: #fff; }
         .badge-perfume { background: #f59e0b; color: #fff; }
-        .badge-qtd { background: #334155; color: #fff; border: 1px solid #475569; margin-left: 5px; }
+        .badge-qtd { background: #fff; color: #000; margin-left: 5px; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
 
         .form-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
@@ -89,7 +92,7 @@
     <div class="header-top">
         <div class="header-left">
             <div onclick="window.location.href='menu.html'" class="btn-home"><i class="fas fa-home"></i> MENU</div>
-            <h1 class="page-title">VÉRTICE BI <span class="version-tag">CORE v11.8</span></h1>
+            <h1 class="page-title">VÉRTICE BI <span class="version-tag">CORE v11.9</span></h1>
         </div>
         <div></div>
     </div>
@@ -268,7 +271,7 @@
         </section>
 
         <div class="footer" style="grid-column: 1 / -1;">
-            VÉRTICE BI CORE v11.8 © Rodrigo N Carvalho 2026
+            VÉRTICE BI CORE v11.9 © Rodrigo N Carvalho 2026
         </div>
 
         <datalist id="dlMarcas"></datalist>
@@ -346,13 +349,13 @@
             ajustarCampos(); 
         };
 
-        // --- FUNÇÃO DE RENDERIZAÇÃO COM AGRUPAMENTO INTELIGENTE ---
+        // --- FUNÇÃO DE RENDERIZAÇÃO COM AGRUPAMENTO ROBUSTO ---
         function renderizarLista() {
             const div = document.getElementById('lista-estoque');
             div.innerHTML = "";
             const termo = document.getElementById('busca').value.toLowerCase();
             
-            // 1. FILTRAR
+            // 1. FILTRAGEM
             const filtrados = dbEstoque.filter(p => {
                 const texto = (p.modelo + (p.imei1 || '') + (p.serial || '')).toLowerCase();
                 const matchTexto = texto.includes(termo);
@@ -360,84 +363,89 @@
                 return matchTexto && matchCat;
             });
 
-            document.getElementById('total-itens').innerText = `${filtrados.length} itens`;
-
-            // 2. LÓGICA DE AGRUPAMENTO
-            const listaFinal = [];
-            const grupos = {}; // Objeto para armazenar grupos
+            // 2. AGRUPAMENTO
+            const listaExibicao = [];
+            const grupos = {};
 
             filtrados.forEach(p => {
                 const cat = (p.categoria || '').toLowerCase();
                 
-                // SE FOR CELULAR OU SE ESTIVER VENDIDO/RESERVADO -> NÃO AGRUPA (MOSTRA INDIVIDUAL)
-                if(cat.includes('celular') || p.status !== 'disponível') {
-                    listaFinal.push({ tipo: 'individual', dados: p });
+                // REGRA: Celulares e itens indisponíveis NÃO agrupam
+                if (cat.includes('celular') || p.status !== 'disponível') {
+                    listaExibicao.push(p);
                 } 
                 else {
-                    // SE FOR OUTROS (Perfume, Roupa, Capa) -> TENTA AGRUPAR
-                    // Chave única: Modelo + Valor + Cor + Tamanho
-                    const chave = `${p.modelo}-${p.venda}-${p.cor||''}-${p.tamanho||''}`;
-                    
-                    if(!grupos[chave]) {
-                        grupos[chave] = { tipo: 'grupo', count: 0, dados: p, ids: [] };
-                        listaFinal.push(grupos[chave]); // Adiciona referência na lista
+                    // CRIA CHAVE ÚNICA DE AGRUPAMENTO
+                    // Normaliza strings (remove espaços extras e coloca minúsculo) para garantir match
+                    const norm = (str) => (str || '').toString().trim().toLowerCase();
+                    const chave = `${norm(p.modelo)}|${norm(p.venda)}|${norm(p.cor)}|${norm(p.tamanho)}|${norm(p.ml)}|${norm(p.fragrancia)}`;
+
+                    if (!grupos[chave]) {
+                        // Cria o líder do grupo
+                        grupos[chave] = { 
+                            ...p, 
+                            isGroup: true, 
+                            qtdGrupo: 0, 
+                            idsGrupo: [] 
+                        };
+                        listaExibicao.push(grupos[chave]);
                     }
-                    grupos[chave].count++;
-                    grupos[chave].ids.push(p.id); // Guarda os IDs do grupo
+                    // Adiciona ao grupo existente
+                    grupos[chave].qtdGrupo++;
+                    grupos[chave].idsGrupo.push(p.id);
                 }
             });
 
-            // 3. DESENHAR NA TELA
-            listaFinal.forEach(item => {
+            document.getElementById('total-itens').innerText = `${listaExibicao.length} registros`;
+
+            // 3. DESENHAR
+            listaExibicao.forEach(item => {
                 const el = document.createElement('div');
-                const p = item.dados;
                 
-                // Se for grupo, usa o ID do primeiro item para carregar ao clicar
-                const clickId = item.tipo === 'grupo' ? item.ids[0] : p.id;
-                // Se item selecionado for um dos itens do grupo, marca o grupo como ativo
-                const isActive = itemSelecionadoId === p.id || (item.tipo === 'grupo' && item.ids.includes(itemSelecionadoId));
+                // Se for grupo, pega o ID do primeiro item para edição
+                const realId = item.isGroup ? item.idsGrupo[0] : item.id;
+                // Verifica se está ativo (se for grupo, verifica se o selecionado está dentro)
+                const isActive = itemSelecionadoId === realId || (item.isGroup && item.idsGrupo.includes(itemSelecionadoId));
 
-                el.className = `item-row ${isActive ? 'active' : ''}`;
+                el.className = `item-row ${isActive ? 'active' : ''} ${item.isGroup && item.qtdGrupo > 1 ? 'group-row' : ''}`;
                 
-                // Ao clicar no grupo, carrega o PRIMEIRO item individualmente (para editar/reservar)
-                // Se salvar como "reservado", ele sai do grupo na próxima renderização. Genial!
-                el.onclick = () => carregarItem(item.tipo === 'grupo' ? buscarPorId(item.ids[0]) : p);
+                // Ao clicar: Se for grupo, busca o item original pelo ID do líder
+                el.onclick = () => carregarItem(item.isGroup ? dbEstoque.find(x => x.id === realId) : item);
 
-                const cat = (p.categoria || 'outros').toLowerCase();
+                const cat = (item.categoria || 'outros').toLowerCase();
                 let badgeClass = 'badge-acessorio';
                 if(cat.includes('celular')) badgeClass = 'badge-celular';
                 if(cat.includes('roupa')) badgeClass = 'badge-roupa';
                 if(cat.includes('perfume')) badgeClass = 'badge-perfume';
 
-                let nome = p.modelo || p.nomeP || 'Sem nome';
-                if(p.gb) nome += ` ${p.gb}`;
+                let nome = item.modelo || item.nomeP || 'Sem nome';
+                if(item.gb) nome += ` ${item.gb}`;
 
-                // BADGE DE QUANTIDADE SE FOR GRUPO
-                let badgeQtd = item.tipo === 'grupo' && item.count > 1 
-                    ? `<span class="badge badge-qtd">${item.count} UNIDADES</span>` 
-                    : '';
+                // Badge de Quantidade (Só aparece se for grupo > 1)
+                let badgeQtd = "";
+                if (item.isGroup && item.qtdGrupo > 1) {
+                    badgeQtd = `<span class="badge badge-qtd">${item.qtdGrupo} UNIDADES</span>`;
+                }
 
                 el.innerHTML = `
                     <div>
-                        <div style="display:flex; gap:5px; margin-bottom:4px;">
+                        <div style="display:flex; gap:5px; margin-bottom:4px; align-items:center;">
                             <span class="badge ${badgeClass}">${cat.toUpperCase()}</span>
                             ${badgeQtd}
-                            ${p.status === 'vendido' ? '<span class="badge" style="background:#ef4444;color:#fff;">VENDIDO</span>' : ''}
-                            ${p.status === 'reservado' ? '<span class="badge" style="background:#f59e0b;color:#fff;">RESERVADO</span>' : ''}
+                            ${item.status === 'vendido' ? '<span class="badge" style="background:#ef4444;color:#fff;">VENDIDO</span>' : ''}
+                            ${item.status === 'reservado' ? '<span class="badge" style="background:#f59e0b;color:#fff;">RESERVADO</span>' : ''}
                         </div>
                         <div style="font-weight:600;">${nome}</div>
-                        <div style="font-size:11px; opacity:0.7;">${p.cor || p.tamanho || p.ml || ''}</div>
+                        <div style="font-size:11px; opacity:0.7;">
+                            ${item.cor || ''} ${item.tamanho ? '- '+item.tamanho : ''} ${item.ml ? '- '+item.ml : ''}
+                        </div>
                     </div>
                     <div style="text-align:right;">
-                        <div style="font-weight:bold;">R$ ${parseFloat(p.venda||0).toFixed(2)}</div>
+                        <div style="font-weight:bold;">R$ ${parseFloat(item.venda||0).toFixed(2)}</div>
                     </div>
                 `;
                 div.appendChild(el);
             });
-        }
-
-        function buscarPorId(id) {
-            return dbEstoque.find(i => i.id === id);
         }
 
         function filtrarCategoria(cat, el) {
