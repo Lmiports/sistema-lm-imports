@@ -317,14 +317,21 @@
                     </div>
                 </div>
 
-                <div style="margin-top:15px;">
-                    <label class="label">Status</label>
-                    <select id="status">
-                        <option value="disponível">🟢 Disponível</option>
-                        <option value="vendido">🔴 Vendido</option>
-                        <option value="reservado">🟡 Reservado</option>
-                    </select>
+                <div class="form-grid" style="margin-top:15px;">
+                    <div>
+                        <label class="label">Status</label>
+                        <select id="status">
+                            <option value="disponível">🟢 Disponível</option>
+                            <option value="vendido">🔴 Vendido</option>
+                            <option value="reservado">🟡 Reservado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="label" style="color:var(--accent)">Quantidade (Lote)</label>
+                        <input type="number" id="qtd" min="1" value="1" placeholder="1" style="font-weight:bold; border-color:var(--accent);">
+                    </div>
                 </div>
+
             </div>
 
             <div class="btn-group">
@@ -399,6 +406,8 @@
         // 1. INICIALIZAÇÃO
         window.onload = () => {
             const cargo = localStorage.getItem('cargoUsuario');
+            const permissoes = localStorage.getItem('permissoesUsuario'); // Pegar permissões do localStorage também se precisar
+            
             if(!cargo) window.location.href='index.html';
 
             db.collection("estoque").orderBy("modelo").onSnapshot(snap => {
@@ -439,7 +448,7 @@
             const termo = document.getElementById('busca').value.toLowerCase();
             
             const filtrados = dbEstoque.filter(p => {
-                const texto = (p.modelo + p.imei1 + p.serial).toLowerCase();
+                const texto = (p.modelo + (p.imei1 || '') + (p.serial || '')).toLowerCase();
                 const matchTexto = texto.includes(termo);
                 const matchCat = filtroCatAtual === 'todos' || (p.categoria || '').toLowerCase().includes(filtroCatAtual);
                 return matchTexto && matchCat;
@@ -530,6 +539,7 @@
             document.getElementById('custo').value = formatMoney(p.custo);
             document.getElementById('venda').value = formatMoney(p.venda);
             document.getElementById('status').value = p.status || 'disponível';
+            document.getElementById('qtd').value = 1; // Ao carregar existente, qtd é 1
             
             ajustarCampos();
 
@@ -567,6 +577,7 @@
             document.getElementById('imei2').value = "";
             document.getElementById('tipoPerfume').value = "";
             document.getElementById('status').value = "disponível";
+            document.getElementById('qtd').value = "1"; // Reset QTD
             document.getElementById('cor').value = "";
             document.getElementById('corRoupa').value = "";
             
@@ -577,6 +588,7 @@
         async function salvarItem() {
             const id = document.getElementById('itemId').value;
             const cat = document.getElementById('categoria').value;
+            const qtd = parseInt(document.getElementById('qtd').value) || 1; // PEGA A QUANTIDADE
             
             const dados = {
                 categoria: cat,
@@ -610,13 +622,19 @@
 
             try {
                 if(id) {
+                    // SE FOR EDIÇÃO: ATUALIZA SÓ 1
                     await db.collection("estoque").doc(id).update(dados);
-                    alert("Atualizado!");
+                    alert("Atualizado com sucesso!");
                 } else {
+                    // SE FOR NOVO: LOOP DA QUANTIDADE
                     dados.dataEntrada = Date.now();
-                    await db.collection("estoque").add(dados);
+                    const promessas = [];
+                    for(let i = 0; i < qtd; i++) {
+                        promessas.push(db.collection("estoque").add(dados));
+                    }
+                    await Promise.all(promessas);
                     novoItem();
-                    alert("Cadastrado!");
+                    alert(`${qtd} item(ns) cadastrado(s)!`);
                 }
             } catch(e) { alert("Erro: " + e.message); }
         }
@@ -689,4 +707,3 @@
     </script>
 </body>
 </html>
-
