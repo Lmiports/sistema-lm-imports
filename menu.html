@@ -46,20 +46,25 @@
         }
         
         .brand-title {
-            font-size: 32px;
+            font-size: 28px; /* Ajustado para caber CORE */
             font-weight: 900;
-            color: var(--accent);
-            letter-spacing: 3px;
+            color: #fff;
+            letter-spacing: 2px;
             margin: 0;
-            text-shadow: 0 0 15px rgba(0, 224, 255, 0.4);
+            text-shadow: 0 0 15px rgba(0, 224, 255, 0.2);
+        }
+        
+        .brand-title span {
+            color: var(--accent);
         }
         
         .brand-sub {
-            font-size: 12px;
+            font-size: 11px;
             color: #64748b;
             text-transform: uppercase;
             letter-spacing: 4px;
             margin-top: 5px;
+            font-weight: 600;
         }
 
         .user-welcome {
@@ -151,8 +156,9 @@
 <body>
 
     <div class="brand-area">
-        <h1 class="brand-title">VÉRTICE</h1>
-        <div class="brand-sub">BI CORE SYSTEM</div>
+        <h1 class="brand-title">VÉRTICE <span>BI CORE</span></h1>
+        <div class="brand-sub">GESTÃO INTELIGENTE</div>
+        
         <div id="usuario-display" class="user-welcome">Carregando...</div>
     </div>
 
@@ -212,7 +218,7 @@
         if (!usuario || !cargo) {
             window.location.href = 'index.html';
         } else {
-            // Saudação no TOPO agora
+            // Saudação no TOPO
             document.getElementById('usuario-display').innerHTML = `<i class="fas fa-user"></i> Olá, ${usuario.toUpperCase()}`;
             
             if (cargo === 'admin') {
@@ -223,7 +229,6 @@
 
         // 2. NAVEGAÇÃO SEGURA (Substitui links)
         function navegar(destino) {
-            // Isso força a troca na MESMA janela
             window.location.href = destino;
         }
 
@@ -235,14 +240,13 @@
             }
         }
 
-        // 4. SINCRONIA DE ABAS (Segurança Extra)
+        // 4. SINCRONIA DE ABAS
         window.addEventListener('storage', function(e) {
             if (!localStorage.getItem('usuarioLogado')) {
                 window.location.href = 'index.html';
             }
         });
 
-        // Checa se ainda está logado ao voltar pra aba
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden && !localStorage.getItem('usuarioLogado')) {
                 window.location.href = 'index.html';
