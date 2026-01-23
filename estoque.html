@@ -46,7 +46,6 @@
         .item-row { padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
         .item-row:hover { background: rgba(0, 224, 255, 0.1); }
         .item-row.active { background: var(--accent); color: #000; }
-        /* Estilo especial para grupos */
         .item-row.group-row { background: rgba(255, 255, 255, 0.02); border-left: 3px solid var(--accent); }
         .item-row.group-row:hover { background: rgba(0, 224, 255, 0.15); }
         
@@ -71,6 +70,9 @@
 
         .hidden { display: none !important; }
         .footer { text-align: center; padding: 20px; color: #64748b; font-size: 11px; border-top: 1px solid var(--border); margin-top: 20px; width: 100%; }
+        
+        /* Loader */
+        .loader-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:none; justify-content:center; align-items:center; z-index:9999; flex-direction: column; color: #fff; }
 
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; justify-content: center; align-items: center; }
@@ -92,7 +94,7 @@
     <div class="header-top">
         <div class="header-left">
             <div onclick="window.location.href='menu.html'" class="btn-home"><i class="fas fa-home"></i> MENU</div>
-            <h1 class="page-title">VÉRTICE BI <span class="version-tag">CORE v11.9</span></h1>
+            <h1 class="page-title">VÉRTICE BI <span class="version-tag">CORE v12.0</span></h1>
         </div>
         <div></div>
     </div>
@@ -271,7 +273,12 @@
         </section>
 
         <div class="footer" style="grid-column: 1 / -1;">
-            VÉRTICE BI CORE v11.9 © Rodrigo N Carvalho 2026
+            VÉRTICE BI CORE v12.0 © Rodrigo N Carvalho 2026
+        </div>
+
+        <div class="loader-overlay" id="loader">
+            <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+            <p style="margin-top:10px;">Processando...</p>
         </div>
 
         <datalist id="dlMarcas"></datalist>
@@ -320,12 +327,12 @@
     <script>
         // --- 🔒 KILL SWITCH ---
         const DATA_LIMITE = new Date('2030-01-01'); 
-        if(new Date() > DATA_LIMITE) { 
-            throw new Error("Bloqueado"); 
-        }
+        if(new Date() > DATA_LIMITE) { throw new Error("Bloqueado"); }
 
         let dbEstoque = [];
         let itemSelecionadoId = null;
+        let grupoSelecionadoIds = []; // IDs do grupo em edição
+        let qtdOriginalGrupo = 0; // Para controle de delta
         let filtroCatAtual = 'todos';
 
         window.onload = () => {
@@ -349,13 +356,12 @@
             ajustarCampos(); 
         };
 
-        // --- FUNÇÃO DE RENDERIZAÇÃO COM AGRUPAMENTO ROBUSTO ---
+        // --- RENDERIZAÇÃO COM AGRUPAMENTO ROBUSTO ---
         function renderizarLista() {
             const div = document.getElementById('lista-estoque');
             div.innerHTML = "";
             const termo = document.getElementById('busca').value.toLowerCase();
             
-            // 1. FILTRAGEM
             const filtrados = dbEstoque.filter(p => {
                 const texto = (p.modelo + (p.imei1 || '') + (p.serial || '')).toLowerCase();
                 const matchTexto = texto.includes(termo);
@@ -363,54 +369,38 @@
                 return matchTexto && matchCat;
             });
 
-            // 2. AGRUPAMENTO
             const listaExibicao = [];
             const grupos = {};
+            const norm = (str) => (str || '').toString().trim().toLowerCase();
 
             filtrados.forEach(p => {
                 const cat = (p.categoria || '').toLowerCase();
-                
-                // REGRA: Celulares e itens indisponíveis NÃO agrupam
+                // REGRA: Celulares ou itens NÃO-disponíveis NÃO agrupam
                 if (cat.includes('celular') || p.status !== 'disponível') {
                     listaExibicao.push(p);
-                } 
-                else {
-                    // CRIA CHAVE ÚNICA DE AGRUPAMENTO
-                    // Normaliza strings (remove espaços extras e coloca minúsculo) para garantir match
-                    const norm = (str) => (str || '').toString().trim().toLowerCase();
+                } else {
+                    // CHAVE DE AGRUPAMENTO (Nome+Valor+Cor+Tamanho+ML)
                     const chave = `${norm(p.modelo)}|${norm(p.venda)}|${norm(p.cor)}|${norm(p.tamanho)}|${norm(p.ml)}|${norm(p.fragrancia)}`;
-
                     if (!grupos[chave]) {
-                        // Cria o líder do grupo
-                        grupos[chave] = { 
-                            ...p, 
-                            isGroup: true, 
-                            qtdGrupo: 0, 
-                            idsGrupo: [] 
-                        };
+                        grupos[chave] = { ...p, isGroup: true, qtdGrupo: 0, idsGrupo: [] };
                         listaExibicao.push(grupos[chave]);
                     }
-                    // Adiciona ao grupo existente
                     grupos[chave].qtdGrupo++;
                     grupos[chave].idsGrupo.push(p.id);
                 }
             });
 
-            document.getElementById('total-itens').innerText = `${listaExibicao.length} registros`;
+            document.getElementById('total-itens').innerText = `${listaExibicao.length} registros (Agrupados)`;
 
-            // 3. DESENHAR
             listaExibicao.forEach(item => {
                 const el = document.createElement('div');
-                
-                // Se for grupo, pega o ID do primeiro item para edição
                 const realId = item.isGroup ? item.idsGrupo[0] : item.id;
-                // Verifica se está ativo (se for grupo, verifica se o selecionado está dentro)
                 const isActive = itemSelecionadoId === realId || (item.isGroup && item.idsGrupo.includes(itemSelecionadoId));
 
                 el.className = `item-row ${isActive ? 'active' : ''} ${item.isGroup && item.qtdGrupo > 1 ? 'group-row' : ''}`;
                 
-                // Ao clicar: Se for grupo, busca o item original pelo ID do líder
-                el.onclick = () => carregarItem(item.isGroup ? dbEstoque.find(x => x.id === realId) : item);
+                // Ao clicar, passa o objeto completo do grupo se for grupo
+                el.onclick = () => carregarItem(item.isGroup ? item : item);
 
                 const cat = (item.categoria || 'outros').toLowerCase();
                 let badgeClass = 'badge-acessorio';
@@ -421,7 +411,6 @@
                 let nome = item.modelo || item.nomeP || 'Sem nome';
                 if(item.gb) nome += ` ${item.gb}`;
 
-                // Badge de Quantidade (Só aparece se for grupo > 1)
                 let badgeQtd = "";
                 if (item.isGroup && item.qtdGrupo > 1) {
                     badgeQtd = `<span class="badge badge-qtd">${item.qtdGrupo} UNIDADES</span>`;
@@ -448,46 +437,27 @@
             });
         }
 
-        function filtrarCategoria(cat, el) {
-            filtroCatAtual = cat;
-            document.querySelectorAll('.f-tab').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
-            renderizarLista();
-        }
-        function filtrarLista() { renderizarLista(); }
-
-        // --- RESTO DAS FUNÇÕES (IGUAIS) ---
-        function ajustarCampos() {
-            const cat = document.getElementById('categoria').value;
-            const inputModelo = document.getElementById('modelo');
-            const labelModelo = document.getElementById('labelModelo');
-
-            document.getElementById('campos-celular').classList.add('hidden');
-            document.getElementById('campos-roupa').classList.add('hidden');
-            document.getElementById('campos-perfume').classList.add('hidden');
-            inputModelo.removeAttribute('list');
-
-            if(cat === 'celular') {
-                document.getElementById('campos-celular').classList.remove('hidden');
-                inputModelo.setAttribute('list', 'dlModelosCelular');
-                labelModelo.innerText = "Modelo (iPhone)";
-            } else if(cat === 'roupa') {
-                document.getElementById('campos-roupa').classList.remove('hidden');
-                inputModelo.setAttribute('list', 'dlModelosRoupa');
-                labelModelo.innerText = "Modelo (Calça, Camisa...)";
-            } else if(cat === 'perfume') {
-                document.getElementById('campos-perfume').classList.remove('hidden');
-                inputModelo.setAttribute('list', 'dlNomesPerfume');
-                labelModelo.innerText = "Nome do Perfume";
-            } else {
-                labelModelo.innerText = "Descrição do Item";
-            }
-        }
-
+        // --- CARREGAR NO FORMULÁRIO (COM LOGICA DE GRUPO) ---
         function carregarItem(p) {
-            itemSelecionadoId = p.id; // Marca o ID específico que foi carregado
-            document.getElementById('itemId').value = p.id;
+            // Se for grupo visual, p tem idsGrupo e qtdGrupo
+            // Se for item normal, não tem
             
+            grupoSelecionadoIds = []; // Reset
+            qtdOriginalGrupo = 1;
+
+            if (p.isGroup) {
+                // Modo Edição de Grupo
+                itemSelecionadoId = p.idsGrupo[0];
+                grupoSelecionadoIds = p.idsGrupo;
+                qtdOriginalGrupo = p.qtdGrupo;
+                document.getElementById('itemId').value = p.idsGrupo[0]; // Usa o ID do líder
+            } else {
+                // Modo Item Único
+                itemSelecionadoId = p.id;
+                document.getElementById('itemId').value = p.id;
+            }
+
+            // Preenche campos visuais
             document.getElementById('categoria').value = p.categoria || 'celular';
             document.getElementById('fornecedor').value = p.fornecedor || '';
             document.getElementById('marca').value = p.marca || '';
@@ -495,7 +465,9 @@
             document.getElementById('custo').value = formatMoney(p.custo);
             document.getElementById('venda').value = formatMoney(p.venda);
             document.getElementById('status').value = p.status || 'disponível';
-            document.getElementById('qtd').value = 1; 
+            
+            // AQUI ESTÁ O SEGREDO: Qtd recebe o tamanho do grupo
+            document.getElementById('qtd').value = qtdOriginalGrupo; 
             
             ajustarCampos();
 
@@ -510,15 +482,14 @@
             document.getElementById('ml').value = p.ml || '';
             document.getElementById('tipoPerfume').value = p.fragrancia || '';
 
-            renderizarLista(); // Re-renderiza para atualizar a classe .active
-            
-            if(window.innerWidth <= 900) {
-                document.querySelector('.form-body').scrollIntoView({behavior: "smooth"});
-            }
+            renderizarLista();
+            if(window.innerWidth <= 900) document.querySelector('.form-body').scrollIntoView({behavior: "smooth"});
         }
 
         function novoItem() {
             itemSelecionadoId = null;
+            grupoSelecionadoIds = [];
+            qtdOriginalGrupo = 1;
             document.getElementById('itemId').value = "";
             document.getElementById('modelo').value = "";
             document.getElementById('marca').value = "";
@@ -538,10 +509,11 @@
             renderizarLista();
         }
 
+        // --- SALVAR INTELIGENTE (GERENCIA LOTES) ---
         async function salvarItem() {
             const id = document.getElementById('itemId').value;
             const cat = document.getElementById('categoria').value;
-            const qtd = parseInt(document.getElementById('qtd').value) || 1;
+            const novaQtd = parseInt(document.getElementById('qtd').value) || 1;
             
             const dados = {
                 categoria: cat,
@@ -554,6 +526,7 @@
                 nomeP: document.getElementById('modelo').value
             };
 
+            // Campos específicos...
             if (cat === 'celular') {
                 dados.gb = document.getElementById('gb').value;
                 dados.cor = document.getElementById('cor').value;
@@ -571,31 +544,99 @@
 
             if(!dados.modelo) return alert("Modelo é obrigatório");
 
+            document.getElementById('loader').style.display = 'flex';
+
             try {
                 if(id) {
-                    await db.collection("estoque").doc(id).update(dados);
-                    alert("Item atualizado!");
+                    // --- MODO EDIÇÃO (INTELIGENTE) ---
+                    const batch = db.batch();
+                    
+                    // 1. Atualiza TODOS os itens do grupo atual com os novos dados (preço, nome, etc)
+                    // Se não tiver grupo (item unico), grupoSelecionadoIds tem só 1 item ou está vazio
+                    const idsParaAtualizar = grupoSelecionadoIds.length > 0 ? grupoSelecionadoIds : [id];
+                    
+                    idsParaAtualizar.forEach(docId => {
+                        const ref = db.collection("estoque").doc(docId);
+                        batch.update(ref, dados);
+                    });
+
+                    // 2. Gerencia a Quantidade (Diferença)
+                    const delta = novaQtd - idsParaAtualizar.length;
+
+                    if (delta > 0) {
+                        // ADICIONAR NOVOS
+                        dados.dataEntrada = Date.now();
+                        const promisesAdd = [];
+                        for(let i=0; i<delta; i++) {
+                             promisesAdd.push(db.collection("estoque").add(dados));
+                        }
+                        await Promise.all(promisesAdd); // Add não vai no batch
+                    } 
+                    else if (delta < 0) {
+                        // REMOVER EXCEDENTES
+                        const qtdParaRemover = Math.abs(delta);
+                        // Remove os últimos IDs da lista
+                        for(let i=0; i<qtdParaRemover; i++) {
+                            const idRemover = idsParaAtualizar.pop(); // Pega o último
+                            if(idRemover) {
+                                const refDel = db.collection("estoque").doc(idRemover);
+                                batch.delete(refDel);
+                            }
+                        }
+                    }
+
+                    await batch.commit();
+                    alert(`Grupo atualizado! Total: ${novaQtd} itens.`);
+
                 } else {
+                    // --- MODO CRIAÇÃO (NOVO) ---
                     dados.dataEntrada = Date.now();
                     const promessas = [];
-                    for(let i = 0; i < qtd; i++) {
+                    for(let i = 0; i < novaQtd; i++) {
                         promessas.push(db.collection("estoque").add(dados));
                     }
                     await Promise.all(promessas);
                     novoItem();
-                    alert(`${qtd} item(ns) cadastrado(s)!`);
+                    alert(`${novaQtd} item(ns) criado(s)!`);
                 }
-            } catch(e) { alert("Erro: " + e.message); }
+            } catch(e) { 
+                console.error(e);
+                alert("Erro: " + e.message); 
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+            }
         }
 
         async function deletarItem() {
             const id = document.getElementById('itemId').value;
             if(!id) return;
-            if(confirm("Excluir item?")) {
-                await db.collection("estoque").doc(id).delete();
+            
+            // Se for grupo, pergunta se quer apagar TUDO ou só UM
+            let apagarTudo = false;
+            if(grupoSelecionadoIds.length > 1) {
+                if(confirm(`Este item faz parte de um grupo de ${grupoSelecionadoIds.length}.\nOK = Apagar TODOS\nCancelar = Apagar SÓ ESTE`)) {
+                    apagarTudo = true;
+                }
+            } else {
+                if(!confirm("Excluir item?")) return;
+                apagarTudo = true;
+            }
+
+            document.getElementById('loader').style.display = 'flex';
+            try {
+                const batch = db.batch();
+                if(apagarTudo && grupoSelecionadoIds.length > 0) {
+                    grupoSelecionadoIds.forEach(gid => {
+                        batch.delete(db.collection("estoque").doc(gid));
+                    });
+                } else {
+                    batch.delete(db.collection("estoque").doc(id));
+                }
+                await batch.commit();
                 novoItem();
                 alert("Excluído.");
-            }
+            } catch(e) { alert("Erro: " + e.message); }
+            finally { document.getElementById('loader').style.display = 'none'; }
         }
 
         async function limparVendidos() {
@@ -632,6 +673,21 @@
                 document.getElementById(id).innerHTML = "";
                 s.forEach(d => document.getElementById(id).innerHTML += `<option value="${d.data().nome}">`);
             });
+        }
+        function filtrarCategoria(cat, el) { filtroCatAtual = cat; document.querySelectorAll('.f-tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); renderizarLista(); }
+        function filtrarLista() { renderizarLista(); }
+        function ajustarCampos() {
+            const cat = document.getElementById('categoria').value;
+            const inputModelo = document.getElementById('modelo');
+            const labelModelo = document.getElementById('labelModelo');
+            document.getElementById('campos-celular').classList.add('hidden');
+            document.getElementById('campos-roupa').classList.add('hidden');
+            document.getElementById('campos-perfume').classList.add('hidden');
+            inputModelo.removeAttribute('list');
+            if(cat === 'celular') { document.getElementById('campos-celular').classList.remove('hidden'); inputModelo.setAttribute('list', 'dlModelosCelular'); labelModelo.innerText = "Modelo (iPhone)"; } 
+            else if(cat === 'roupa') { document.getElementById('campos-roupa').classList.remove('hidden'); inputModelo.setAttribute('list', 'dlModelosRoupa'); labelModelo.innerText = "Modelo (Calça, Camisa...)"; }
+            else if(cat === 'perfume') { document.getElementById('campos-perfume').classList.remove('hidden'); inputModelo.setAttribute('list', 'dlNomesPerfume'); labelModelo.innerText = "Nome do Perfume"; }
+            else { labelModelo.innerText = "Descrição do Item"; }
         }
         function moeda(i) { let v = i.value.replace(/\D/g,''); v = (v/100).toFixed(2)+''; v = v.replace(".",",").replace(/(\d)(\d{3}),/g,"$1.$2,"); i.value = "R$ "+v; }
         function numeros(i) { i.value = i.value.replace(/\D/g,''); }
