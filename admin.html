@@ -27,97 +27,88 @@
         }
         
         body { 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0; 
-            display: block; 
-            min-height: 100vh; 
-            overflow-y: auto; 
-            user-select: none;
-            padding-bottom: 40px;
+            background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; 
+            margin: 0; display: block; min-height: 100vh; overflow-y: auto; user-select: none; padding-bottom: 40px;
         }
 
-        .content { width: 100%; padding: 20px; box-sizing: border-box; }
+        .content { width: 100%; padding: 15px; box-sizing: border-box; }
 
         .header-title { 
             display: flex; justify-content: space-between; align-items: center; 
-            margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; 
+            margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 15px; 
         }
-        
-        .header-title h2 { margin: 0; color: var(--accent); letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,224,255,0.3); }
-        .version-tag { font-size: 10px; color: #000; background: var(--accent); padding: 2px 6px; border-radius: 4px; margin-left: 10px; font-weight: 900; letter-spacing: 1px; vertical-align: middle; }
+        .header-title h2 { margin: 0; color: var(--accent); letter-spacing: 2px; font-size: 20px; }
+        .version-tag { font-size: 10px; color: #000; background: var(--accent); padding: 2px 6px; border-radius: 4px; font-weight: 900; vertical-align: middle; }
 
         .btn-voltar-home {
             text-decoration: none; color: #fff; background: rgba(255,255,255,0.1);
             padding: 8px 15px; border-radius: 5px; display: flex; align-items: center; gap: 8px;
-            border: 1px solid var(--border); font-size: 14px; transition: 0.3s; cursor: pointer;
+            border: 1px solid var(--border); font-size: 13px; cursor: pointer;
         }
-        .btn-voltar-home:hover { background: var(--accent); color: #000; font-weight: bold; }
 
-        .action-group { display: flex; gap: 10px; }
-        .btn-print { background: var(--accent); color: #000; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; box-shadow: 0 0 10px rgba(0,224,255,0.2); }
+        .action-group { display: flex; gap: 8px; }
+        .btn-print { background: var(--accent); color: #000; border: none; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; font-size: 12px; }
         
-        .filter-group { display: flex; background: var(--card); padding: 5px; border-radius: 8px; border: 1px solid var(--border); }
-        .filter-btn { background: transparent; border: none; color: #94a3b8; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; font-size: 12px; }
+        .filter-group { display: flex; background: var(--card); padding: 3px; border-radius: 6px; border: 1px solid var(--border); }
+        .filter-btn { background: transparent; border: none; color: #94a3b8; padding: 5px 10px; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 11px; }
         .filter-btn.active { background: var(--accent); color: #000; }
 
-        .section-title { font-size: 14px; color: #94a3b8; margin: 30px 0 15px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 5px; display: flex; align-items: center; gap: 10px; }
+        .section-title { font-size: 12px; color: #94a3b8; margin: 25px 0 10px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 5px; font-weight: 700; display: flex; gap: 8px; align-items: center; }
         
-        /* CARDS KPI */
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .kpi-card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); position: relative; overflow: hidden; }
-        .kpi-card::after { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); }
+        /* GRIDS COMPACTOS */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
         
-        /* Cores das Barras Laterais */
+        .kpi-card { background: var(--card); padding: 15px; border-radius: 10px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+        .kpi-card::after { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--accent); }
         .kpi-card.green::after { background: var(--success); }
         .kpi-card.red::after { background: var(--danger); }
         .kpi-card.gold::after { background: var(--gold); }
         .kpi-card.purple::after { background: var(--purple); }
         
-        .kpi-title { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; }
-        .kpi-value { font-size: 22px; font-weight: bold; margin: 10px 0; color: #fff; }
-        .kpi-sub { font-size: 11px; opacity: 0.7; }
+        .kpi-title { font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 700; }
+        .kpi-value { font-size: 18px; font-weight: bold; margin: 5px 0; color: #fff; }
+        .kpi-sub { font-size: 10px; opacity: 0.7; }
+
+        /* STOCK GRID (O Retorno) - Menor para caber tudo */
+        .stock-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        .stock-card { 
+            background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); padding: 12px; border-radius: 8px; 
+            display: flex; flex-direction: column; position: relative;
+        }
+        .stock-card small { color: #94a3b8; font-size: 9px; text-transform: uppercase; margin-top: 4px; }
+        .stock-card strong { font-size: 14px; color: #fff; margin-top: 2px; }
+        .stock-card i { font-size: 14px; position: absolute; top: 12px; right: 12px; opacity: 0.5; }
 
         /* GRÁFICOS */
-        .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
-        .chart-box { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); height: 300px; }
+        .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .chart-box { background: var(--card); padding: 15px; border-radius: 10px; border: 1px solid var(--border); height: 250px; }
 
         /* TABELA */
-        .table-box { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 20px; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
-        th { text-align: left; color: #94a3b8; padding: 12px; border-bottom: 1px solid var(--border); }
-        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
+        .table-box { background: var(--card); border-radius: 10px; border: 1px solid var(--border); padding: 15px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 600px; }
+        th { text-align: left; color: #94a3b8; padding: 10px; border-bottom: 1px solid var(--border); }
+        td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
 
         .btn-trash {
-            background: transparent; border: 1px solid var(--danger); color: var(--danger);
-            width: 30px; height: 30px; border-radius: 5px; cursor: pointer;
+            background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); color: var(--danger);
+            width: 25px; height: 25px; border-radius: 4px; cursor: pointer;
             display: flex; align-items: center; justify-content: center; transition: 0.2s;
         }
         .btn-trash:hover { background: var(--danger); color: #fff; }
 
-        /* VALUATION BARRA */
-        .stock-bar { display: flex; gap: 2px; height: 6px; width: 100%; border-radius: 3px; overflow: hidden; margin: 10px 0; }
-        .sb-item { height: 100%; }
-        .stock-legend { display: flex; flex-wrap: wrap; gap: 15px; font-size: 11px; color: #94a3b8; }
-        .sl-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-
         /* IMPRESSÃO */
         #print-area { display: none; }
-
         @media print {
             @page { margin: 0; size: A4; }
             .content { display: none !important; }
             #print-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; padding: 1.5cm; background: #fff; color: #000; }
-            /* Estilos básicos de impressão omitidos para brevidade, mantendo os originais */
-            .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 20px; }
             .print-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
             .print-table th, .print-table td { border-bottom: 1px solid #ccc; padding: 5px; text-align: left; }
         }
 
         @media (max-width: 768px) {
             .charts-grid { grid-template-columns: 1fr; }
-            .header-title { flex-direction: column; align-items: stretch; gap: 15px; }
+            .header-title { flex-direction: column; align-items: stretch; gap: 10px; }
             .action-group { justify-content: space-between; }
         }
     </style>
@@ -137,16 +128,16 @@
                     <button class="filter-btn active" onclick="mudarFiltro('mensal', this)">Mês</button>
                     <button class="filter-btn" onclick="mudarFiltro('todos', this)">Geral</button>
                 </div>
-                <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> Relatório</button>
+                <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i></button>
             </div>
         </div>
 
-        <div class="section-title"><i class="fas fa-wallet"></i> Resultados Financeiros (Vendas Reais)</div>
+        <div class="section-title"><i class="fas fa-brain"></i> Inteligência Financeira (Vendas Reais)</div>
         <div class="kpi-grid">
             <div class="kpi-card green">
-                <div class="kpi-title">Faturamento Bruto</div>
+                <div class="kpi-title">Faturamento</div>
                 <div class="kpi-value" id="kpi-faturamento">R$ 0,00</div>
-                <div class="kpi-sub">Total vendido no período</div>
+                <div class="kpi-sub">Total vendido</div>
             </div>
             <div class="kpi-card gold">
                 <div class="kpi-title">Lucro Estimado</div>
@@ -156,7 +147,7 @@
             <div class="kpi-card purple">
                 <div class="kpi-title">Ticket Médio</div>
                 <div class="kpi-value" id="kpi-ticket">R$ 0,00</div>
-                <div class="kpi-sub">Por venda realizada</div>
+                <div class="kpi-sub">Média por cliente</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-title">Markup Médio</div>
@@ -167,66 +158,77 @@
 
         <div class="section-title"><i class="fas fa-cogs"></i> Operacional</div>
         <div class="kpi-grid">
-             <div class="kpi-card red">
+            <div class="kpi-card red">
                 <div class="kpi-title">Descontos</div>
                 <div class="kpi-value" id="kpi-descontos">R$ 0,00</div>
-                <div class="kpi-sub">Negociações</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-title">Brindes</div>
-                <div class="kpi-value" id="kpi-brindes">0</div>
-                <div class="kpi-sub">Itens bonificados</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-title">Orçamentos</div>
-                <div class="kpi-value" id="kpi-orcamentos">0</div>
-                <div class="kpi-sub">Em aberto</div>
             </div>
              <div class="kpi-card yellow">
                 <div class="kpi-title">Trocas (Entrada)</div>
                 <div class="kpi-value" id="kpi-trocas">R$ 0,00</div>
-                <div class="kpi-sub">Crédito gerado</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Brindes</div>
+                <div class="kpi-value" id="kpi-brindes">0</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Orçamentos</div>
+                <div class="kpi-value" id="kpi-orcamentos">0</div>
+            </div>
+        </div>
+
+        <div class="section-title"><i class="fas fa-cubes"></i> Valuation de Estoque (Disponível)</div>
+        <div class="stock-grid">
+            <div class="stock-card" style="border-left: 3px solid var(--accent);">
+                <i class="fas fa-mobile-alt" style="color:var(--accent)"></i>
+                <small>Celulares</small><strong id="val-celular">R$ 0,00</strong>
+            </div>
+            <div class="stock-card" style="border-left: 3px solid var(--purple);">
+                <i class="fas fa-headphones" style="color:var(--purple)"></i>
+                <small>Acessórios</small><strong id="val-acessorio">R$ 0,00</strong>
+            </div>
+            <div class="stock-card" style="border-left: 3px solid var(--pink);">
+                <i class="fas fa-tshirt" style="color:var(--pink)"></i>
+                <small>Roupas</small><strong id="val-roupa">R$ 0,00</strong>
+            </div>
+            <div class="stock-card" style="border-left: 3px solid var(--gold);">
+                <i class="fas fa-spray-can" style="color:var(--gold)"></i>
+                <small>Perfumes</small><strong id="val-perfume">R$ 0,00</strong>
+            </div>
+            <div class="stock-card" style="border-left: 3px solid #ef4444; background: rgba(239, 68, 68, 0.1);">
+                <i class="fas fa-coins" style="color:#ef4444"></i>
+                <small>Custo Total (Estoque)</small><strong id="val-custo-total">R$ 0,00</strong>
+            </div>
+            <div class="stock-card" style="border-left: 3px solid #10b981; background: rgba(16, 185, 129, 0.1);">
+                <i class="fas fa-wallet" style="color:#10b981"></i>
+                <small>Valor de Venda Total</small><strong id="val-total">R$ 0,00</strong>
             </div>
         </div>
 
         <div class="charts-grid">
-            <div class="chart-box"><h4 style="margin:0 0 10px 0;">Evolução de Vendas</h4><canvas id="graficoLinha"></canvas></div>
-            <div class="chart-box"><h4 style="margin:0 0 10px 0;">Mix de Produtos</h4><canvas id="graficoRosca"></canvas></div>
-        </div>
-
-        <div class="section-title"><i class="fas fa-cubes"></i> Valuation de Estoque (Disponível)</div>
-        <div style="background:var(--card); padding:20px; border-radius:12px; border:1px solid var(--border); margin-bottom:20px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <span style="color:#94a3b8; font-size:12px;">CAPITAL TOTAL EM ESTOQUE</span>
-                <strong style="font-size:20px; color:var(--text);" id="val-total">R$ 0,00</strong>
-            </div>
-            <div class="stock-bar" id="stock-bar">
-                </div>
-            <div class="stock-legend" id="stock-legend">
-                </div>
+            <div class="chart-box"><h4 style="margin:0 0 10px 0;">Evolução</h4><canvas id="graficoLinha"></canvas></div>
+            <div class="chart-box"><h4 style="margin:0 0 10px 0;">Mix</h4><canvas id="graficoRosca"></canvas></div>
         </div>
 
         <div class="table-box">
-            <h4 style="margin:0 0 15px 0;">Últimas Vendas Realizadas (Edição)</h4>
+            <h4 style="margin:0 0 15px 0;">Histórico de Vendas (Edição)</h4>
             <table>
-                <thead><tr><th>Data</th><th>Cliente</th><th>Itens</th><th>Total</th><th style="text-align:center;">Ação</th></tr></thead>
-                <tbody id="tabela-vendas"><tr><td colspan="5" style="text-align:center; color:#888;">Carregando dados...</td></tr></tbody>
+                <thead><tr><th>Data</th><th>Cliente</th><th>Total</th><th style="text-align:center;">Ação</th></tr></thead>
+                <tbody id="tabela-vendas"><tr><td colspan="4" style="text-align:center; color:#888;">Carregando...</td></tr></tbody>
             </table>
         </div>
 
         <div class="footer">
-            VÉRTICE BI CORE v11.1 © Rodrigo N Carvalho 2026
+            VÉRTICE BI CORE v11.2 © Rodrigo N Carvalho 2026
         </div>
     </main>
 
     <div id="print-area">
-        <div class="print-header"><h1>RELATÓRIO GERENCIAL - LM IMPORTS</h1></div>
-        <p>Data: <span id="print-date"></span></p>
-        <h3>Resumo Financeiro</h3>
-        <p>Faturamento: <b id="print-fat"></b></p>
-        <p>Lucro Estimado: <b id="print-lucro"></b></p>
+        <h3>RELATÓRIO LM IMPORTS</h3>
+        <p>Emissão: <span id="print-date"></span></p>
         <hr>
-        <h3>Vendas</h3>
+        <p>Faturamento: <b id="print-fat"></b></p>
+        <p>Lucro Est.: <b id="print-lucro"></b></p>
+        <hr>
         <table class="print-table">
             <thead><tr><th>Data</th><th>Cliente</th><th>Valor</th></tr></thead>
             <tbody id="print-table-body"></tbody>
@@ -271,13 +273,13 @@
             } catch (error) { console.error("Erro:", error); }
         }
 
-        // --- EXCLUSÃO DE VENDA (NOVO) ---
+        // --- EXCLUSÃO DE VENDA ---
         function excluirVenda(id) {
-            if(confirm("ATENÇÃO: Deseja excluir este registro de venda do histórico financeiro?\n\nIsso NÃO retorna os itens ao estoque (caso já tenha feito manualmente).")) {
+            if(confirm("Deseja apagar esta venda do histórico financeiro?")) {
                 db.collection("vendas").doc(id).delete().then(() => {
-                    alert("Venda removida do histórico!");
-                    carregarDados(); // Recarrega tudo
-                }).catch(e => alert("Erro ao excluir: " + e));
+                    alert("Venda excluída!");
+                    carregarDados(); 
+                }).catch(e => alert("Erro: " + e));
             }
         }
 
@@ -309,38 +311,31 @@
             let trocasEntrada = 0;
 
             dados.forEach(v => {
-                // Filtra orçamentos
                 if (v.status === 'ORCAMENTO' || v.tipoRegistro === 'ORÇAMENTO' || v.status === 'ORÇAMENTO') {
                     qtdOrcamentos++; return; 
                 }
 
-                let totalVenda = limparMoeda(v.total);
-                faturamento += totalVenda;
+                faturamento += limparMoeda(v.total);
                 totalDescontos += limparMoeda(v.desconto);
                 qtdVendasReais++;
 
-                // CALCULO DO CUSTO (LUCRO)
                 if (v.itens) {
                     v.itens.forEach(item => {
                         if (item.isBrinde) qtdBrindes++;
-                        // Tenta pegar o custo salvo na venda, se não tiver, assume 0 (margem 100% falsa, mas evita erro)
                         let custoItem = limparMoeda(item.custo || 0); 
                         custoTotalVendas += custoItem;
                     });
                 }
                 
-                // Trocas
                 if (v.trocas && Array.isArray(v.trocas)) {
                     v.trocas.forEach(t => trocasEntrada += limparMoeda(t.valor));
                 }
             });
 
-            // NOVOS CALCULOS
             let lucroEstimado = faturamento - custoTotalVendas;
             let ticketMedio = qtdVendasReais > 0 ? faturamento / qtdVendasReais : 0;
             let markup = custoTotalVendas > 0 ? (lucroEstimado / custoTotalVendas) * 100 : 0;
 
-            // DOM UPDATE
             document.getElementById('kpi-faturamento').innerText = formatMoeda(faturamento);
             document.getElementById('kpi-lucro').innerText = formatMoeda(lucroEstimado);
             document.getElementById('kpi-ticket').innerText = formatMoeda(ticketMedio);
@@ -351,7 +346,6 @@
             document.getElementById('kpi-orcamentos').innerText = qtdOrcamentos;
             document.getElementById('kpi-trocas').innerText = formatMoeda(trocasEntrada);
 
-            // Print Update
             document.getElementById('print-fat').innerText = formatMoeda(faturamento);
             document.getElementById('print-lucro').innerText = formatMoeda(lucroEstimado);
         }
@@ -359,7 +353,6 @@
         function renderizarGraficos(dados) {
             const dadosReais = dados.filter(v => v.status !== 'ORCAMENTO' && v.tipoRegistro !== 'ORÇAMENTO');
             
-            // LINHA
             const vendasPorDia = {};
             dadosReais.forEach(v => {
                 const dia = new Date(v.data).toLocaleDateString('pt-BR').slice(0,5);
@@ -373,20 +366,19 @@
                 data: {
                     labels: Object.keys(vendasPorDia).reverse(),
                     datasets: [{
-                        label: 'Vendas (R$)', data: Object.values(vendasPorDia).reverse(),
+                        label: 'Vendas', data: Object.values(vendasPorDia).reverse(),
                         borderColor: '#00e0ff', backgroundColor: 'rgba(0, 224, 255, 0.1)', fill: true, tension: 0.3
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#94a3b8' } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display:false }, y: { display:false } } }
             });
 
-            // ROSCA
             let cats = { 'Celular':0, 'Acessório':0, 'Outros':0 };
             dadosReais.forEach(v => {
                 if(v.itens) v.itens.forEach(i => {
                     let nome = (i.modelo || i || '').toString().toLowerCase();
-                    if(nome.includes('celular') || nome.includes('iphone') || nome.includes('samsung')) cats['Celular']++;
-                    else if(nome.includes('capa') || nome.includes('película') || nome.includes('fone')) cats['Acessório']++;
+                    if(nome.includes('celular') || nome.includes('iphone')) cats['Celular']++;
+                    else if(nome.includes('capa') || nome.includes('película')) cats['Acessório']++;
                     else cats['Outros']++;
                 });
             });
@@ -397,12 +389,9 @@
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(cats),
-                    datasets: [{
-                        data: Object.values(cats),
-                        backgroundColor: ['#00e0ff', '#8b5cf6', '#cbd5e1'], borderWidth: 0
-                    }]
+                    datasets: [{ data: Object.values(cats), backgroundColor: ['#00e0ff', '#8b5cf6', '#334155'], borderWidth: 0 }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#fff' } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#fff', font: {size:10} } } } }
             });
         }
 
@@ -413,16 +402,12 @@
             
             const dadosReais = dados.filter(v => v.status !== 'ORCAMENTO' && v.tipoRegistro !== 'ORÇAMENTO');
 
-            dadosReais.slice(0, 20).forEach(v => {
-                let itensStr = v.itens ? v.itens.map(i => i.modelo || i).join(", ") : "-";
-                let resumo = itensStr.length > 25 ? itensStr.substring(0,25)+"..." : itensStr;
-                
+            dadosReais.slice(0, 15).forEach(v => {
                 tbody.innerHTML += `
                     <tr>
-                        <td>${new Date(v.data).toLocaleDateString('pt-BR')}</td>
-                        <td style="font-weight:bold; color:#fff;">${v.cliente}</td>
-                        <td style="color:#94a3b8;">${resumo}</td>
-                        <td style="color:#10b981; font-weight:bold;">${formatMoeda(limparMoeda(v.total))}</td>
+                        <td>${new Date(v.data).toLocaleDateString('pt-BR').slice(0,5)}</td>
+                        <td style="font-weight:bold; color:#fff;">${v.cliente.split(' ')[0]}</td>
+                        <td style="color:#10b981;">${formatMoeda(limparMoeda(v.total))}</td>
                         <td style="text-align:center;">
                             <button class="btn-trash" onclick="excluirVenda('${v.id}')"><i class="fas fa-trash"></i></button>
                         </td>
@@ -433,39 +418,31 @@
         }
 
         function calcularValuationEstoque() {
-            let total = 0;
-            let porCat = {}; 
+            let val = { celular: 0, acessorio: 0, roupa: 0, perfume: 0, totalVenda: 0, totalCusto: 0 };
             
             estoqueData.forEach(p => {
-                if(p.status === 'disponível') {
-                    let val = limparMoeda(p.venda);
-                    let cat = (p.categoria || 'Outros').toUpperCase();
-                    total += val;
-                    porCat[cat] = (porCat[cat] || 0) + val;
+                if (p.status === 'disponível') {
+                    let venda = limparMoeda(p.venda);
+                    let custo = limparMoeda(p.custo); // Pega o custo do produto
+                    
+                    let cat = (p.categoria || 'outros').toLowerCase();
+                    
+                    if (cat.includes('celular')) val.celular += venda;
+                    else if (cat.includes('acessorio')) val.acessorio += venda;
+                    else if (cat.includes('roupa')) val.roupa += venda;
+                    else if (cat.includes('perfume')) val.perfume += venda;
+                    
+                    val.totalVenda += venda;
+                    val.totalCusto += custo; // Soma o custo total
                 }
             });
 
-            document.getElementById('val-total').innerText = formatMoeda(total);
-
-            // GERA BARRA VISUAL
-            const bar = document.getElementById('stock-bar');
-            const legend = document.getElementById('stock-legend');
-            bar.innerHTML = ''; legend.innerHTML = '';
-            
-            const cores = ['#00e0ff', '#8b5cf6', '#ec4899', '#fbbf24', '#10b981'];
-            let i = 0;
-
-            for (let [cat, valor] of Object.entries(porCat)) {
-                let pct = (valor / total) * 100;
-                let cor = cores[i % cores.length];
-                
-                // Barra
-                bar.innerHTML += `<div class="sb-item" style="width:${pct}%; background:${cor};" title="${cat}: ${formatMoeda(valor)}"></div>`;
-                
-                // Legenda
-                legend.innerHTML += `<div><span class="sl-dot" style="background:${cor}"></span>${cat} (${Math.round(pct)}%)</div>`;
-                i++;
-            }
+            document.getElementById('val-celular').innerText = formatMoeda(val.celular);
+            document.getElementById('val-acessorio').innerText = formatMoeda(val.acessorio);
+            document.getElementById('val-roupa').innerText = formatMoeda(val.roupa);
+            document.getElementById('val-perfume').innerText = formatMoeda(val.perfume);
+            document.getElementById('val-total').innerText = formatMoeda(val.totalVenda);
+            document.getElementById('val-custo-total').innerText = formatMoeda(val.totalCusto); // O Novo Quadradinho!
         }
     </script>
 </body>
