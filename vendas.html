@@ -19,169 +19,100 @@
     <style>
         /* --- PADRÃO VISUAL VÉRTICE BI CORE --- */
         :root { 
-            --bg: #020617; 
-            --card: #0f172a; 
-            --accent: #00e0ff; /* AZUL NEON */
-            --border: #1e293b; 
-            --text: #f8fafc; 
-            --success: #10b981; 
-            --danger: #ef4444; 
-            --warning: #eab308; 
-            --purple: #8b5cf6;
+            --bg: #020617; --card: #0f172a; --accent: #00e0ff; --border: #1e293b; 
+            --text: #f8fafc; --success: #10b981; --danger: #ef4444; 
+            --warning: #eab308; --purple: #8b5cf6;
         }
         
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0; 
-            display: block; 
-            min-height: 100vh;
-            overflow-y: auto; 
-            user-select: none; 
-        }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: block; min-height: 100vh; overflow-y: auto; user-select: none; }
 
-        /* HEADER PADRÃO */
-        .header-top {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 20px; background: var(--bg); border-bottom: 1px solid var(--border);
-            position: sticky; top: 0; z-index: 100;
-        }
-
+        /* HEADER */
+        .header-top { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
         .header-left { display: flex; align-items: center; gap: 15px; }
-        
-        .btn-home {
-            background: #1e293b; color: #fff; padding: 8px 15px; border-radius: 6px;
-            font-size: 14px; display: flex; align-items: center; gap: 8px;
-            border: 1px solid var(--border); font-weight: bold; transition: 0.3s; cursor: pointer;
-        }
+        .btn-home { background: #1e293b; color: #fff; padding: 8px 15px; border-radius: 6px; font-size: 14px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); font-weight: bold; transition: 0.3s; cursor: pointer; }
         .btn-home:hover { background: var(--accent); border-color: var(--accent); color: #000; }
-
         .page-title { font-size: 18px; font-weight: bold; color: var(--accent); letter-spacing: 1px; margin: 0; text-shadow: 0 0 10px rgba(0, 224, 255, 0.3); }
         .version-tag { font-size: 10px; color: #000; background: var(--accent); padding: 2px 6px; border-radius: 4px; margin-left: 10px; font-weight: 900; letter-spacing: 1px; vertical-align: middle; }
 
-        /* LAYOUT PRINCIPAL */
-        .main-grid { 
-            padding: 20px; 
-            display: grid; 
-            grid-template-columns: 2fr 1fr; 
-            gap: 20px; 
-            max-width: 1600px;
-            margin: 0 auto;
-        }
+        /* LAYOUT */
+        .main-grid { padding: 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 20px; max-width: 1600px; margin: 0 auto; }
 
         /* PRODUTOS */
         .products-section { display: flex; flex-direction: column; gap: 15px; }
-        
         .search-box { display: flex; gap: 10px; position: sticky; top: 70px; z-index: 90; background: var(--bg); padding-bottom: 10px; align-items: center; }
         .search-box input, .search-box select { width: 100%; padding: 12px; background: var(--card); border: 1px solid var(--border); color: #fff; border-radius: 8px; outline: none; height: 45px; box-sizing: border-box; }
-        .search-box input:focus, .search-box select:focus { border-color: var(--accent); }
-
-        .btn-avulso {
-            background: var(--purple); color: #fff; border: none; border-radius: 8px;
-            padding: 0 15px; height: 45px; font-weight: bold; cursor: pointer;
-            white-space: nowrap; display: flex; align-items: center; gap: 5px;
-            box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
-        }
-        .btn-avulso:hover { filter: brightness(1.1); }
-
-        .products-list { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-            gap: 15px; 
-            overflow: visible; 
-        }
+        .search-box input:focus { border-color: var(--accent); }
+        .btn-avulso { background: var(--purple); color: #fff; border: none; border-radius: 8px; padding: 0 15px; height: 45px; font-weight: bold; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 5px; box-shadow: 0 0 10px rgba(139, 92, 246, 0.2); }
+        
+        .products-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; overflow: visible; }
         
         .product-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 15px; cursor: pointer; transition: 0.2s; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
         .product-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,224,255,0.1); }
-        .product-card.reserved { opacity: 0.6; border-color: var(--warning); cursor: not-allowed; filter: grayscale(0.5); }
         
-        /* TAGS NOS CARDS */
-        .reserved-tag { position: absolute; top: 10px; right: 10px; background: var(--warning); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
-        .qtd-tag { position: absolute; top: 10px; right: 10px; background: #334155; color: #fff; border: 1px solid #475569; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
-        
+        /* CARD TRAVADO / EM USO */
+        .product-card.locked { opacity: 0.5; border-color: var(--warning); pointer-events: none; filter: grayscale(1); }
+        .tag-locked { position: absolute; top: 10px; right: 10px; background: var(--warning); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .tag-qty { position: absolute; top: 10px; right: 10px; background: #334155; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; border: 1px solid #475569; font-weight: bold; }
+
         .prod-cat-tag { font-size: 10px; text-transform: uppercase; background: rgba(0, 224, 255, 0.1); color: var(--accent); padding: 4px 8px; border-radius: 4px; width: fit-content; margin-bottom: 5px; font-weight: bold; }
         .prod-name { font-weight: bold; margin-bottom: 5px; font-size: 14px; }
         .prod-detail { font-size: 11px; color: #94a3b8; margin-bottom: 5px; }
         .prod-price { color: var(--success); font-weight: bold; font-size: 16px; margin-top: auto; }
 
         /* CARRINHO */
-        .cart-section { 
-            background: var(--card); 
-            border-radius: 15px; 
-            border: 1px solid var(--border); 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            height: fit-content; 
-            position: sticky; 
-            top: 80px; 
-        }
-        
+        .cart-section { background: var(--card); border-radius: 15px; border: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; height: fit-content; position: sticky; top: 80px; }
         .client-area { margin-bottom: 15px; }
         .client-row { display: flex; gap: 5px; }
         .client-input-wrapper { width: 100%; position: relative; }
         .client-row input[list] { width: 100%; padding: 10px; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 5px; box-sizing: border-box; }
-        
-        /* Botões Cliente */
-        .btn-mini { border: none; width: 40px; border-radius: 5px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn-mini { border: none; width: 40px; border-radius: 5px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
         .btn-add-client { background: var(--success); color: #000; }
         .btn-hist-client { background: #eab308; color: #000; margin-left: 2px; }
-        .btn-hist-client:hover { filter: brightness(1.1); transform: scale(1.05); }
         
         .cart-items { max-height: 350px; overflow-y: auto; margin-bottom: 15px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 0; }
         .cart-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin-bottom: 8px; }
         .cart-item.brinde { border: 1px solid var(--accent); background: rgba(0, 224, 255, 0.1); }
         .cart-item.avulso { border-left: 3px solid var(--purple); }
-        
         .item-actions { display: flex; gap: 10px; align-items: center; }
-        .btn-icon { cursor: pointer; padding: 5px; font-size: 14px; transition: 0.2s; }
+        .btn-icon { cursor: pointer; padding: 5px; font-size: 14px; }
         .btn-remove { color: var(--danger); }
         .btn-gift { color: #94a3b8; }
-        .btn-gift.active { color: var(--accent); text-shadow: 0 0 5px var(--accent); }
+        .btn-gift.active { color: var(--accent); }
 
         .trade-in-box { background: rgba(234, 179, 8, 0.1); border: 1px solid var(--warning); padding: 10px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
         .trade-in-text { font-size: 12px; color: var(--warning); }
-        
         .totals { margin-bottom: 15px; font-size: 14px; }
         .row { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: center;}
         .total-final { font-size: 24px; font-weight: 900; color: var(--success); border-top: 1px solid var(--border); padding-top: 10px; }
         .input-desconto { width: 100px !important; padding: 5px !important; text-align: right; background: #0f172a; border: 1px solid #334155; color: var(--danger); font-weight: bold; }
-        .parcela-info { text-align: right; color: var(--accent); font-size: 12px; font-weight: bold; margin-top: -5px; margin-bottom: 15px; display: none; text-shadow: 0 0 5px rgba(0, 224, 255, 0.5); border-bottom: 1px dashed var(--accent); padding-bottom: 5px; }
+        .parcela-info { text-align: right; color: var(--accent); font-size: 12px; font-weight: bold; margin-top: -5px; margin-bottom: 15px; display: none; border-bottom: 1px dashed var(--accent); padding-bottom: 5px; }
 
-        /* AÇÕES */
         .action-buttons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .btn-vender { background: var(--success); color: #000; padding: 15px; width: 100%; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.3s; }
-        .btn-orcamento { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.3s; }
-        .btn-vender:hover { transform: scale(1.02); filter: brightness(1.1); }
-        .btn-orcamento:hover { background: rgba(0,224,255,0.1); }
-        
+        .btn-vender { background: var(--success); color: #000; padding: 15px; width: 100%; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; }
+        .btn-orcamento { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; }
         .btn-troca { background: transparent; border: 1px solid var(--warning); color: var(--warning); padding: 10px; width: 100%; border-radius: 8px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .btn-limpar { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px; width: 100%; border-radius: 5px; margin-bottom: 10px; cursor: pointer; font-size: 11px; }
         .btn-simular { background: #334155; color: #fff; border: 1px solid var(--border); width: 100%; padding: 8px; border-radius: 5px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .btn-simular:hover { background: #475569; }
         .btn-preview { width:100%; background:transparent; border:1px solid #666; color:#aaa; padding:5px; border-radius:5px; cursor:pointer; font-size:11px; margin-bottom:10px; }
-        .btn-preview:hover { border-color:#fff; color:#fff; }
 
-        /* MODAIS */
+        /* Loader */
+        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 2000; flex-direction: column; color: #fff; }
+
+        /* MODAIS (MANTIDOS) */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
         .modal { background: var(--card); padding: 25px; border-radius: 15px; width: 400px; max-width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--accent); }
-        .modal input, .modal select, .modal textarea { width: 100%; padding: 10px; margin: 5px 0; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 5px; box-sizing: border-box; }
+        .modal input, .modal select { width: 100%; padding: 10px; margin: 5px 0; background: #1e293b; border: 1px solid var(--border); color: #fff; border-radius: 5px; box-sizing: border-box; }
         .modal h3 { margin-top: 0; color: var(--accent); }
         .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .btn-cancel { flex: 1; padding: 10px; background: #334155; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
         .btn-confirm { flex: 1; padding: 10px; background: var(--success); color: #000; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
-
-        /* HISTÓRICO */
+        
         .historico-lista { max-height: 250px; overflow-y: auto; background: #020617; padding: 10px; border-radius: 5px; margin-bottom: 10px; border: 1px solid var(--border); font-size: 11px; color: #cbd5e1; white-space: pre-wrap; font-family: monospace; }
-
-        /* TABELA SIMULAÇÃO */
         .sim-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         .sim-table th { text-align: left; color: var(--accent); padding: 5px; border-bottom: 1px solid var(--border); }
         .sim-table td { padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .sim-row:hover { background: rgba(255,255,255,0.05); cursor: pointer; }
 
-        /* RESPONSIVIDADE */
         @media (max-width: 900px) {
             .main-grid { grid-template-columns: 1fr; display: flex; flex-direction: column; }
             .cart-section { order: 2; } 
@@ -196,7 +127,7 @@
     <div class="header-top">
         <div class="header-left">
             <div onclick="window.location.href='menu.html'" class="btn-home"><i class="fas fa-home"></i> MENU</div>
-            <h1 class="page-title">VÉRTICE BI <span class="version-tag">CORE v12.0</span></h1>
+            <h1 class="page-title">VÉRTICE BI <span class="version-tag">CORE v12.1</span></h1>
         </div>
         <div></div>
     </div>
@@ -212,9 +143,7 @@
                     <option value="perfume">🌸 Perfumes</option>
                     <option value="acessorio">🎧 Acessórios</option>
                 </select>
-                <button class="btn-avulso" onclick="abrirModalAvulso()">
-                    <i class="fas fa-calculator"></i> Add Valor
-                </button>
+                <button class="btn-avulso" onclick="abrirModalAvulso()"><i class="fas fa-calculator"></i> Add Valor</button>
             </div>
             
             <div class="products-list" id="lista-produtos">
@@ -232,8 +161,8 @@
                         <input list="lista-clientes-db" id="cliente-input" placeholder="Buscar..." autocomplete="off" onchange="salvarRascunho()">
                         <datalist id="lista-clientes-db"></datalist>
                     </div>
-                    <button class="btn-mini btn-hist-client" onclick="verHistoricoCliente()" title="Ver Histórico (F9)"><i class="fas fa-history"></i></button>
-                    <button class="btn-mini btn-add-client" onclick="abrirModalCliente()" title="Novo Cliente">+</button>
+                    <button class="btn-mini btn-hist-client" onclick="verHistoricoCliente()"><i class="fas fa-history"></i></button>
+                    <button class="btn-mini btn-add-client" onclick="abrirModalCliente()">+</button>
                 </div>
             </div>
 
@@ -264,8 +193,7 @@
 
             <div style="margin-bottom: 10px;">
                 <label style="font-size: 12px;">Pagamento:</label>
-                <select id="forma-pagamento" style="width: 100%; padding: 8px; background: #1e293b; color: #fff; border: 1px solid var(--border); border-radius: 5px;" onchange="salvarRascunho()">
-                </select>
+                <select id="forma-pagamento" style="width: 100%; padding: 8px; background: #1e293b; color: #fff; border: 1px solid var(--border); border-radius: 5px;" onchange="salvarRascunho()"></select>
             </div>
 
             <button class="btn-troca" onclick="abrirModalTroca()"><i class="fas fa-exchange-alt"></i> Entrada de Troca</button>
@@ -278,96 +206,24 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="modal-avulso">
-        <div class="modal" style="border-color: var(--purple);">
-            <h3 style="color: var(--purple);">Adicionar Valor Avulso</h3>
-            <label style="font-size:12px; color:#999;">Descrição:</label>
-            <input type="text" id="avulso-desc" placeholder="Taxa / Item não cadastrado">
-            <label style="font-size:12px; color:#999;">Valor:</label>
-            <input type="text" id="avulso-valor" placeholder="R$ 0,00" style="font-size:18px; font-weight:bold; color:var(--success);" onkeyup="mascaraMoeda(this)">
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button onclick="document.getElementById('modal-avulso').style.display='none'" class="btn-cancel">Cancelar</button>
-                <button onclick="confirmarAvulso()" class="btn-confirm" style="background: var(--purple);">Adicionar</button>
-            </div>
-        </div>
+    <div class="loader-overlay" id="loader">
+        <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+        <p style="margin-top:10px;">Processando...</p>
     </div>
 
-    <div class="modal-overlay" id="modal-historico">
-        <div class="modal">
-            <h3 style="color: #eab308;"><i class="fas fa-history"></i> Histórico do Cliente</h3>
-            <div id="conteudo-historico" class="historico-lista">Carregando...</div>
-            <button onclick="document.getElementById('modal-historico').style.display='none'" class="btn-cancel" style="width:100%;">Fechar</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="modal-simulador">
-        <div class="modal">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3>Simulação</h3>
-                <div style="display:flex; gap:10px;">
-                    <button onclick="toggleTaxasVisuais()" title="Ocultar/Mostrar Taxas" style="background:none; border:none; color:#fff; cursor:pointer; font-size:18px;"><i class="fas fa-eye" id="icon-eye"></i></button>
-                    <button onclick="abrirConfigTaxas()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:18px;"><i class="fas fa-cog"></i></button>
-                </div>
-            </div>
-            <table class="sim-table">
-                <thead><tr><th>Parc.</th><th>Valor Parc.</th><th>Total</th></tr></thead>
-                <tbody id="lista-simulacao"></tbody>
-            </table>
-            <button onclick="copiarOfertaZap()" style="margin-top:15px; width:100%; background:#25D366; color:#fff; padding:10px; border:none; border-radius:5px; cursor:pointer; font-weight:bold;"><i class="fab fa-whatsapp"></i> Copiar (Sem Taxas)</button>
-            <button onclick="document.getElementById('modal-simulador').style.display='none'" class="btn-cancel" style="margin-top:5px; width:100%;">Fechar</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="modal-config-taxas">
-        <div class="modal">
-            <h3>Configurar Taxas (%)</h3>
-            <div id="grid-inputs-taxas" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; max-height:300px; overflow-y:auto;"></div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button onclick="document.getElementById('modal-config-taxas').style.display='none'" class="btn-cancel">Cancelar</button>
-                <button onclick="salvarConfigTaxas()" class="btn-confirm">Salvar</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="modal-troca">
-        <div class="modal" style="border-color: var(--warning);">
-            <h3 style="color: var(--warning);">Entrada de Troca</h3>
-            <label style="font-size: 11px; color: #999;">Modelo:</label><input list="dl-modelos-list" id="troca-modelo" placeholder="Selecione..."><datalist id="dl-modelos-list"></datalist>
-            <div class="modal-grid"><div><label style="font-size: 11px; color: #999;">GB:</label><select id="troca-gb"><option value="">-</option><option value="64GB">64GB</option><option value="128GB">128GB</option><option value="256GB">256GB</option><option value="512GB">512GB</option></select></div><div><label style="font-size: 11px; color: #999;">Cor:</label><input list="dl-cores-list" id="troca-cor" placeholder="Cor"><datalist id="dl-cores-list"></datalist></div></div>
-            <label style="font-size: 11px; color: #999;">IMEI:</label><input type="text" id="troca-imei" placeholder="15 dígitos" maxlength="15">
-            <div class="modal-grid"><div><label style="font-size: 11px; color: #999;">Valor (R$):</label><input type="number" id="troca-valor"></div><div><label style="font-size: 11px; color: #999;">Bateria (%):</label><input type="number" id="troca-bateria"></div></div>
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button onclick="fecharModalTroca()" class="btn-cancel">Cancelar</button>
-                <button onclick="confirmarTroca()" class="btn-confirm" style="background: var(--warning);">Confirmar</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="modal-cliente">
-        <div class="modal">
-            <h3>Novo Cliente</h3>
-            <input type="text" id="novo-nome" placeholder="Nome Completo">
-            <div class="modal-grid"><input type="text" id="novo-zap" placeholder="Zap"><input type="text" id="novo-cpf" placeholder="CPF"></div>
-            <input type="email" id="novo-email" placeholder="Email">
-            <div class="modal-grid"><input type="text" id="novo-cep" placeholder="CEP" onblur="buscarCep()"><input type="text" id="novo-numero" placeholder="Nº"></div>
-            <input type="text" id="novo-endereco" placeholder="Endereço">
-            <div class="modal-grid"><input type="text" id="novo-bairro" placeholder="Bairro"><input type="text" id="novo-cidade" placeholder="Cidade"></div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button onclick="fecharModalCliente()" class="btn-cancel">Cancelar</button>
-                <button onclick="salvarNovoCliente()" class="btn-confirm">Salvar</button>
-            </div>
-        </div>
-    </div>
+    <div class="modal-overlay" id="modal-avulso"> <div class="modal" style="border-color: var(--purple);"> <h3 style="color: var(--purple);">Adicionar Valor Avulso</h3> <label style="font-size:12px; color:#999;">Descrição:</label> <input type="text" id="avulso-desc" placeholder="Taxa / Item não cadastrado"> <label style="font-size:12px; color:#999;">Valor:</label> <input type="text" id="avulso-valor" placeholder="R$ 0,00" style="font-size:18px; font-weight:bold; color:var(--success);" onkeyup="mascaraMoeda(this)"> <div style="display: flex; gap: 10px; margin-top: 20px;"> <button onclick="document.getElementById('modal-avulso').style.display='none'" class="btn-cancel">Cancelar</button> <button onclick="confirmarAvulso()" class="btn-confirm" style="background: var(--purple);">Adicionar</button> </div> </div> </div>
+    <div class="modal-overlay" id="modal-historico"> <div class="modal"> <h3 style="color: #eab308;"><i class="fas fa-history"></i> Histórico do Cliente</h3> <div id="conteudo-historico" class="historico-lista">Carregando...</div> <button onclick="document.getElementById('modal-historico').style.display='none'" class="btn-cancel" style="width:100%;">Fechar</button> </div> </div>
+    <div class="modal-overlay" id="modal-simulador"> <div class="modal"> <div style="display:flex; justify-content:space-between; align-items:center;"> <h3>Simulação</h3> <div style="display:flex; gap:10px;"> <button onclick="toggleTaxasVisuais()" title="Ocultar/Mostrar Taxas" style="background:none; border:none; color:#fff; cursor:pointer; font-size:18px;"><i class="fas fa-eye" id="icon-eye"></i></button> <button onclick="abrirConfigTaxas()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:18px;"><i class="fas fa-cog"></i></button> </div> </div> <table class="sim-table"> <thead><tr><th>Parc.</th><th>Valor Parc.</th><th>Total</th></tr></thead> <tbody id="lista-simulacao"></tbody> </table> <button onclick="copiarOfertaZap()" style="margin-top:15px; width:100%; background:#25D366; color:#fff; padding:10px; border:none; border-radius:5px; cursor:pointer; font-weight:bold;"><i class="fab fa-whatsapp"></i> Copiar (Sem Taxas)</button> <button onclick="document.getElementById('modal-simulador').style.display='none'" class="btn-cancel" style="margin-top:5px; width:100%;">Fechar</button> </div> </div>
+    <div class="modal-overlay" id="modal-config-taxas"> <div class="modal"> <h3>Configurar Taxas (%)</h3> <div id="grid-inputs-taxas" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; max-height:300px; overflow-y:auto;"></div> <div style="display: flex; gap: 10px; margin-top: 20px;"> <button onclick="document.getElementById('modal-config-taxas').style.display='none'" class="btn-cancel">Cancelar</button> <button onclick="salvarConfigTaxas()" class="btn-confirm">Salvar</button> </div> </div> </div>
+    <div class="modal-overlay" id="modal-troca"> <div class="modal" style="border-color: var(--warning);"> <h3 style="color: var(--warning);">Entrada de Troca</h3> <label style="font-size: 11px; color: #999;">Modelo:</label><input list="dl-modelos-list" id="troca-modelo" placeholder="Selecione..."><datalist id="dl-modelos-list"></datalist> <div class="modal-grid"><div><label style="font-size: 11px; color: #999;">GB:</label><select id="troca-gb"><option value="">-</option><option value="64GB">64GB</option><option value="128GB">128GB</option><option value="256GB">256GB</option><option value="512GB">512GB</option></select></div><div><label style="font-size: 11px; color: #999;">Cor:</label><input list="dl-cores-list" id="troca-cor" placeholder="Cor"><datalist id="dl-cores-list"></datalist></div></div> <label style="font-size: 11px; color: #999;">IMEI:</label><input type="text" id="troca-imei" placeholder="15 dígitos" maxlength="15"> <div class="modal-grid"><div><label style="font-size: 11px; color: #999;">Valor (R$):</label><input type="number" id="troca-valor"></div><div><label style="font-size: 11px; color: #999;">Bateria (%):</label><input type="number" id="troca-bateria"></div></div> <div style="display: flex; gap: 10px; margin-top: 10px;"> <button onclick="fecharModalTroca()" class="btn-cancel">Cancelar</button> <button onclick="confirmarTroca()" class="btn-confirm" style="background: var(--warning);">Confirmar</button> </div> </div> </div>
+    <div class="modal-overlay" id="modal-cliente"> <div class="modal"> <h3>Novo Cliente</h3> <input type="text" id="novo-nome" placeholder="Nome Completo"> <div class="modal-grid"><input type="text" id="novo-zap" placeholder="Zap"><input type="text" id="novo-cpf" placeholder="CPF"></div> <input type="email" id="novo-email" placeholder="Email"> <div class="modal-grid"><input type="text" id="novo-cep" placeholder="CEP" onblur="buscarCep()"><input type="text" id="novo-numero" placeholder="Nº"></div> <input type="text" id="novo-endereco" placeholder="Endereço"> <div class="modal-grid"><input type="text" id="novo-bairro" placeholder="Bairro"><input type="text" id="novo-cidade" placeholder="Cidade"></div> <div style="display: flex; gap: 10px; margin-top: 20px;"> <button onclick="fecharModalCliente()" class="btn-cancel">Cancelar</button> <button onclick="salvarNovoCliente()" class="btn-confirm">Salvar</button> </div> </div> </div>
 
     <script>
-        // --- 🔒 SEGURANÇA ---
-        const DATA_LIMITE = new Date('2030-01-01');
-        if(new Date() > DATA_LIMITE) throw new Error("Bloqueado");
+        const DATA_LIMITE = new Date('2030-01-01'); if(new Date() > DATA_LIMITE) throw new Error("Bloqueado");
 
-        let dbEstoque = [], dbClientes = [], carrinho = [], trocas = [];
-        let totalVendaGlobal = 0, valorTaxaAplicada = 0, parcelasSelecionadas = 0;
-        let taxasAtuais = {};
-        let mostrarTaxasNaTela = true;
+        let dbEstoque=[], dbClientes=[], carrinho=[], trocas=[];
+        let totalVendaGlobal=0, valorTaxaAplicada=0, parcelasSelecionadas=0;
+        let taxasAtuais={}; let mostrarTaxasNaTela=true;
 
         window.onload = function() {
             const cargo = localStorage.getItem('cargoUsuario');
@@ -377,34 +233,31 @@
             restaurarRascunho();
             carregarTaxasDoBanco();
             
-            const carregarEstoque = (colecao) => {
-                db.collection(colecao).onSnapshot(snap => { 
-                    if(snap.empty) return;
-                    dbEstoque = []; 
-                    snap.forEach(doc => {
-                        const data = doc.data();
-                        // Carrega itens que não foram vendidos
-                        if (!data.status || data.status.toLowerCase() !== "vendido") { dbEstoque.push({ id: doc.id, ...data }); }
-                    }); 
-                    renderizarProdutos(); 
-                }, err => console.log("Erro estoque"));
-            };
-            carregarEstoque("estoque"); 
+            // CARREGA TUDO (Inclusive 'em_negociacao' para travar visualmente)
+            db.collection("estoque").onSnapshot(snap => { 
+                if(snap.empty) return;
+                dbEstoque = []; 
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    // Ignora apenas VENDIDOS definitivos
+                    if (!data.status || data.status.toLowerCase() !== "vendido") { 
+                        dbEstoque.push({ id: doc.id, ...data }); 
+                    }
+                }); 
+                renderizarProdutos(); 
+            });
 
             db.collection("clientes").orderBy("nome").onSnapshot(snap => { dbClientes = []; snap.forEach(doc => dbClientes.push({ id: doc.id, ...doc.data() })); renderizarDatalistClientes(); });
             carregarListasAuxiliares();
-
-            document.addEventListener('keydown', function(e) { if(e.key === 'F9') verHistoricoCliente(); });
+            document.addEventListener('keydown', e => { if(e.key === 'F9') verHistoricoCliente(); });
         };
 
-        // --- RENDERIZAÇÃO COM AGRUPAMENTO INTELIGENTE (PULO DO GATO) ---
         function renderizarProdutos() {
             const d = document.getElementById('lista-produtos');
             d.innerHTML = "";
             const busca = document.getElementById('busca').value.toLowerCase();
             const filtroCat = document.getElementById('filtro-cat').value.toLowerCase();
 
-            // 1. Filtrar
             const filtrados = dbEstoque.filter(p => {
                 const texto = (p.modelo + (p.imei1||'')).toLowerCase();
                 const matchTexto = texto.includes(busca);
@@ -412,7 +265,6 @@
                 return matchTexto && matchCat;
             });
 
-            // 2. Agrupar
             const listaExibicao = [];
             const grupos = {};
             const norm = (str) => (str || '').toString().trim().toLowerCase();
@@ -420,57 +272,54 @@
             filtrados.forEach(p => {
                 const cat = (p.categoria || '').toLowerCase();
                 
-                // Celulares ou itens em negociação (por outros) não agrupam visualmente
-                if (cat.includes('celular') || p.status === 'em_negociacao') {
+                // Celulares ou Itens já no carrinho/em negociação NÃO agrupam visualmente
+                if (cat.includes('celular')) {
                     listaExibicao.push(p);
                 } else {
-                    // Chave de Agrupamento
                     const chave = `${norm(p.modelo)}|${norm(p.venda)}|${norm(p.cor)}|${norm(p.tamanho)}|${norm(p.ml)}|${norm(p.fragrancia)}`;
-                    
                     if (!grupos[chave]) {
                         grupos[chave] = { ...p, isGroup: true, idsDisponiveis: [], count: 0 };
                         listaExibicao.push(grupos[chave]);
                     }
-                    grupos[chave].count++;
-                    grupos[chave].idsDisponiveis.push(p.id);
+                    if(p.status === 'disponível') {
+                        grupos[chave].count++;
+                        grupos[chave].idsDisponiveis.push(p.id);
+                    }
                 }
             });
 
-            // 3. Desenhar Cards
             if(listaExibicao.length === 0) return d.innerHTML = '<div style="color:#888;text-align:center;padding:20px;">Nada encontrado.</div>';
 
             listaExibicao.forEach(item => {
                 let qtdVisivel = 0;
                 let idsParaVender = [];
+                let isLocked = false;
 
                 if (item.isGroup) {
-                    // Filtra IDs que já estão no carrinho
-                    idsParaVender = item.idsDisponiveis.filter(id => !carrinho.find(c => c.id === id));
-                    qtdVisivel = idsParaVender.length;
-                    if (qtdVisivel === 0) return; // Se todos do grupo estão no carrinho, esconde card
+                    // Grupo: Quantidade é o que está disponível
+                    qtdVisivel = item.count;
+                    idsParaVender = item.idsDisponiveis;
+                    // Se o grupo tem 0 disponível (tudo vendido ou no carrinho), esconde ou trava
+                    if (qtdVisivel === 0) return; 
                 } else {
-                    if (carrinho.find(c => c.id === item.id)) return; // Item único já no carrinho
-                    qtdVisivel = 1;
+                    // Item Único: Se status não é disponível, trava
+                    isLocked = item.status !== 'disponível';
+                    qtdVisivel = isLocked ? 0 : 1;
                     idsParaVender = [item.id];
                 }
 
                 const el = document.createElement('div');
-                const isReserved = item.status === 'em_negociacao';
-                el.className = isReserved ? 'product-card reserved' : 'product-card';
-                
-                // Ao clicar, adiciona o PRIMEIRO ID disponível
-                if(!isReserved) el.onclick = () => adicionarAoCarrinho(item, idsParaVender[0]);
+                el.className = isLocked ? 'product-card locked' : 'product-card';
+                if(!isLocked) el.onclick = () => adicionarAoCarrinho(item, idsParaVender[0]);
 
                 let cat = (item.categoria||'').toLowerCase();
                 let icon = cat.includes('celular')?'📱':cat.includes('roupa')?'👕':cat.includes('perfume')?'🌸':'📦';
-                let reservedBadge = isReserved ? '<span class="reserved-tag">EM USO</span>' : '';
-                
-                // Badge de Quantidade do Grupo
-                let qtdBadge = item.isGroup ? `<span class="qtd-tag">${qtdVisivel} UN</span>` : '';
+                let lockedBadge = isLocked ? '<span class="tag-locked">EM USO</span>' : '';
+                let qtyBadge = item.isGroup ? `<span class="tag-qty">${qtdVisivel} UN</span>` : '';
 
                 el.innerHTML = `
-                    ${reservedBadge}
-                    ${qtdBadge}
+                    ${lockedBadge}
+                    ${qtyBadge}
                     <span class="prod-cat-tag">${icon} ${cat.toUpperCase()}</span>
                     <span class="prod-name">${item.modelo||item.nomeP||'Item'}</span>
                     <span class="prod-detail">${item.cor||''} ${item.gb||''}</span>
@@ -481,34 +330,59 @@
         }
 
         async function adicionarAoCarrinho(itemVisual, idReal) {
-            // Busca o item real atualizado do banco (para garantir status)
             const p = dbEstoque.find(x => x.id === idReal);
-            if (!p) return alert("Erro: Item não encontrado no fluxo.");
+            if (!p || p.status !== 'disponível') return alert("Item já selecionado por outro caixa!");
 
             try {
-                // Trava no banco
+                // TRAVA NO BANCO (Feedback Visual Imediato)
                 await db.collection("estoque").doc(p.id).update({status: "em_negociacao"});
                 carrinho.push({...p, isBrinde: false});
                 atualizarTotais();
                 salvarRascunho();
-                // Re-renderiza para atualizar contadores
-                renderizarProdutos();
+                // Renderização automática via Snapshot vai atualizar a tela
             } catch(e) {
-                alert("Erro: Item já pego!");
+                console.error(e);
+                alert("Erro ao selecionar item.");
             }
         }
 
         async function removerDoCarrinho(i){ 
-            if(!carrinho[i].isAvulso && carrinho[i].id) {
-                try { await db.collection("estoque").doc(carrinho[i].id).update({status:"disponível"}); } catch(e){}
+            const item = carrinho[i];
+            if(!item.isAvulso && item.id) {
+                try { 
+                    await db.collection("estoque").doc(item.id).update({status:"disponível"}); 
+                } catch(e){ console.log(e); }
             }
             carrinho.splice(i,1); 
             atualizarTotais(); 
             salvarRascunho(); 
-            renderizarProdutos(); // Devolve item para a lista visual
         }
 
-        // --- MANTEVE O RESTANTE DAS FUNÇÕES ORIGINAIS ---
+        async function cancelarVendaTotal(){
+            if(!confirm("Tem certeza? Isso vai liberar os itens.")) return;
+            
+            document.getElementById('loader').style.display = 'flex';
+            
+            // LÓGICA DE OURO: ESPERAR O BANCO RESPONDER
+            const promessas = carrinho.map(async (item) => {
+                if(!item.isAvulso && item.id) {
+                    return db.collection("estoque").doc(item.id).update({status:"disponível"});
+                }
+                return Promise.resolve();
+            });
+
+            try {
+                await Promise.all(promessas);
+                limparRascunho();
+                alert("Tela limpa e itens devolvidos ao estoque!");
+            } catch(e) {
+                alert("Erro ao liberar itens: " + e.message);
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+
+        // --- FUNÇÕES DE APOIO E MODAIS (ORIGINAIS) ---
         function abrirModalAvulso(){document.getElementById('avulso-desc').value="";document.getElementById('avulso-valor').value="";document.getElementById('modal-avulso').style.display='flex';document.getElementById('avulso-desc').focus();}
         function mascaraMoeda(i){let v=i.value.replace(/\D/g,'');v=(v/100).toFixed(2)+'';v=v.replace(".",",");v=v.replace(/(\d)(\d{3})(\d{3}),/g,"$1.$2.$3,");v=v.replace(/(\d)(\d{3}),/g,"$1.$2,");i.value="R$ "+v;}
         function confirmarAvulso(){const d=document.getElementById('avulso-desc').value||"Item Avulso";let vR=document.getElementById('avulso-valor').value;vR=vR.replace(/\D/g,"");let v=parseFloat(vR)/100;if(!v||v<=0)return alert("Valor?");carrinho.push({modelo:d,nomeP:d,venda:v,isAvulso:true,isBrinde:false});document.getElementById('modal-avulso').style.display='none';atualizarTotais();salvarRascunho();}
@@ -520,7 +394,44 @@
         function aplicarParcelamento(p,vJ){valorTaxaAplicada=vJ;parcelasSelecionadas=p;let s=document.getElementById('forma-pagamento');let n=`Crédito ${p}x`;let e=false;for(let i=0;i<s.options.length;i++){if(s.options[i].value===n)e=true;}if(!e)s.innerHTML+=`<option value="${n}">${n} (Simulado)</option>`;s.value=n;document.getElementById('modal-simulador').style.display='none';atualizarTotais();salvarRascunho();}
         function copiarOfertaZap(){const t=document.getElementById('modal-simulador').getAttribute('data-copy');navigator.clipboard.writeText(t);alert("Copiado!");}
         function preVisualizar(){const c=document.getElementById('cliente-input').value;if(carrinho.length===0)return alert("Vazio!");const cf=dbClientes.find(x=>x.nome===c)||{nome:c||"Consumidor"};let ir=carrinho.map(i=>({nome:i.modelo||i.nomeP,desc:i.cor||'',preco:i.venda,isBrinde:i.isBrinde}));trocas.forEach(t=>ir.push({nome:"TROCA: "+t.modelo,desc:t.imei,preco:-t.valor,isTroca:true}));let tp="";if(parcelasSelecionadas>0&&totalVendaGlobal>0){const vp=totalVendaGlobal/parcelasSelecionadas;tp=`(${parcelasSelecionadas}x de ${vp.toLocaleString('pt-br',{style:'currency',currency:'BRL'})})`;}const d={titulo:"PRÉ-VISUALIZAÇÃO",numeroPedido:"PREVIEW",cliente:cf.nome,cpf:cf.cpf||'',tel:cf.whats||'',endereco:cf.logradouro||'',itens:ir,descontoManual:parseFloat(document.getElementById('valor-desconto-manual').value)||0,taxaMaquininha:valorTaxaAplicada,total:totalVendaGlobal,pagamento:document.getElementById('forma-pagamento').value,textoParcelas:tp,data:new Date().toLocaleDateString('pt-BR'),isOrcamento:false,autoPrint:false};localStorage.setItem('dadosRecibo',JSON.stringify(d));window.open('orcamento.html','_blank');}
-        async function finalizar(isOrc){const c=document.getElementById('cliente-input').value;const pg=document.getElementById('forma-pagamento').value;if(carrinho.length===0)return alert("Vazio!");if(!c)return alert("Cliente?");if(!pg)return alert("Pagamento?");const tp=isOrc?"ORÇAMENTO":"VENDA";const st=isOrc?"ORCAMENTO":"CONCRETIZADA";if(!confirm(`Confirmar ${tp}?`))return;try{const b=db.batch();if(!isOrc){carrinho.forEach(i=>{if(!i.isAvulso&&i.id){b.update(db.collection("estoque").doc(i.id),{status:"vendido",dataVenda:Date.now(),clienteVenda:c,foiBrinde:i.isBrinde});}});trocas.forEach(t=>{const r=db.collection("estoque").doc();b.set(r,{categoria:'celular',modelo:`${t.modelo} (TROCA ${c})`,nomeP:`${t.modelo} (TROCA)`,marca:'Apple',cor:t.cor,gb:t.gb,imei1:t.imei,bateria:t.bateria,custo:t.valor,venda:0,status:'disponível',fornecedor:`Cliente: ${c}`,dataEntrada:Date.now()});});}else{carrinho.forEach(i=>{if(!i.isAvulso&&i.id){b.update(db.collection("estoque").doc(i.id),{status:"disponível"});}});}const s=await db.collection("vendas").get();const num=String(s.size+1).padStart(4,'0');b.set(db.collection("vendas").doc(),{numeroPedido:num,tipoRegistro:tp,status:st,cliente:c,data:new Date().toISOString(),itens:carrinho.map(x=>({modelo:x.modelo||x.nomeP,isBrinde:x.isBrinde,isAvulso:!!x.isAvulso})),trocas:trocas.map(x=>x.modelo),desconto:parseFloat(document.getElementById('valor-desconto-manual').value)||0,taxaMaquininha:valorTaxaAplicada,total:totalVendaGlobal,pagamento:pg});await b.commit();let hist=`${new Date().toLocaleDateString('pt-BR')} - ${c} ${isOrc?'fez ORÇAMENTO':'comprou'} ${carrinho.length} itens. Total: ${formatMoeda(totalVendaGlobal)}`;db.collection("clientes").where("nome","==",c).get().then(q=>{q.forEach(d=>{db.collection("clientes").doc(d.id).update({historico:hist+"\n"+(d.data().historico||"")});});});gerarDocumento(isOrc,num,c,pg);if(!isOrc){limparRascunho();window.location.reload();}else{alert("Orçamento salvo! Se o cliente sair, limpe a tela.");}}catch(e){alert("Erro: "+e.message);}}
+        async function finalizar(isOrc){
+            const c=document.getElementById('cliente-input').value;
+            const pg=document.getElementById('forma-pagamento').value;
+            if(carrinho.length===0)return alert("Vazio!");
+            if(!c)return alert("Cliente?");
+            if(!pg)return alert("Pagamento?");
+            
+            const tp=isOrc?"ORÇAMENTO":"VENDA";
+            const st=isOrc?"ORCAMENTO":"CONCRETIZADA";
+            if(!confirm(`Confirmar ${tp}?`))return;
+            
+            document.getElementById('loader').style.display='flex';
+
+            try{
+                const b=db.batch();
+                if(!isOrc){
+                    carrinho.forEach(i=>{if(!i.isAvulso&&i.id){b.update(db.collection("estoque").doc(i.id),{status:"vendido",dataVenda:Date.now(),clienteVenda:c,foiBrinde:i.isBrinde});}});
+                    trocas.forEach(t=>{const r=db.collection("estoque").doc();b.set(r,{categoria:'celular',modelo:`${t.modelo} (TROCA ${c})`,nomeP:`${t.modelo} (TROCA)`,marca:'Apple',cor:t.cor,gb:t.gb,imei1:t.imei,bateria:t.bateria,custo:t.valor,venda:0,status:'disponível',fornecedor:`Cliente: ${c}`,dataEntrada:Date.now()});});
+                }else{
+                    // Orçamento libera
+                    carrinho.forEach(i=>{if(!i.isAvulso&&i.id){b.update(db.collection("estoque").doc(i.id),{status:"disponível"});}});
+                }
+                const s=await db.collection("vendas").get();
+                const num=String(s.size+1).padStart(4,'0');
+                b.set(db.collection("vendas").doc(),{numeroPedido:num,tipoRegistro:tp,status:st,cliente:c,data:new Date().toISOString(),itens:carrinho.map(x=>({modelo:x.modelo||x.nomeP,isBrinde:x.isBrinde,isAvulso:!!x.isAvulso, custo:x.custo||0})),trocas:trocas.map(x=>x.modelo),desconto:parseFloat(document.getElementById('valor-desconto-manual').value)||0,taxaMaquininha:valorTaxaAplicada,total:totalVendaGlobal,pagamento:pg});
+                
+                await b.commit();
+                
+                let hist=`${new Date().toLocaleDateString('pt-BR')} - ${c} ${isOrc?'fez ORÇAMENTO':'comprou'} ${carrinho.length} itens. Total: ${formatMoeda(totalVendaGlobal)}`;
+                db.collection("clientes").where("nome","==",c).get().then(q=>{q.forEach(d=>{db.collection("clientes").doc(d.id).update({historico:hist+"\n"+(d.data().historico||"")});});});
+                gerarDocumento(isOrc,num,c,pg);
+                
+                if(!isOrc){limparRascunho();window.location.reload();}
+                else{alert("Orçamento salvo!"); document.getElementById('loader').style.display='none';}
+            }catch(e){
+                alert("Erro: "+e.message); document.getElementById('loader').style.display='none';
+            }
+        }
         function gerarDocumento(isO,n,c,pg){const cf=dbClientes.find(x=>x.nome===c)||{nome:c};let ir=carrinho.map(i=>({nome:i.modelo||i.nomeP,desc:i.cor||'',preco:i.venda,isBrinde:i.isBrinde}));trocas.forEach(t=>ir.push({nome:"TROCA: "+t.modelo,desc:t.imei,preco:-t.valor,isTroca:true}));let tp="";if(parcelasSelecionadas>0&&totalVendaGlobal>0){const vp=totalVendaGlobal/parcelasSelecionadas;tp=`(${parcelasSelecionadas}x de ${vp.toLocaleString('pt-br',{style:'currency',currency:'BRL'})})`;}const d={titulo:isO?"ORÇAMENTO":"RECIBO DE VENDA",isOrcamento:isO,numeroPedido:n,cliente:cf.nome,cpf:cf.cpf||'',tel:cf.whats||'',endereco:cf.logradouro||'',itens:ir,descontoManual:parseFloat(document.getElementById('valor-desconto-manual').value)||0,total:totalVendaGlobal,pagamento:pg,textoParcelas:tp,data:new Date().toLocaleDateString('pt-BR'),autoPrint:!isO};localStorage.setItem('dadosRecibo',JSON.stringify(d));window.open('orcamento.html','_blank');}
         function formatMoeda(v){return parseFloat(v).toLocaleString('pt-br',{style:'currency',currency:'BRL'});}
         function abrirConfigTaxas(){const c=document.getElementById('grid-inputs-taxas');c.innerHTML="";for(let i=1;i<=24;i++){let v=taxasAtuais[i]!==undefined?taxasAtuais[i]:(4+(i*1.2));c.innerHTML+=`<div class="taxa-item"><label>${i}x</label><input type="number" id="taxa-input-${i}" value="${parseFloat(v).toFixed(2)}" step="0.01"> %</div>`;}document.getElementById('modal-config-taxas').style.display='flex';}
@@ -531,7 +442,6 @@
         function limparRascunho(){localStorage.removeItem('pdv_rascunho');carrinho=[];trocas=[];valorTaxaAplicada=0;parcelasSelecionadas=0;document.getElementById('cliente-input').value="";document.getElementById('valor-desconto-manual').value="";atualizarTotais();}
         function carregarListasAuxiliares(){db.collection("lista_modelos_cel").orderBy("nome").onSnapshot(s=>{document.getElementById('dl-modelos-list').innerHTML="";s.forEach(d=>document.getElementById('dl-modelos-list').innerHTML+=`<option value="${d.data().nome}">`)});db.collection("lista_cores_cel").orderBy("nome").onSnapshot(s=>{document.getElementById('dl-cores-list').innerHTML="";s.forEach(d=>document.getElementById('dl-cores-list').innerHTML+=`<option value="${d.data().nome}">`)});}
         function renderizarDatalistClientes(){const d=document.getElementById('lista-clientes-db');d.innerHTML="";dbClientes.forEach(c=>d.innerHTML+=`<option value="${c.nome}">${c.cpf||c.whats||''}</option>`);}
-        async function cancelarVendaTotal(){if(!confirm("Liberar itens?"))return;for(const i of carrinho){if(!i.isAvulso&&i.id){try{await db.collection("estoque").doc(i.id).update({status:"disponível"});}catch(e){}}}limparRascunho();}
         function toggleBrinde(i){carrinho[i].isBrinde=!carrinho[i].isBrinde;atualizarTotais();salvarRascunho();}
         function confirmarTroca(){const t={modelo:document.getElementById('troca-modelo').value,gb:document.getElementById('troca-gb').value,cor:document.getElementById('troca-cor').value,imei:document.getElementById('troca-imei').value,valor:parseFloat(document.getElementById('troca-valor').value)||0,bateria:document.getElementById('troca-bateria').value};if(!t.modelo||!t.valor||t.imei.length!==15)return alert("Dados?");trocas.push(t);fecharModalTroca();atualizarTotais();salvarRascunho();document.querySelectorAll('#modal-troca input').forEach(i=>i.value='');}
         function removerTroca(i){trocas.splice(i,1);atualizarTotais();salvarRascunho();}
