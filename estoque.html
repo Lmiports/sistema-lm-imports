@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VÉRTICE BI | CORE</title>
+    <title>VÉRTICE BI | ESTOQUE</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="shortcut icon" href="logo.png" type="image/png">
-    <link rel="icon" href="logo.png" type="image/png">
-    <link rel="apple-touch-icon" href="logo.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
@@ -17,675 +15,297 @@
     <script src="js/firebase-config.js"></script>
 
     <style>
-        /* --- PADRÃO VISUAL VÉRTICE BI CORE --- */
-        :root { 
-            --bg: #020617; 
-            --card: #0f172a; 
-            --accent: #00e0ff; /* AZUL NEON CORE */
-            --border: #1e293b; 
-            --text: #f8fafc; 
-            --success: #10b981; 
-            --warning: #f59e0b; 
-            --danger: #ef4444; 
-        }
+        :root { --bg: #020617; --card: #0f172a; --accent: #00e0ff; --text: #f8fafc; --border: #1e293b; --success: #10b981; }
         
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0; 
-            display: block; 
-            min-height: 100vh; 
-            overflow-y: auto; 
-            user-select: none; /* Evita seleção no touch */
-        }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; padding-bottom: 80px; user-select: none; }
         
-        /* HEADER */
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: var(--bg);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        .header h2 { margin: 0; color: var(--accent); font-size: 20px; letter-spacing: 1px; }
+        
+        .btn-voltar { color: #fff; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); }
+        .btn-add { background: var(--accent); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(0,224,255,0.3); }
 
-        .header-left { display: flex; align-items: center; gap: 15px; }
-        
-        /* Botão Menu estilo APP */
-        .btn-home {
-            background: #1e293b;
-            color: #fff;
-            padding: 8px 15px;
-            border-radius: 6px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid var(--border);
-            font-weight: bold;
-            transition: 0.3s;
-            cursor: pointer;
-        }
-        .btn-home:hover { background: var(--accent); border-color: var(--accent); color: #000; }
-
-        /* TÍTULO PADRÃO CORE */
-        .page-title { font-size: 18px; font-weight: bold; color: var(--accent); letter-spacing: 1px; margin: 0; }
-        .version-tag { font-size: 10px; color: #000; background: var(--accent); padding: 2px 6px; border-radius: 4px; margin-left: 10px; font-weight: 900; letter-spacing: 1px; vertical-align: middle; }
-        
-        /* CONTENT */
-        .content { 
-            padding: 20px; 
-            display: grid; 
-            grid-template-columns: 1fr 1.3fr; 
-            gap: 20px; 
-            max-width: 1400px; 
-            margin: 0 auto; 
-        }
-        
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; height: fit-content; }
-        .card-header { padding: 15px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: center; }
-        .card-title { font-size: 14px; font-weight: bold; color: var(--accent); text-transform: uppercase; margin: 0; }
-
-        /* FILTROS E BUSCA */
-        .filter-tabs { display: flex; gap: 5px; padding: 10px 15px; border-bottom: 1px solid var(--border); overflow-x: auto; white-space: nowrap; }
-        .f-tab { padding: 6px 12px; background: #1e293b; border-radius: 15px; font-size: 11px; cursor: pointer; color: #94a3b8; border: 1px solid transparent; transition:0.2s; }
-        .f-tab:hover { color: #fff; }
-        .f-tab.active { background: var(--accent); color: #000; border-color: var(--accent); }
-
-        .search-box { padding: 10px 15px; border-bottom: 1px solid var(--border); }
-        input, select { width: 100%; padding: 12px; background: #020617; border: 1px solid var(--border); border-radius: 8px; color: #fff; box-sizing: border-box; outline: none; transition: 0.3s; font-size: 13px; }
-        input:focus, select:focus { border-color: var(--accent); }
+        /* BUSCA */
+        .search-box { position: relative; margin-bottom: 20px; }
+        .search-box input { width: 100%; background: var(--card); border: 1px solid var(--border); padding: 12px 12px 12px 40px; border-radius: 10px; color: #fff; font-size: 14px; box-sizing: border-box; outline: none; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b; }
 
         /* LISTA */
-        .item-list { max-height: 600px; overflow-y: auto; flex: 1; }
-        .item-row { padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
-        .item-row:hover { background: rgba(0, 224, 255, 0.1); }
-        .item-row.active { background: var(--accent); color: #000; }
+        .item-list { display: flex; flex-direction: column; gap: 10px; }
+        .item-card { 
+            background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid var(--border); 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .item-info h4 { margin: 0 0 5px 0; color: #fff; font-size: 14px; }
+        .item-info p { margin: 0; color: #94a3b8; font-size: 11px; }
+        .item-price { text-align: right; }
+        .price-val { display: block; font-weight: bold; color: var(--success); font-size: 14px; }
+        .cost-val { display: block; font-size: 10px; color: #64748b; margin-top: 2px; }
+
+        .tag-cat { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 9px; text-transform: uppercase; font-weight: bold; margin-top: 5px; background: rgba(255,255,255,0.05); color: #94a3b8; }
         
-        .badge { padding: 3px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; text-transform: uppercase; }
-        .badge-celular { background: var(--accent); color: #000; }
-        .badge-roupa { background: #ec4899; color: #fff; }
-        .badge-acessorio { background: #8b5cf6; color: #fff; }
-        .badge-perfume { background: #f59e0b; color: #fff; }
-
-        /* FORMULÁRIO */
-        .form-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .label { font-size: 11px; color: #64748b; margin-bottom: 5px; display: block; text-transform: uppercase; }
-        .req { color: var(--danger); margin-left: 2px; }
-
-        .btn-group { padding: 15px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; background: var(--card); }
-        .btn { padding: 10px 20px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; justify-content: center; }
-        .btn-save { background: var(--success); color: #000; }
-        .btn-new { background: var(--accent); color: #000; }
-        .btn-del { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
-        .btn-manage { background: #334155; color: #fff; font-size: 10px; padding: 8px; flex: 1; }
-        .btn-clean { background: rgba(239, 68, 68, 0.2); color: var(--danger); font-size: 10px; padding: 8px; border: 1px solid var(--danger); flex: 1; }
-
-        .hidden { display: none !important; }
-
-        /* RODAPÉ */
-        .footer { text-align: center; padding: 20px; color: #64748b; font-size: 11px; border-top: 1px solid var(--border); margin-top: 20px; width: 100%; }
+        .actions { margin-left: 10px; display: flex; gap: 8px; }
+        .btn-icon { background: transparent; border: 1px solid var(--border); color: #94a3b8; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-icon.del:hover { background: rgba(239, 68, 68, 0.2); color: #ef4444; border-color: #ef4444; }
 
         /* MODAL */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; justify-content: center; align-items: center; }
-        .modal-box { background: var(--card); border: 1px solid var(--accent); padding: 20px; border-radius: 12px; width: 400px; max-height: 80vh; display: flex; flex-direction: column; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .modal-body { overflow-y: auto; flex: 1; }
-        .list-manage-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid var(--border); }
-        .btn-mini-del { color: var(--danger); cursor: pointer; }
-        optgroup { color: var(--accent); font-weight: bold; background: #000; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 99; display: none; justify-content: center; align-items: flex-end; }
+        .modal-sheet { background: #1e293b; width: 100%; max-width: 500px; border-radius: 20px 20px 0 0; padding: 25px; box-sizing: border-box; animation: slideUp 0.3s ease; border-top: 1px solid var(--accent); }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-        /* RESPONSIVIDADE MOBILE */
-        @media (max-width: 900px) {
-            .content { display: flex; flex-direction: column; padding: 10px; }
-            .card:first-child { max-height: 400px; }
-            .form-grid { grid-template-columns: 1fr; }
-            .btn-group { flex-direction: column-reverse; }
-            .btn { width: 100%; }
-        }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; color: #94a3b8; font-size: 12px; margin-bottom: 5px; }
+        .form-control { width: 100%; background: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 8px; color: #fff; box-sizing: border-box; outline: none; font-size: 14px; }
+        .form-control:focus { border-color: var(--accent); }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #020617; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        .btn-save { width: 100%; background: var(--accent); color: #000; font-weight: bold; padding: 15px; border-radius: 10px; border: none; cursor: pointer; margin-top: 10px; font-size: 16px; }
+
+        /* Loader */
+        .loader-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:none; justify-content:center; align-items:center; z-index:100; flex-direction: column; color: #fff; }
     </style>
 </head>
 <body>
 
-    <div class="header-top">
-        <div class="header-left">
-            <div onclick="window.location.href='menu.html'" class="btn-home"><i class="fas fa-home"></i> MENU</div>
-            <h1 class="page-title">VÉRTICE BI <span class="version-tag">CORE</span></h1>
-        </div>
-        <div></div>
+    <div class="header">
+        <a href="menu.html" class="btn-voltar"><i class="fas fa-arrow-left"></i> Menu</a>
+        <h2>ESTOQUE</h2>
+        <button class="btn-add" onclick="abrirModal()"><i class="fas fa-plus"></i></button>
     </div>
 
-    <main class="content">
-        
-        <section class="card">
-            <div class="card-header">
-                <h3 class="card-title">Inventário</h3>
-                <span style="font-size:10px; color:#64748b" id="total-itens">0 itens</span>
-            </div>
+    <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="busca" placeholder="Buscar produto..." onkeyup="filtrarEstoque()">
+    </div>
+
+    <div class="item-list" id="lista-estoque">
+        <div style="text-align:center; color:#64748b; margin-top:50px;">Carregando estoque...</div>
+    </div>
+
+    <div class="modal-overlay" id="modalProduto">
+        <div class="modal-sheet">
+            <h3 style="margin:0 0 20px 0; color:#fff;">Novo Produto</h3>
             
-            <div class="filter-tabs">
-                <div class="f-tab active" onclick="filtrarCategoria('todos', this)">Todos</div>
-                <div class="f-tab" onclick="filtrarCategoria('celular', this)">Celulares</div>
-                <div class="f-tab" onclick="filtrarCategoria('roupa', this)">Roupas</div>
-                <div class="f-tab" onclick="filtrarCategoria('perfume', this)">Perfumes</div>
-                <div class="f-tab" onclick="filtrarCategoria('acessorio', this)">Acessórios</div>
-            </div>
-
-            <div class="search-box">
-                <input type="text" id="busca" placeholder="🔍 Buscar modelo, imei..." onkeyup="filtrarLista()">
-            </div>
+            <input type="hidden" id="prod-id">
             
-            <div class="item-list" id="lista-estoque">
-                <div style="padding:20px; text-align:center; color:#64748b;">Carregando...</div>
+            <div class="form-group">
+                <label>Nome do Produto (Modelo)</label>
+                <input type="text" id="prod-nome" class="form-control" placeholder="Ex: Capa iPhone 13">
             </div>
-            
-            <div style="padding:15px; border-top:1px solid var(--border); display:flex; gap:10px; flex-direction: column;">
-                <button class="btn btn-new" style="width:100%;" onclick="novoItem()">+ PRODUTO</button>
-                <div style="display:flex; gap:5px; width:100%; justify-content:space-between;">
-                    <button class="btn btn-manage" onclick="abrirModalGestao()"><i class="fas fa-cog"></i> LISTAS</button>
-                    <button class="btn btn-clean" onclick="limparVendidos()"><i class="fas fa-trash-alt"></i> LIMPAR VENDIDOS</button>
-                </div>
-            </div>
-        </section>
 
-        <section class="card">
-            <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-edit"></i> Dados do Produto</h3>
-                <input type="hidden" id="itemId">
-            </div>
-            
-            <div class="form-body">
-                
-                <div class="form-grid">
-                    <div>
-                        <label class="label">Categoria</label>
-                        <select id="categoria" onchange="ajustarCampos()">
-                            <option value="celular">Celular / iPhone</option>
-                            <option value="roupa">Roupa</option>
-                            <option value="perfume">Perfume</option>
-                            <option value="acessorio">Acessório</option>
-                            <option value="eletronico">Eletrônico</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="label">Fornecedor</label>
-                        <input type="text" id="fornecedor" placeholder="Origem" list="dlFornecedores">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="label">Marca</label>
-                    <input type="text" id="marca" placeholder="Apple..." list="dlMarcas">
-                </div>
-
-                <div>
-                    <label class="label" id="labelModelo">Modelo / Nome <span class="req">*</span></label>
-                    <input type="text" id="modelo" placeholder="Ex: iPhone 14 Pro Max">
-                </div>
-
-                <div class="form-grid">
-                    <div>
-                        <label class="label" style="color:var(--danger)">Custo (R$)</label>
-                        <input type="text" id="custo" style="color:var(--danger);font-weight:bold;" placeholder="0,00" onkeyup="moeda(this)">
-                    </div>
-                    <div>
-                        <label class="label" style="color:var(--success)">Venda (R$)</label>
-                        <input type="text" id="venda" style="color:var(--success);font-weight:bold;" placeholder="0,00" onkeyup="moeda(this)">
-                    </div>
-                </div>
-
-                <hr style="border:0; border-top:1px solid var(--border); width:100%;">
-
-                <div id="campos-celular">
-                    <div class="form-grid">
-                        <div>
-                            <label class="label">Armazenamento</label>
-                            <select id="gb">
-                                <option value="64GB">64 GB</option>
-                                <option value="128GB">128 GB</option>
-                                <option value="256GB">256 GB</option>
-                                <option value="512GB">512 GB</option>
-                                <option value="1TB">1 TB</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="label">Cor</label>
-                            <input type="text" id="cor" placeholder="Ex: Deep Purple" list="dlCoresCelular">
-                        </div>
-                    </div>
-                    <div class="form-grid">
-                        <div>
-                            <label class="label">Serial Number <span class="req">*</span></label>
-                            <input type="text" id="serial" style="text-transform:uppercase;">
-                        </div>
-                        <div>
-                            <label class="label">Bateria (%) <span class="req">*</span></label>
-                            <input type="number" id="bateria" placeholder="100">
-                        </div>
-                    </div>
-                    <div class="form-grid">
-                        <div>
-                            <label class="label">IMEI 1 <span class="req">*</span></label>
-                            <input type="text" id="imei1" maxlength="15" oninput="numeros(this)" placeholder="15 dígitos">
-                        </div>
-                        <div>
-                            <label class="label">IMEI 2</label>
-                            <input type="text" id="imei2" maxlength="15" oninput="numeros(this)" placeholder="Opcional">
-                        </div>
-                    </div>
-                </div>
-
-                <div id="campos-roupa" class="hidden">
-                    <div class="form-grid">
-                        <div>
-                            <label class="label">Tamanho</label>
-                            <select id="tamanho">
-                                <option value="">-</option>
-                                <option value="PP">PP</option>
-                                <option value="P">P</option>
-                                <option value="M">M</option>
-                                <option value="G">G</option>
-                                <option value="GG">GG</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="label">Tipo / Tecido</label>
-                            <input type="text" id="corRoupa" placeholder="Ex: Jeans, Algodão" list="dlTiposRoupa">
-                        </div>
-                    </div>
-                </div>
-
-                <div id="campos-perfume" class="hidden">
-                    <div class="form-grid">
-                        <div>
-                            <label class="label">Volume</label>
-                            <input type="text" id="ml" placeholder="Ex: 100ml">
-                        </div>
-                        <div>
-                            <label class="label">Tipo de Fragrância</label>
-                            <input type="text" id="tipoPerfume" placeholder="Selecione..." list="dlFragrancias">
-                        </div>
-                    </div>
-                </div>
-
-                <div style="margin-top:15px;">
-                    <label class="label">Status</label>
-                    <select id="status">
-                        <option value="disponível">🟢 Disponível</option>
-                        <option value="vendido">🔴 Vendido</option>
-                        <option value="reservado">🟡 Reservado</option>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select id="prod-cat" class="form-control">
+                        <option value="celular">Celular</option>
+                        <option value="acessorio">Acessório</option>
+                        <option value="roupa">Roupa</option>
+                        <option value="perfume">Perfume</option>
+                        <option value="eletronico">Eletrônico</option>
+                        <option value="outros">Outros</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>Quantidade (Lote)</label>
+                    <input type="number" id="prod-qtd" class="form-control" value="1" min="1">
+                </div>
             </div>
 
-            <div class="btn-group">
-                <button class="btn btn-del" onclick="deletarItem()"><i class="fas fa-trash"></i></button>
-                <button class="btn btn-save" onclick="salvarItem()"><i class="fas fa-save"></i> SALVAR</button>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                <div class="form-group">
+                    <label>Custo (R$)</label>
+                    <input type="text" id="prod-custo" class="form-control" placeholder="0,00" oninput="mascaraMoeda(this)">
+                </div>
+                <div class="form-group">
+                    <label>Venda (R$)</label>
+                    <input type="text" id="prod-venda" class="form-control" placeholder="0,00" oninput="mascaraMoeda(this)">
+                </div>
             </div>
-        </section>
 
-        <div class="footer" style="grid-column: 1 / -1;">
-            VÉRTICE BI CORE v11.0 © Rodrigo N Carvalho 2026
+            <div class="form-group">
+                <label>IMEI / Serial / Obs</label>
+                <input type="text" id="prod-imei" class="form-control" placeholder="Opcional">
+            </div>
+
+            <button class="btn-save" onclick="salvarProduto()">SALVAR PRODUTO</button>
+            <button onclick="fecharModal()" style="width:100%; background:transparent; color:#94a3b8; border:none; padding:15px; cursor:pointer;">Cancelar</button>
         </div>
+    </div>
 
-        <datalist id="dlMarcas"></datalist>
-        <datalist id="dlFornecedores"></datalist>
-        <datalist id="dlModelosCelular"></datalist>
-        <datalist id="dlCoresCelular"></datalist>
-        <datalist id="dlModelosRoupa"></datalist>
-        <datalist id="dlTiposRoupa"></datalist>
-        <datalist id="dlNomesPerfume"></datalist>
-        <datalist id="dlFragrancias"></datalist>
-
-    </main>
-
-    <div id="modalListas" class="modal-overlay">
-        <div class="modal-box">
-            <div class="modal-header">
-                <h3>Gerenciar Listas</h3>
-                <button onclick="fecharModalGestao()" style="background:none; border:none; color:white; cursor:pointer;">X</button>
-            </div>
-            
-            <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <select id="selListaGerenciar" onchange="carregarItensLista()" style="flex:1;">
-                    <optgroup label="GERAL">
-                        <option value="lista_marcas">Marcas (Geral)</option>
-                    </optgroup>
-                    <optgroup label="CELULARES">
-                        <option value="lista_modelos_cel">Modelos (iPhones)</option>
-                        <option value="lista_cores_cel">Cores</option>
-                    </optgroup>
-                    <optgroup label="ROUPAS">
-                        <option value="lista_modelos_roupa">Modelos (Calça/Camisa)</option>
-                        <option value="lista_tipos_roupa">Tipos/Tecidos</option>
-                    </optgroup>
-                    <optgroup label="PERFUMES">
-                        <option value="lista_nomes_perfume">Nomes de Perfume</option>
-                        <option value="lista_fragrancias">Fragrâncias</option>
-                    </optgroup>
-                </select>
-            </div>
-            
-            <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <input type="text" id="novoItemLista" placeholder="Novo Item...">
-                <button class="btn btn-save" style="width:auto;" onclick="adicionarItemLista()">+</button>
-            </div>
-
-            <div id="containerItensLista" class="modal-body"></div>
-        </div>
+    <div class="loader-overlay" id="loader">
+        <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+        <p style="margin-top:10px;">Salvando...</p>
     </div>
 
     <script>
-        // --- 🔒 KILL SWITCH (TRAVA DE SEGURANÇA) ---
-        const DATA_LIMITE = new Date('2030-01-01'); 
-        if(new Date() > DATA_LIMITE) { 
-            document.body.innerHTML = '<div style="height:100vh;display:flex;justify-content:center;align-items:center;background:#000;color:red;flex-direction:column;"><h1>ACESSO SUSPENSO</h1><p>Contate o suporte.</p></div>'; 
-            throw new Error("Bloqueado"); 
+        // --- 🔒 SEGURANÇA ---
+        const DATA_LIMITE = new Date('2030-01-01');
+        if(new Date() > DATA_LIMITE) throw new Error("Bloqueado");
+        
+        // Verifica permissão
+        const permissoes = localStorage.getItem('permissoesUsuario');
+        // Se não for admin e não tiver 'estoque' nas permissões
+        if (localStorage.getItem('cargoUsuario') !== 'admin' && (!permissoes || !permissoes.includes('estoque'))) {
+            alert("Acesso não autorizado.");
+            window.location.href = 'menu.html';
         }
 
-        let dbEstoque = [];
-        let itemSelecionadoId = null;
-        let filtroCatAtual = 'todos';
+        let estoque = [];
 
-        // 1. INICIALIZAÇÃO
-        window.onload = () => {
-            const cargo = localStorage.getItem('cargoUsuario');
-            if(!cargo) window.location.href='index.html';
+        window.onload = carregarEstoque;
 
-            db.collection("estoque").orderBy("modelo").onSnapshot(snap => {
-                dbEstoque = [];
-                snap.forEach(doc => dbEstoque.push({ id: doc.id, ...doc.data() }));
-                renderizarLista();
+        function carregarEstoque() {
+            db.collection("estoque").orderBy("modelo").onSnapshot(snapshot => {
+                estoque = [];
+                const lista = document.getElementById('lista-estoque');
+                lista.innerHTML = "";
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if(data.status === 'disponível') { // Só mostra o que não foi vendido
+                        estoque.push({ id: doc.id, ...data });
+                    }
+                });
+                renderizarLista(estoque);
             });
-            
-            carregarDatalist('fornecedores', 'dlFornecedores');
-            carregarDatalist('lista_marcas', 'dlMarcas');
-            carregarDatalist('lista_modelos_cel', 'dlModelosCelular');
-            carregarDatalist('lista_cores_cel', 'dlCoresCelular');
-            carregarDatalist('lista_modelos_roupa', 'dlModelosRoupa');
-            carregarDatalist('lista_tipos_roupa', 'dlTiposRoupa');
-            carregarDatalist('lista_nomes_perfume', 'dlNomesPerfume');
-            carregarDatalist('lista_fragrancias', 'dlFragrancias');
-
-            ajustarCampos(); 
-        };
-
-        // 2. FUNÇÃO LIMPAR VENDIDOS
-        async function limparVendidos() {
-            if(!confirm("ATENÇÃO: Deseja limpar os itens vendidos da visualização?")) return;
-            try {
-                const snap = await db.collection("estoque").where("status", "==", "vendido").get();
-                if(snap.empty) return alert("Nada para limpar.");
-                const batch = db.batch();
-                snap.docs.forEach(doc => batch.delete(doc.ref));
-                await batch.commit();
-                alert("Limpeza concluída!");
-            } catch(e) { alert("Erro: " + e.message); }
         }
 
-        // 3. RENDERIZAÇÃO
-        function renderizarLista() {
-            const div = document.getElementById('lista-estoque');
-            div.innerHTML = "";
-            const termo = document.getElementById('busca').value.toLowerCase();
-            
-            const filtrados = dbEstoque.filter(p => {
-                const texto = (p.modelo + p.imei1 + p.serial).toLowerCase();
-                const matchTexto = texto.includes(termo);
-                const matchCat = filtroCatAtual === 'todos' || (p.categoria || '').toLowerCase().includes(filtroCatAtual);
-                return matchTexto && matchCat;
-            });
+        function renderizarLista(itens) {
+            const lista = document.getElementById('lista-estoque');
+            lista.innerHTML = "";
 
-            document.getElementById('total-itens').innerText = `${filtrados.length} itens`;
+            if(itens.length === 0) {
+                lista.innerHTML = '<div style="text-align:center; color:#64748b; margin-top:20px;">Estoque vazio.</div>';
+                return;
+            }
 
-            filtrados.forEach(p => {
-                const el = document.createElement('div');
-                el.className = `item-row ${itemSelecionadoId === p.id ? 'active' : ''}`;
-                el.onclick = () => carregarItem(p);
-                
-                const cat = (p.categoria || 'outros').toLowerCase();
-                let badgeClass = 'badge-acessorio';
-                if(cat.includes('celular')) badgeClass = 'badge-celular';
-                if(cat.includes('roupa')) badgeClass = 'badge-roupa';
-                if(cat.includes('perfume')) badgeClass = 'badge-perfume';
+            itens.forEach(item => {
+                let icone = 'box';
+                if(item.categoria === 'celular') icone = 'mobile-alt';
+                if(item.categoria === 'acessorio') icone = 'headphones';
+                if(item.categoria === 'roupa') icone = 'tshirt';
+                if(item.categoria === 'perfume') icone = 'spray-can';
 
-                let nome = p.modelo || p.nomeP || 'Sem nome';
-                if(p.gb) nome += ` ${p.gb}`;
-
-                el.innerHTML = `
-                    <div>
-                        <div style="display:flex; gap:5px; margin-bottom:4px;">
-                            <span class="badge ${badgeClass}">${cat.toUpperCase()}</span>
-                            ${p.status === 'vendido' ? '<span class="badge" style="background:#ef4444;color:#fff;">VENDIDO</span>' : ''}
-                            ${p.status === 'reservado' ? '<span class="badge" style="background:#f59e0b;color:#fff;">RESERVADO</span>' : ''}
+                lista.innerHTML += `
+                    <div class="item-card">
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <div style="background:rgba(255,255,255,0.05); width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#94a3b8;">
+                                <i class="fas fa-${icone}"></i>
+                            </div>
+                            <div class="item-info">
+                                <h4>${item.modelo}</h4>
+                                <span class="tag-cat">${item.categoria}</span>
+                                <p style="margin-top:4px;">${item.imei || 'S/N'}</p>
+                            </div>
                         </div>
-                        <div style="font-weight:600;">${nome}</div>
-                        <div style="font-size:11px; opacity:0.7;">${p.cor || ''}</div>
-                    </div>
-                    <div style="text-align:right;">
-                        <div style="font-weight:bold;">R$ ${parseFloat(p.venda||0).toFixed(2)}</div>
+                        <div style="display:flex; align-items:center;">
+                            <div class="item-price">
+                                <span class="price-val">${formatMoeda(item.venda)}</span>
+                                <span class="cost-val">Custo: ${formatMoeda(item.custo)}</span>
+                            </div>
+                            <div class="actions">
+                                <button class="btn-icon del" onclick="excluirProduto('${item.id}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
                     </div>
                 `;
-                div.appendChild(el);
             });
         }
 
-        function filtrarCategoria(cat, el) {
-            filtroCatAtual = cat;
-            document.querySelectorAll('.f-tab').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
-            renderizarLista();
+        function filtrarEstoque() {
+            const termo = document.getElementById('busca').value.toLowerCase();
+            const filtrados = estoque.filter(item => 
+                item.modelo.toLowerCase().includes(termo) || 
+                (item.imei && item.imei.toLowerCase().includes(termo))
+            );
+            renderizarLista(filtrados);
         }
 
-        function filtrarLista() { renderizarLista(); }
-
-        // --- LÓGICA DE FORMULÁRIO ---
-        function ajustarCampos() {
-            const cat = document.getElementById('categoria').value;
-            const inputModelo = document.getElementById('modelo');
-            const labelModelo = document.getElementById('labelModelo');
-
-            document.getElementById('campos-celular').classList.add('hidden');
-            document.getElementById('campos-roupa').classList.add('hidden');
-            document.getElementById('campos-perfume').classList.add('hidden');
-            inputModelo.removeAttribute('list');
-
-            if(cat === 'celular') {
-                document.getElementById('campos-celular').classList.remove('hidden');
-                inputModelo.setAttribute('list', 'dlModelosCelular');
-                labelModelo.innerText = "Modelo (iPhone)";
-            } 
-            else if(cat === 'roupa') {
-                document.getElementById('campos-roupa').classList.remove('hidden');
-                inputModelo.setAttribute('list', 'dlModelosRoupa');
-                labelModelo.innerText = "Modelo (Calça, Camisa...)";
-            }
-            else if(cat === 'perfume') {
-                document.getElementById('campos-perfume').classList.remove('hidden');
-                inputModelo.setAttribute('list', 'dlNomesPerfume');
-                labelModelo.innerText = "Nome do Perfume";
-            }
-            else {
-                labelModelo.innerText = "Descrição do Item";
-            }
+        // --- FUNÇÕES DE CADASTRO ---
+        function abrirModal() {
+            document.getElementById('modalProduto').style.display = 'flex';
+            document.getElementById('prod-id').value = '';
+            document.getElementById('prod-nome').value = '';
+            document.getElementById('prod-custo').value = '';
+            document.getElementById('prod-venda').value = '';
+            document.getElementById('prod-imei').value = '';
+            document.getElementById('prod-qtd').value = '1'; // Reset Qtd
+            document.getElementById('prod-nome').focus();
         }
 
-        function carregarItem(p) {
-            itemSelecionadoId = p.id;
-            document.getElementById('itemId').value = p.id;
-            
-            document.getElementById('categoria').value = p.categoria || 'celular';
-            document.getElementById('fornecedor').value = p.fornecedor || '';
-            document.getElementById('marca').value = p.marca || '';
-            document.getElementById('modelo').value = p.modelo || p.nomeP || '';
-            document.getElementById('custo').value = formatMoney(p.custo);
-            document.getElementById('venda').value = formatMoney(p.venda);
-            document.getElementById('status').value = p.status || 'disponível';
-            
-            ajustarCampos();
+        function fecharModal() {
+            document.getElementById('modalProduto').style.display = 'none';
+        }
 
-            document.getElementById('gb').value = p.gb || '128GB';
-            document.getElementById('cor').value = p.cor || '';
-            document.getElementById('serial').value = p.serial || '';
-            document.getElementById('bateria').value = p.bateria || '';
-            document.getElementById('imei1').value = p.imei1 || '';
-            document.getElementById('imei2').value = p.imei2 || '';
-            
-            document.getElementById('tamanho').value = p.tamanho || '';
-            document.getElementById('corRoupa').value = p.cor || '';
-            
-            document.getElementById('ml').value = p.ml || '';
-            document.getElementById('tipoPerfume').value = p.fragrancia || '';
+        async function salvarProduto() {
+            const nome = document.getElementById('prod-nome').value.trim();
+            const cat = document.getElementById('prod-cat').value;
+            const custo = parseFloat(document.getElementById('prod-custo').value.replace('.','').replace(',','.')) || 0;
+            const venda = parseFloat(document.getElementById('prod-venda').value.replace('.','').replace(',','.')) || 0;
+            const imei = document.getElementById('prod-imei').value.trim();
+            const qtd = parseInt(document.getElementById('prod-qtd').value) || 1; // PEGA A QUANTIDADE
 
-            renderizarLista();
-            
-            if(window.innerWidth <= 900) {
-                document.querySelector('.form-body').scrollIntoView({behavior: "smooth"});
+            if (!nome || !venda) {
+                alert("Preencha o nome e o valor de venda!");
+                return;
             }
-        }
 
-        function novoItem() {
-            itemSelecionadoId = null;
-            document.getElementById('itemId').value = "";
-            document.getElementById('modelo').value = "";
-            document.getElementById('marca').value = "";
-            document.getElementById('fornecedor').value = "";
-            document.getElementById('custo').value = "";
-            document.getElementById('venda').value = "";
-            document.getElementById('serial').value = "";
-            document.getElementById('bateria').value = "";
-            document.getElementById('imei1').value = "";
-            document.getElementById('imei2').value = "";
-            document.getElementById('tipoPerfume').value = "";
-            document.getElementById('status').value = "disponível";
-            document.getElementById('cor').value = "";
-            document.getElementById('corRoupa').value = "";
-            
-            document.getElementById('modelo').focus();
-            renderizarLista();
-        }
+            document.getElementById('loader').style.display = 'flex';
 
-        async function salvarItem() {
-            const id = document.getElementById('itemId').value;
-            const cat = document.getElementById('categoria').value;
-            
+            // DADOS BASE DO PRODUTO
             const dados = {
+                modelo: nome,
                 categoria: cat,
-                fornecedor: document.getElementById('fornecedor').value,
-                marca: document.getElementById('marca').value,
-                modelo: document.getElementById('modelo').value,
-                custo: parseMoney(document.getElementById('custo').value),
-                venda: parseMoney(document.getElementById('venda').value),
-                status: document.getElementById('status').value,
-                nomeP: document.getElementById('modelo').value
+                custo: custo,
+                venda: venda,
+                imei: imei,
+                status: 'disponível',
+                data_cadastro: new Date().toISOString()
             };
 
-            if (cat === 'celular') {
-                dados.gb = document.getElementById('gb').value;
-                dados.cor = document.getElementById('cor').value;
-                dados.imei1 = document.getElementById('imei1').value;
-                dados.imei2 = document.getElementById('imei2').value;
-                dados.serial = document.getElementById('serial').value.toUpperCase();
-                dados.bateria = document.getElementById('bateria').value;
-            } 
-            else if (cat === 'roupa') {
-                dados.tamanho = document.getElementById('tamanho').value;
-                dados.cor = document.getElementById('corRoupa').value;
-            }
-            else if (cat === 'perfume') {
-                dados.ml = document.getElementById('ml').value;
-                dados.fragrancia = document.getElementById('tipoPerfume').value;
-            }
-
-            if(!dados.modelo) return alert("Modelo é obrigatório");
-
             try {
-                if(id) {
-                    await db.collection("estoque").doc(id).update(dados);
-                    alert("Atualizado!");
-                } else {
-                    dados.dataEntrada = Date.now();
-                    await db.collection("estoque").add(dados);
-                    novoItem();
-                    alert("Cadastrado!");
+                const batchPromises = [];
+                
+                // --- MULTIPLICADOR DE CADASTRO ---
+                // Cria X produtos de uma vez no banco
+                for(let i = 0; i < qtd; i++) {
+                    batchPromises.push(db.collection("estoque").add(dados));
                 }
-            } catch(e) { alert("Erro: " + e.message); }
-        }
 
-        async function deletarItem() {
-            const id = document.getElementById('itemId').value;
-            if(!id) return;
-            if(confirm("Excluir item?")) {
-                await db.collection("estoque").doc(id).delete();
-                novoItem();
-                alert("Excluído.");
+                await Promise.all(batchPromises);
+
+                document.getElementById('loader').style.display = 'none';
+                fecharModal();
+                // Não precisa alert, a lista atualiza sozinha (realtime)
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao salvar: " + error);
+                document.getElementById('loader').style.display = 'none';
             }
         }
 
-        // --- GESTÃO DE LISTAS DINÂMICA ---
-        function abrirModalGestao() {
-            document.getElementById('modalListas').style.display = 'flex';
-            carregarItensLista();
-        }
-        function fecharModalGestao() {
-            document.getElementById('modalListas').style.display = 'none';
-        }
-
-        async function carregarItensLista() {
-            const colecao = document.getElementById('selListaGerenciar').value;
-            const container = document.getElementById('containerItensLista');
-            container.innerHTML = "Carregando...";
-            const snap = await db.collection(colecao).orderBy('nome').get();
-            container.innerHTML = "";
-            snap.forEach(doc => {
-                const div = document.createElement('div');
-                div.className = 'list-manage-item';
-                div.innerHTML = `<span>${doc.data().nome}</span><span class="btn-mini-del" onclick="removerItemLista('${colecao}', '${doc.id}')"><i class="fas fa-trash"></i></span>`;
-                container.appendChild(div);
-            });
-        }
-
-        async function adicionarItemLista() {
-            const colecao = document.getElementById('selListaGerenciar').value;
-            const valor = document.getElementById('novoItemLista').value.trim();
-            if(!valor) return;
-            await db.collection(colecao).add({ nome: valor });
-            document.getElementById('novoItemLista').value = "";
-            carregarItensLista();
-        }
-
-        async function removerItemLista(colecao, id) {
-            if(confirm("Remover?")) {
-                await db.collection(colecao).doc(id).delete();
-                carregarItensLista();
+        function excluirProduto(id) {
+            if(confirm("Excluir este item do estoque?")) {
+                db.collection("estoque").doc(id).delete();
             }
         }
 
-        function carregarDatalist(colecao, datalistId) {
-            db.collection(colecao).orderBy('nome').onSnapshot(snap => {
-                const dl = document.getElementById(datalistId);
-                dl.innerHTML = "";
-                snap.forEach(doc => { dl.innerHTML += `<option value="${doc.data().nome}">`; });
-            });
+        // MÁSCARAS
+        function mascaraMoeda(i) {
+            var v = i.value.replace(/\D/g,'');
+            v = (v/100).toFixed(2) + '';
+            v = v.replace(".", ",");
+            v = v.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
+            v = v.replace(/(\d)(\d{3}),/g, "$1.$2,");
+            i.value = v;
         }
+        function formatMoeda(val) { return val.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); }
 
-        // Auxiliares
-        function moeda(i) {
-            let v = i.value.replace(/\D/g,''); v = (v/100).toFixed(2) + ''; v = v.replace(".", ",");
-            v = v.replace(/(\d)(\d{3}),/g, "$1.$2,"); i.value = "R$ " + v;
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('modalProduto')) {
+                fecharModal();
+            }
         }
-        function numeros(i) { i.value = i.value.replace(/\D/g,''); }
-        function formatMoney(val) { return val ? "R$ " + parseFloat(val).toFixed(2).replace('.',',') : ""; }
-        function parseMoney(val) { return parseFloat(val.replace(/[R$\s.]/g, '').replace(',', '.')) || 0; }
     </script>
 </body>
 </html>
