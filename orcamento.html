@@ -11,167 +11,223 @@
     <meta name="mobile-web-app-capable" content="yes">
 
     <style>
-        /* Estilo "Cupom Fiscal" para Impressora Térmica e A4 */
+        /* ESTILO A4 CLÁSSICO */
         body {
-            font-family: 'Courier New', Courier, monospace;
-            background: #eee;
+            background: #525659; /* Fundo cinza escuro (igual visualizador de PDF) */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
             display: flex;
             justify-content: center;
         }
 
-        .paper {
+        .page {
             background: #fff;
-            width: 100%;
-            max-width: 380px; /* Largura padrão cupom 80mm */
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            box-sizing: border-box;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            position: relative;
         }
 
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
-        .bold { font-weight: bold; }
-        
-        .divider {
-            border-top: 1px dashed #000;
-            margin: 10px 0;
+        /* CABEÇALHO */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
         }
 
-        h2, h3, p { margin: 5px 0; }
-        
-        .company-info { margin-bottom: 20px; font-size: 12px; }
-        .doc-title { font-size: 16px; margin: 15px 0; font-weight: bold; border: 2px solid #000; padding: 5px; }
+        .company-info h1 { margin: 0; color: #000; font-size: 24px; text-transform: uppercase; }
+        .company-info p { margin: 2px 0; font-size: 12px; color: #555; }
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 5px 10px;
+        .doc-info { text-align: right; }
+        .doc-title { font-size: 22px; font-weight: bold; color: #000; margin: 0; text-transform: uppercase; }
+        .doc-number { font-size: 16px; color: #d32f2f; font-weight: bold; margin-top: 5px; }
+        .doc-date { font-size: 12px; color: #666; margin-top: 5px; }
+
+        /* DADOS DO CLIENTE */
+        .section-title {
+            background: #f3f4f6;
+            padding: 5px 10px;
             font-size: 12px;
-            text-align: left;
-            margin-bottom: 15px;
+            font-weight: bold;
+            border-left: 4px solid #000;
+            margin-bottom: 10px;
+            text-transform: uppercase;
         }
 
-        table { width: 100%; font-size: 12px; border-collapse: collapse; }
-        th { text-align: left; border-bottom: 1px solid #000; }
-        td { padding: 5px 0; vertical-align: top; }
-        
-        .total-section {
-            margin-top: 15px;
-            font-size: 14px;
+        .client-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+            font-size: 13px;
         }
+        .info-row { margin-bottom: 5px; }
+        .info-label { font-weight: bold; color: #333; }
 
-        .footer-msg {
-            margin-top: 30px;
+        /* TABELA DE ITENS */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 12px; }
+        th { background: #000; color: #fff; padding: 10px; text-align: left; text-transform: uppercase; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+        tr:nth-child(even) { background: #f9fafb; }
+        .col-right { text-align: right; }
+
+        /* TOTAIS */
+        .totals-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 40px;
+        }
+        .totals-box {
+            width: 250px;
+            font-size: 13px;
+        }
+        .total-row { display: flex; justify-content: space-between; padding: 5px 0; }
+        .total-row.final { font-size: 18px; font-weight: bold; border-top: 2px solid #000; margin-top: 10px; padding-top: 10px; }
+
+        /* RODAPÉ / CONTRATO */
+        .footer-terms {
+            margin-top: auto;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
             font-size: 10px;
+            color: #666;
+            text-align: justify;
+            line-height: 1.5;
+        }
+
+        .signatures {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
             text-align: center;
         }
+        .sig-line { border-top: 1px solid #000; width: 40%; padding-top: 5px; }
 
-        /* Botão de Imprimir (some na impressão) */
-        .no-print {
+        /* BOTÃO DE IMPRIMIR */
+        .btn-print {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #000;
-            color: #fff;
+            bottom: 30px;
+            right: 30px;
+            background: #00e0ff;
+            color: #000;
+            border: none;
             padding: 15px 30px;
             border-radius: 50px;
-            text-decoration: none;
             font-weight: bold;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            font-size: 16px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
+        .btn-print:hover { transform: scale(1.05); background: #fff; }
 
         @media print {
             body { background: #fff; padding: 0; }
-            .paper { box-shadow: none; max-width: 100%; width: 100%; padding: 0; }
-            .no-print { display: none; }
+            .page { box-shadow: none; margin: 0; width: 100%; min-height: auto; padding: 0; }
+            .btn-print { display: none; }
+            @page { margin: 15mm; }
         }
     </style>
 </head>
 <body>
 
-    <button class="no-print" onclick="window.print()">🖨️ IMPRIMIR</button>
+    <button class="btn-print" onclick="window.print()">
+        <i class="fas fa-print"></i> IMPRIMIR
+    </button>
 
-    <div class="paper">
+    <div class="page">
         
-        <div class="company-info text-center" contenteditable="true">
-            <h2>LM IMPORTS</h2>
-            <p>CNPJ: 00.000.000/0001-00</p>
-            <p>Rua Exemplo, 123 - Centro</p>
-            <p>Tel/WhatsApp: (11) 99999-9999</p>
-            <p>Instagram: @lmimports</p>
+        <div class="header">
+            <div class="company-info" contenteditable="true">
+                <h1>LM IMPORTS</h1> <p>CNPJ: 00.000.000/0001-00</p>
+                <p>Rua Exemplo, 123, Centro - SP</p>
+                <p>Tel: (11) 99999-9999 | Insta: @lmimports</p>
+            </div>
+            <div class="doc-info">
+                <div class="doc-title" id="lbl-titulo">RECIBO</div>
+                <div class="doc-number" id="lbl-numero">Nº 0000</div>
+                <div class="doc-date" id="lbl-data">01/01/2026</div>
+            </div>
         </div>
 
-        <div class="divider"></div>
-
-        <div class="text-center doc-title" id="doc-title">
-            CARREGANDO...
+        <div class="section-title">Dados do Cliente</div>
+        <div class="client-grid">
+            <div>
+                <div class="info-row"><span class="info-label">Nome:</span> <span id="cli-nome">-</span></div>
+                <div class="info-row"><span class="info-label">Endereço:</span> <span id="cli-end">-</span></div>
+            </div>
+            <div>
+                <div class="info-row"><span class="info-label">CPF:</span> <span id="cli-cpf">-</span></div>
+                <div class="info-row"><span class="info-label">Tel:</span> <span id="cli-tel">-</span></div>
+            </div>
         </div>
 
-        <div class="info-grid">
-            <span class="bold">Data:</span> <span id="data-emissao">-</span>
-            <span class="bold">Cliente:</span> <span id="cli-nome" contenteditable="true">-</span>
-            <span class="bold">CPF:</span> <span id="cli-cpf" contenteditable="true">-</span>
-            <span class="bold">Tel:</span> <span id="cli-tel" contenteditable="true">-</span>
-            <span class="bold">End:</span> <span id="cli-end" contenteditable="true">-</span>
-        </div>
-
-        <div class="divider"></div>
-
+        <div class="section-title">Itens do Pedido</div>
         <table>
             <thead>
                 <tr>
-                    <th style="width:60%">Item</th>
-                    <th class="text-right">Valor</th>
+                    <th style="width: 10%;">Qtd</th>
+                    <th>Descrição</th>
+                    <th class="col-right" style="width: 20%;">Valor</th>
                 </tr>
             </thead>
-            <tbody id="lista-itens"></tbody>
+            <tbody id="lista-itens">
+                </tbody>
         </table>
 
-        <div class="divider"></div>
-
-        <div class="total-section">
-            <div style="display:flex; justify-content:space-between;">
-                <span>Subtotal:</span>
-                <span id="txt-subtotal">R$ 0,00</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; color:red;" id="row-desc">
-                <span>Desconto:</span>
-                <span id="txt-desconto">- R$ 0,00</span>
-            </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>Taxas:</span>
-                <span id="txt-taxa">+ R$ 0,00</span>
-            </div>
-            <div class="divider"></div>
-            <div style="display:flex; justify-content:space-between; font-size:18px; font-weight:bold;">
-                <span>TOTAL:</span>
-                <span id="txt-total">R$ 0,00</span>
-            </div>
-            <br>
-            <div style="font-size:12px;">
-                <span class="bold">Forma de Pagamento:</span><br>
-                <span id="txt-pagamento">-</span> <span id="txt-parcelas"></span>
+        <div class="totals-section">
+            <div class="totals-box">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span id="val-subtotal">R$ 0,00</span>
+                </div>
+                <div class="total-row" style="color: #d32f2f;">
+                    <span>Desconto:</span>
+                    <span id="val-desconto">- R$ 0,00</span>
+                </div>
+                <div class="total-row">
+                    <span>Taxas/Outros:</span>
+                    <span id="val-taxa">R$ 0,00</span>
+                </div>
+                <div class="total-row final">
+                    <span>TOTAL:</span>
+                    <span id="val-total">R$ 0,00</span>
+                </div>
+                <div style="margin-top: 10px; font-size: 11px; text-align: right; color: #666;">
+                    <strong id="txt-pagamento">PIX</strong><br>
+                    <span id="txt-parcelas"></span>
+                </div>
             </div>
         </div>
 
-        <div class="divider"></div>
-
-        <div class="footer-msg" contenteditable="true">
-            <p style="text-align:justify; margin-bottom:10px;">
-                <strong>TERMO DE GARANTIA:</strong> 90 dias de garantia legal para defeitos de fabricação. 
-                Não cobrimos danos causados por mau uso, quedas ou contato com líquidos.
-                Trocas somente com este recibo e o produto nas mesmas condições.
-            </p>
-            <p>__________________________________________</p>
-            <p>Assinatura do Cliente</p>
-            <br>
-            <p>Obrigado pela preferência!</p>
+        <div class="signatures">
+            <div class="sig-line">
+                LM IMPORTS<br>Vendedor
+            </div>
+            <div class="sig-line">
+                ASSINATURA DO CLIENTE<br>
+                <span id="sign-cli-nome" style="font-size:10px;"></span>
+            </div>
         </div>
 
-        <div class="text-center" style="margin-top:20px; font-size:8px; color:#ccc;">
-            VÉRTICE BI CORE SYSTEM
+        <div class="footer-terms" contenteditable="true">
+            <strong>TERMOS DE GARANTIA E VENDA:</strong><br>
+            1. Garantia legal de 90 dias para defeitos de fabricação (eletrônicos usados/novos).<br>
+            2. Não cobrimos danos causados por mau uso, quedas, contato com líquidos ou alterações de software.<br>
+            3. Trocas somente mediante apresentação deste documento.<br>
+            4. Em caso de desistência (compras online), o prazo é de 7 dias conforme CDC.<br>
+            <br>
+            Declaro ter recebido os produtos listados acima em perfeito estado de funcionamento e conferência.
         </div>
 
     </div>
@@ -184,65 +240,78 @@
         window.onload = function() {
             const dadosStr = localStorage.getItem('dadosRecibo');
             if(!dadosStr) {
-                alert("Nenhum dado de venda encontrado.");
+                alert("Nenhum dado encontrado!");
                 window.close();
                 return;
             }
-
             const dados = JSON.parse(dadosStr);
 
-            // 1. TÍTULO DO DOCUMENTO (CORREÇÃO AQUI)
-            // Agora mostra o número tanto para Orçamento quanto para Venda
-            const tipoDoc = dados.isOrcamento ? "ORÇAMENTO" : "RECIBO DE VENDA";
-            document.getElementById('doc-title').innerText = `${tipoDoc} N° ${dados.numeroPedido}`;
+            // 1. TÍTULO E NÚMERO (CORREÇÃO)
+            const titulo = dados.isOrcamento ? "ORÇAMENTO" : "PEDIDO DE VENDA";
+            document.getElementById('lbl-titulo').innerText = titulo;
+            document.getElementById('lbl-numero').innerText = "Nº " + (dados.numeroPedido || "----");
+            document.getElementById('lbl-data').innerText = dados.data;
 
-            // 2. PREENCHER DADOS
-            document.getElementById('data-emissao').innerText = dados.data;
+            // 2. CLIENTE
             document.getElementById('cli-nome').innerText = dados.cliente;
             document.getElementById('cli-cpf').innerText = dados.cpf;
             document.getElementById('cli-tel').innerText = dados.tel;
             document.getElementById('cli-end').innerText = dados.endereco;
+            document.getElementById('sign-cli-nome').innerText = dados.cliente;
 
-            // 3. LISTAR ITENS
+            // 3. ITENS
             const tbody = document.getElementById('lista-itens');
-            let subtotalReal = 0;
+            let subtotal = 0;
 
             dados.itens.forEach(item => {
                 const tr = document.createElement('tr');
-                let nomeItem = item.nome;
-                let precoItem = item.preco;
+                let desc = item.nome;
+                if(item.desc) desc += ` - ${item.desc}`;
                 
-                // Formatação visual para trocas e brindes
+                let valor = parseFloat(item.preco);
+                let visualValor = valor.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+
+                // Tratamento visual para trocas e brindes
                 if(item.isTroca) {
-                    nomeItem = `(ENTRADA) ${item.nome} - ${item.desc}`;
-                    tr.style.color = '#eab308'; // Amarelo escuro na impressão colorida (ou cinza na pb)
-                } else if(item.isBrinde) {
-                    nomeItem = `(BRINDE) ${item.nome}`;
-                    precoItem = 0;
+                    desc = `[ENTRADA] ${desc}`;
+                    tr.style.color = "#eab308"; // Amarelo escuro na tela
+                } else if (item.isBrinde) {
+                    desc = `[BRINDE] ${desc}`;
+                    visualValor = "R$ 0,00";
+                    valor = 0;
                 } else {
-                    subtotalReal += parseFloat(item.preco);
-                    if(item.desc) nomeItem += ` (${item.desc})`;
+                    subtotal += valor;
                 }
 
                 tr.innerHTML = `
-                    <td>${nomeItem}</td>
-                    <td class="text-right">${parseFloat(precoItem).toLocaleString('pt-br',{style:'currency', currency:'BRL'})}</td>
+                    <td>1</td>
+                    <td>${desc}</td>
+                    <td class="col-right">${visualValor}</td>
                 `;
                 tbody.appendChild(tr);
             });
 
-            // 4. TOTAIS
-            document.getElementById('txt-subtotal').innerText = subtotalReal.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
-            document.getElementById('txt-desconto').innerText = "- " + parseFloat(dados.descontoManual).toLocaleString('pt-br',{style:'currency', currency:'BRL'});
-            document.getElementById('txt-taxa').innerText = "+ " + parseFloat(dados.taxaMaquininha).toLocaleString('pt-br',{style:'currency', currency:'BRL'});
-            document.getElementById('txt-total').innerText = parseFloat(dados.total).toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+            // 4. VALORES FINAIS
+            document.getElementById('val-subtotal').innerText = subtotal.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
             
+            // Desconto
+            const desc = parseFloat(dados.descontoManual) || 0;
+            document.getElementById('val-desconto').innerText = "- " + desc.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+
+            // Taxas
+            const taxa = parseFloat(dados.taxaMaquininha) || 0;
+            document.getElementById('val-taxa').innerText = "+ " + taxa.toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+
+            // Total Final
+            document.getElementById('val-total').innerText = parseFloat(dados.total).toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+
+            // Pagamento
             document.getElementById('txt-pagamento').innerText = dados.pagamento;
             document.getElementById('txt-parcelas').innerText = dados.textoParcelas || "";
 
-            // IMPRESSÃO AUTOMÁTICA (Só se for venda final)
+            // AUTO PRINT (Apenas se for venda final, não se for preview)
             if(dados.autoPrint) {
-                setTimeout(() => window.print(), 500);
+                setTimeout(() => window.print(), 800);
             }
         };
     </script>
