@@ -303,10 +303,15 @@
     <div class="modal-overlay" id="modal-avulso">
         <div class="modal" style="border-color: var(--purple);">
             <h3 style="color: var(--purple);">Adicionar Valor Avulso</h3>
-            <label style="font-size:12px; color:#999;">Descrição (Opcional):</label>
-            <input type="text" id="avulso-desc" placeholder="Ex: Mão de Obra, Taxa, Item s/ Cadastro">
-            <label style="font-size:12px; color:#999;">Valor (R$):</label>
-            <input type="number" id="avulso-valor" placeholder="0,00" style="font-size:18px; font-weight:bold; color:var(--success);">
+            
+            <label style="font-size:12px; color:#999;">Descrição:</label>
+            <input type="text" id="avulso-desc" placeholder="Taxa / Item não cadastrado">
+            
+            <label style="font-size:12px; color:#999;">Valor:</label>
+            <input type="text" id="avulso-valor" placeholder="R$ 0,00" 
+                   style="font-size:18px; font-weight:bold; color:var(--success);"
+                   onkeyup="mascaraMoeda(this)">
+                   
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button onclick="document.getElementById('modal-avulso').style.display='none'" class="btn-cancel">Cancelar</button>
                 <button onclick="confirmarAvulso()" class="btn-confirm" style="background: var(--purple);">Adicionar</button>
@@ -432,12 +437,24 @@
             document.getElementById('avulso-desc').focus();
         }
 
+        function mascaraMoeda(i) {
+            let v = i.value.replace(/\D/g,'');
+            v = (v/100).toFixed(2) + '';
+            v = v.replace(".", ",");
+            v = v.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
+            v = v.replace(/(\d)(\d{3}),/g, "$1.$2,");
+            i.value = "R$ " + v;
+        }
+
         function confirmarAvulso() {
             const desc = document.getElementById('avulso-desc').value || "Item Avulso";
-            const val = parseFloat(document.getElementById('avulso-valor').value);
+            let valorRaw = document.getElementById('avulso-valor').value;
+            // Limpa o R$ e converte para float
+            valorRaw = valorRaw.replace(/\D/g, "");
+            let val = parseFloat(valorRaw) / 100;
+
             if(!val || val <= 0) return alert("Digite um valor válido.");
 
-            // Adiciona item especial sem ID (isAvulso)
             carrinho.push({
                 modelo: desc,
                 nomeP: desc,
