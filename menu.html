@@ -4,8 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VÉRTICE BI | MENU</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="shortcut icon" href="logo.png" type="image/png">
+    <link rel="icon" href="logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="logo.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <script src="js/firebase-config.js"></script>
 
     <style>
@@ -33,7 +39,7 @@
             user-select: none; /* Evita seleção de texto no celular */
         }
 
-        /* LOGO */
+        /* LOGO & SAUDAÇÃO */
         .brand-area {
             text-align: center;
             margin-bottom: 40px;
@@ -56,6 +62,17 @@
             margin-top: 5px;
         }
 
+        .user-welcome {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #fff;
+            background: rgba(255,255,255,0.1);
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            display: inline-block;
+        }
+
         /* GRID (HUB) */
         .menu-grid {
             display: grid;
@@ -66,7 +83,6 @@
         }
 
         /* BOTÃO TIPO APP (DIV clicável) */
-        /* Isso impede o "Abrir em nova guia" */
         .menu-card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -80,9 +96,9 @@
             align-items: center;
             justify-content: center;
             height: 110px;
-            cursor: pointer; /* Mãozinha no PC */
+            cursor: pointer;
             position: relative;
-            -webkit-tap-highlight-color: transparent; /* Remove flash no celular */
+            -webkit-tap-highlight-color: transparent;
         }
 
         .menu-card i {
@@ -100,7 +116,7 @@
         }
 
         /* HOVER E ATIVO */
-        .menu-card:active { transform: scale(0.95); } /* Efeito de clique */
+        .menu-card:active { transform: scale(0.95); } 
         
         .menu-card:hover {
             border-color: var(--accent);
@@ -137,6 +153,7 @@
     <div class="brand-area">
         <h1 class="brand-title">VÉRTICE</h1>
         <div class="brand-sub">BI CORE SYSTEM</div>
+        <div id="usuario-display" class="user-welcome">Carregando...</div>
     </div>
 
     <div class="menu-grid">
@@ -177,11 +194,17 @@
     </div>
 
     <div class="footer-info">
-        <div id="usuario-display" style="color: var(--accent); margin-bottom: 5px; font-weight: bold;"></div>
         VÉRTICE BI CORE v11.0 © Rodrigo N Carvalho 2026
     </div>
 
     <script>
+        // --- 🔒 KILL SWITCH ---
+        const DATA_LIMITE = new Date('2030-01-01'); 
+        if(new Date() > DATA_LIMITE) { 
+            document.body.innerHTML = '<div style="height:100vh;display:flex;justify-content:center;align-items:center;background:#000;color:red;flex-direction:column;"><h1>ACESSO SUSPENSO</h1><p>Contate o suporte.</p></div>'; 
+            throw new Error("Bloqueado"); 
+        }
+
         // 1. SEGURANÇA DE LOGIN
         const usuario = localStorage.getItem('usuarioLogado');
         const cargo = localStorage.getItem('cargoUsuario');
@@ -189,7 +212,9 @@
         if (!usuario || !cargo) {
             window.location.href = 'index.html';
         } else {
-            document.getElementById('usuario-display').innerText = `Olá, ${usuario.toUpperCase()}`;
+            // Saudação no TOPO agora
+            document.getElementById('usuario-display').innerHTML = `<i class="fas fa-user"></i> Olá, ${usuario.toUpperCase()}`;
+            
             if (cargo === 'admin') {
                 document.getElementById('btn-admin').style.display = 'flex';
                 document.getElementById('btn-equipe').style.display = 'flex';
@@ -211,7 +236,6 @@
         }
 
         // 4. SINCRONIA DE ABAS (Segurança Extra)
-        // Se sair em uma aba, todas as outras do sistema fecham/vão pro login
         window.addEventListener('storage', function(e) {
             if (!localStorage.getItem('usuarioLogado')) {
                 window.location.href = 'index.html';
