@@ -69,7 +69,7 @@
         .kpi-value { font-size: 18px; font-weight: bold; margin: 5px 0; color: #fff; }
         .kpi-sub { font-size: 10px; opacity: 0.7; }
 
-        /* STOCK GRID (O Retorno) - Menor para caber tudo */
+        /* STOCK GRID */
         .stock-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 15px; }
         .stock-card { 
             background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); padding: 12px; border-radius: 8px; 
@@ -212,13 +212,13 @@
         <div class="table-box">
             <h4 style="margin:0 0 15px 0;">Histórico de Vendas (Edição)</h4>
             <table>
-                <thead><tr><th>Data</th><th>Cliente</th><th>Total</th><th style="text-align:center;">Ação</th></tr></thead>
-                <tbody id="tabela-vendas"><tr><td colspan="4" style="text-align:center; color:#888;">Carregando...</td></tr></tbody>
+                <thead><tr><th>Data</th><th>Cliente</th><th>Itens</th><th>Total</th><th style="text-align:center;">Ação</th></tr></thead>
+                <tbody id="tabela-vendas"><tr><td colspan="5" style="text-align:center; color:#888;">Carregando...</td></tr></tbody>
             </table>
         </div>
 
         <div class="footer">
-            VÉRTICE BI CORE v11.2 © Rodrigo N Carvalho 2026
+            VÉRTICE BI CORE v11.3 © Rodrigo N Carvalho 2026
         </div>
     </main>
 
@@ -230,7 +230,7 @@
         <p>Lucro Est.: <b id="print-lucro"></b></p>
         <hr>
         <table class="print-table">
-            <thead><tr><th>Data</th><th>Cliente</th><th>Valor</th></tr></thead>
+            <thead><tr><th>Data</th><th>Cliente</th><th>Itens</th><th>Valor</th></tr></thead>
             <tbody id="print-table-body"></tbody>
         </table>
     </div>
@@ -370,7 +370,16 @@
                         borderColor: '#00e0ff', backgroundColor: 'rgba(0, 224, 255, 0.1)', fill: true, tension: 0.3
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display:false }, y: { display:false } } }
+                // REATIVADO: Escalas X e Y para mostrar gráfico mesmo com 1 ponto
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } }, 
+                    scales: { 
+                        x: { display: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }, 
+                        y: { display: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } } 
+                    } 
+                }
             });
 
             let cats = { 'Celular':0, 'Acessório':0, 'Outros':0 };
@@ -391,7 +400,15 @@
                     labels: Object.keys(cats),
                     datasets: [{ data: Object.values(cats), backgroundColor: ['#00e0ff', '#8b5cf6', '#334155'], borderWidth: 0 }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#fff', font: {size:10} } } } }
+                // AJUSTADO: Cutout para 70% para ficar mais elegante e legendas
+                options: { 
+                    cutout: '70%',
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { position: 'right', labels: { color: '#fff', font: {size:10}, boxWidth: 10 } } 
+                    } 
+                }
             });
         }
 
@@ -403,17 +420,22 @@
             const dadosReais = dados.filter(v => v.status !== 'ORCAMENTO' && v.tipoRegistro !== 'ORÇAMENTO');
 
             dadosReais.slice(0, 15).forEach(v => {
+                let itensStr = v.itens ? v.itens.map(i => i.modelo || i).join(", ") : "-";
+                // Truncar para não quebrar no celular
+                let resumo = itensStr.length > 25 ? itensStr.substring(0,25)+"..." : itensStr;
+
                 tbody.innerHTML += `
                     <tr>
                         <td>${new Date(v.data).toLocaleDateString('pt-BR').slice(0,5)}</td>
                         <td style="font-weight:bold; color:#fff;">${v.cliente.split(' ')[0]}</td>
+                        <td style="color:#94a3b8; font-size:11px;">${resumo}</td>
                         <td style="color:#10b981;">${formatMoeda(limparMoeda(v.total))}</td>
                         <td style="text-align:center;">
                             <button class="btn-trash" onclick="excluirVenda('${v.id}')"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
-                pbody.innerHTML += `<tr><td>${new Date(v.data).toLocaleDateString('pt-BR')}</td><td>${v.cliente}</td><td>${formatMoeda(limparMoeda(v.total))}</td></tr>`;
+                pbody.innerHTML += `<tr><td>${new Date(v.data).toLocaleDateString('pt-BR')}</td><td>${v.cliente}</td><td>${itensStr}</td><td>${formatMoeda(limparMoeda(v.total))}</td></tr>`;
             });
         }
 
@@ -423,8 +445,7 @@
             estoqueData.forEach(p => {
                 if (p.status === 'disponível') {
                     let venda = limparMoeda(p.venda);
-                    let custo = limparMoeda(p.custo); // Pega o custo do produto
-                    
+                    let custo = limparMoeda(p.custo);
                     let cat = (p.categoria || 'outros').toLowerCase();
                     
                     if (cat.includes('celular')) val.celular += venda;
@@ -433,7 +454,7 @@
                     else if (cat.includes('perfume')) val.perfume += venda;
                     
                     val.totalVenda += venda;
-                    val.totalCusto += custo; // Soma o custo total
+                    val.totalCusto += custo;
                 }
             });
 
@@ -442,7 +463,7 @@
             document.getElementById('val-roupa').innerText = formatMoeda(val.roupa);
             document.getElementById('val-perfume').innerText = formatMoeda(val.perfume);
             document.getElementById('val-total').innerText = formatMoeda(val.totalVenda);
-            document.getElementById('val-custo-total').innerText = formatMoeda(val.totalCusto); // O Novo Quadradinho!
+            document.getElementById('val-custo-total').innerText = formatMoeda(val.totalCusto);
         }
     </script>
 </body>
