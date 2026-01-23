@@ -6,6 +6,12 @@
     <title>VÉRTICE BI | CORE</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="shortcut icon" href="logo.png" type="image/png">
+    <link rel="icon" href="logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="logo.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
@@ -29,8 +35,9 @@
             font-family: 'Segoe UI', sans-serif; 
             margin: 0; 
             display: block; 
-            min-height: 100vh;
+            min-height: 100vh; 
             overflow-y: auto; 
+            user-select: none; /* Evita seleção no touch */
         }
         
         /* HEADER FIXO */
@@ -48,10 +55,10 @@
 
         .header-left { display: flex; align-items: center; gap: 15px; }
         
+        /* Botão Menu estilo APP */
         .btn-home {
-            text-decoration: none;
-            color: #fff;
             background: #1e293b;
+            color: #fff;
             padding: 8px 15px;
             border-radius: 6px;
             font-size: 14px;
@@ -61,6 +68,7 @@
             border: 1px solid var(--border);
             font-weight: bold;
             transition: 0.3s;
+            cursor: pointer;
         }
         .btn-home:hover { background: var(--accent); border-color: var(--accent); color: #000; }
 
@@ -70,8 +78,8 @@
         /* CONTENT */
         .content { 
             padding: 30px; 
-            max-width: 1000px;
-            margin: 0 auto;
+            max-width: 1000px; 
+            margin: 0 auto; 
         }
         
         h2 { border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-top: 0; color: var(--text); }
@@ -176,13 +184,18 @@
             .perms-grid { grid-template-columns: 1fr 1fr; }
             .content { padding: 15px; }
         }
+        
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
     </style>
 </head>
 <body>
 
     <div class="header-top">
         <div class="header-left">
-            <a href="menu.html" class="btn-home"><i class="fas fa-home"></i> MENU</a>
+            <div onclick="window.location.href='menu.html'" class="btn-home"><i class="fas fa-home"></i> MENU</div>
             <h1 class="page-title">VÉRTICE BI <span class="version-tag">CORE</span></h1>
         </div>
         <div></div>
@@ -272,11 +285,10 @@
             });
         });
 
-        // 2. SALVAR (COM PROTEÇÃO CONTRA DUPLICIDADE)
+        // 2. SALVAR (COM PROTEÇÃO)
         async function salvarUsuario(e) {
             e.preventDefault();
             const id = document.getElementById('editId').value;
-            // Limpa o nome (sem espaços, minúsculo)
             const login = document.getElementById('login').value.toLowerCase().trim().replace(/\s/g, '');
             const pass = document.getElementById('pass').value.trim();
             
@@ -286,13 +298,13 @@
             const dados = { login, pass, role, permissoes: marcados };
 
             try {
-                // VERIFICAÇÃO INTELIGENTE DE DUPLICIDADE
+                // VERIFICAÇÃO DE DUPLICIDADE
                 const check = await db.collection("equipe").where("login", "==", login).get();
 
                 if(!check.empty) {
                     const usuarioEncontrado = check.docs[0];
                     if (id) {
-                        // Editando: Se o ID encontrado for diferente do meu, o nome já é de outro.
+                        // Editando: Se o ID encontrado for diferente do meu, erro.
                         if (usuarioEncontrado.id !== id) return alert(`Erro: O login "${login}" já existe!`);
                     } else {
                         // Criando: Se achou qualquer um, erro.
