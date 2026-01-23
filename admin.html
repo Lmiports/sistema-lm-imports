@@ -55,9 +55,8 @@
 
         .section-title { font-size: 12px; color: #94a3b8; margin: 30px 0 10px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 5px; font-weight: 700; display: flex; gap: 8px; align-items: center; }
 
-        /* GRIDS DE CARDS */
+        /* KPI CARDS */
         .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 15px; }
-        
         .kpi-card { background: var(--card); padding: 15px; border-radius: 10px; border: 1px solid var(--border); position: relative; overflow: hidden; }
         .kpi-card::after { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--accent); }
         .kpi-card.green::after { background: var(--success); }
@@ -69,7 +68,7 @@
         .kpi-value { font-size: 20px; font-weight: bold; margin: 6px 0; color: #fff; }
         .kpi-sub { font-size: 10px; opacity: 0.7; }
 
-        /* VALUATION GRID (ESTOQUE) */
+        /* STOCK GRID */
         .stock-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
         .stock-card { 
             background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); padding: 12px; border-radius: 8px; 
@@ -99,7 +98,7 @@
 
         .footer { text-align: center; margin-top: 30px; font-size: 11px; color: #475569; }
 
-        /* --- IMPRESSÃO --- */
+        /* --- IMPRESSÃO (ESTILOS FINAIS) --- */
         #print-area { display: none; }
         
         @media print {
@@ -115,11 +114,18 @@
             .print-header h1 { margin: 0; font-size: 24px; font-weight: 900; letter-spacing: 2px; }
             .print-header p { margin: 5px 0; color: #555; font-size: 12px; }
 
-            .print-kpi-box { display: flex; justify-content: space-between; border: 1px solid #ccc; padding: 15px; margin-bottom: 30px; border-radius: 5px; }
+            .print-kpi-box { display: flex; justify-content: space-between; border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
             .pk-item { text-align: center; width: 33%; border-right: 1px solid #eee; }
             .pk-item:last-child { border: none; }
             .pk-label { display: block; font-size: 10px; text-transform: uppercase; color: #666; margin-bottom: 5px; }
             .pk-val { font-size: 16px; font-weight: bold; }
+
+            /* NOVO: BOX DE RESULTADO */
+            .print-result-box { 
+                background: #f0f0f0; border: 1px solid #000; padding: 15px; 
+                text-align: center; font-size: 16px; font-weight: bold; 
+                margin-bottom: 30px; border-radius: 5px; 
+            }
 
             .print-table { width: 100%; border-collapse: collapse; font-size: 11px; }
             .print-table th { border-bottom: 2px solid #000; text-align: left; padding: 8px 5px; font-weight: bold; }
@@ -141,7 +147,7 @@
         <div class="header-title">
             <div style="display:flex; align-items:center; gap:15px;">
                 <div onclick="window.location.href='menu.html'" class="btn-voltar-home"><i class="fas fa-home"></i> Menu</div>
-                <h2>VÉRTICE BI <span class="version-tag">CORE v11.5</span></h2>
+                <h2>VÉRTICE BI <span class="version-tag">CORE v11.6</span></h2>
             </div>
             
             <div class="action-group">
@@ -246,7 +252,7 @@
         </div>
 
         <div class="footer">
-            VÉRTICE BI CORE v11.5 © Rodrigo N Carvalho 2026
+            VÉRTICE BI CORE v11.6 © Rodrigo N Carvalho 2026
         </div>
     </main>
 
@@ -263,13 +269,17 @@
                 <span class="pk-val" id="print-fat">R$ 0,00</span>
             </div>
             <div class="pk-item">
-                <span class="pk-label">Lucro Estimado</span>
-                <span class="pk-val" id="print-lucro">R$ 0,00</span>
-            </div>
-            <div class="pk-item">
                 <span class="pk-label">Ticket Médio</span>
                 <span class="pk-val" id="print-ticket">R$ 0,00</span>
             </div>
+            <div class="pk-item">
+                <span class="pk-label">Markup Médio</span>
+                <span class="pk-val" id="print-markup">0%</span>
+            </div>
+        </div>
+
+        <div class="print-result-box" id="print-result-message">
+            Calculando resultado...
         </div>
 
         <h3 style="border-bottom: 2px solid #000; padding-bottom: 5px;">Detalhamento das Vendas</h3>
@@ -392,6 +402,7 @@
             let ticketMedio = qtdVendasReais > 0 ? faturamento / qtdVendasReais : 0;
             let markup = custoTotalVendas > 0 ? (lucroEstimado / custoTotalVendas) * 100 : 0;
 
+            // ATUALIZA TELA
             document.getElementById('kpi-faturamento').innerText = formatMoeda(faturamento);
             document.getElementById('kpi-lucro').innerText = formatMoeda(lucroEstimado);
             document.getElementById('kpi-ticket').innerText = formatMoeda(ticketMedio);
@@ -402,16 +413,24 @@
             document.getElementById('kpi-orcamentos').innerText = qtdOrcamentos;
             document.getElementById('kpi-trocas').innerText = formatMoeda(trocasEntrada);
 
-            // Print Header
+            // ATUALIZA IMPRESSÃO (HEADER E BOX DE RESULTADO)
             document.getElementById('print-fat').innerText = formatMoeda(faturamento);
-            document.getElementById('print-lucro').innerText = formatMoeda(lucroEstimado);
             document.getElementById('print-ticket').innerText = formatMoeda(ticketMedio);
+            document.getElementById('print-markup').innerText = markup.toFixed(1) + '%';
+
+            // Lógica do Texto do Box
+            let textoPeriodo = "neste período";
+            if(filtroAtual === 'semanal') textoPeriodo = "nos últimos 7 dias";
+            if(filtroAtual === 'mensal') textoPeriodo = "neste mês";
+            if(filtroAtual === 'todos') textoPeriodo = "acumulado (total)";
+
+            document.getElementById('print-result-message').innerHTML = 
+                `Seu lucro líquido ${textoPeriodo} foi de <br><span style="font-size:22px; color:#000;">${formatMoeda(lucroEstimado)}</span>`;
         }
 
         function renderizarGraficos(dados) {
             const dadosReais = dados.filter(v => v.status !== 'ORCAMENTO' && v.tipoRegistro !== 'ORÇAMENTO');
             
-            // LINHA
             const vendasPorDia = {};
             dadosReais.forEach(v => {
                 const dia = new Date(v.data).toLocaleDateString('pt-BR').slice(0,5);
@@ -439,7 +458,6 @@
                 }
             });
 
-            // ROSCA (CENTRALIZADA)
             let cats = { 'Celular':0, 'Acessório':0, 'Outros':0 };
             dadosReais.forEach(v => {
                 if(v.itens) v.itens.forEach(i => {
@@ -459,12 +477,9 @@
                     datasets: [{ data: Object.values(cats), backgroundColor: ['#00e0ff', '#8b5cf6', '#334155'], borderWidth: 0 }]
                 },
                 options: { 
-                    cutout: '60%', // Rosca mais grossa
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { 
-                        legend: { position: 'bottom', labels: { color: '#fff', padding: 20, font: {size: 11} } } 
-                    },
+                    cutout: '60%', 
+                    responsive: true, maintainAspectRatio: false, 
+                    plugins: { legend: { position: 'bottom', labels: { color: '#fff', padding: 20, font: {size: 11} } } },
                     layout: { padding: 10 }
                 }
             });
@@ -479,10 +494,9 @@
 
             dadosReais.forEach(v => {
                 let itensStr = v.itens ? v.itens.map(i => i.modelo || i).join(", ") : "-";
-                // Resumo para tela
                 let resumo = itensStr.length > 30 ? itensStr.substring(0,30)+"..." : itensStr;
 
-                // TELA (Limitado a 15)
+                // TELA
                 if (tbody.children.length < 15) {
                     tbody.innerHTML += `
                         <tr>
@@ -497,7 +511,7 @@
                     `;
                 }
 
-                // IMPRESSÃO (Tudo e Detalhado)
+                // IMPRESSÃO
                 pbody.innerHTML += `
                     <tr>
                         <td>
