@@ -74,7 +74,7 @@
         }
 
         /* Barra Neon no topo do card */
-        .login-card::top {
+        .login-card::before {
             content: '';
             position: absolute;
             top: 0; left: 0; width: 100%; height: 2px;
@@ -187,11 +187,15 @@
             to { transform: rotate(360deg); }
         }
 
+        /* ASSINATURA PADRÃO RODRIGO */
         .footer-version {
             position: absolute;
             bottom: 20px;
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.2);
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 0.5px;
+            text-align: center;
+            width: 100%;
         }
     </style>
 </head>
@@ -219,7 +223,9 @@
         </form>
     </div>
 
-    <div class="footer-version">v11.0 CORE • 2026</div>
+    <div class="footer-version">
+        VÉRTICE BI CORE v11.0 © Rodrigo N Carvalho 2026
+    </div>
 
     <script>
         // --- 🔒 KILL SWITCH ---
@@ -249,7 +255,7 @@
 
             try {
                 // Simula um delay mínimo pra animação aparecer (charme visual)
-                await new Promise(r => setTimeout(r, 1000));
+                await new Promise(r => setTimeout(r, 1500));
 
                 // 2. BUSCA NO BANCO
                 const snapshot = await db.collection("equipe")
