@@ -117,7 +117,7 @@
     <div class="header-top">
         <div class="header-left">
             <div onclick="window.location.href='menu.html'" class="btn-home"><i class="fas fa-home"></i> MENU</div>
-            <h1 class="page-title">VÉRTICE BI <span class="version-tag">CORE</span></h1>
+            <h1 class="page-title">VÉRTICE BI <span class="version-tag">CORE v12.5</span></h1>
         </div>
         <div></div>
     </div>
@@ -176,7 +176,25 @@
 
     <div class="modal-overlay" id="modal-avulso"> <div class="modal" style="border-color: var(--purple);"> <h3 style="color: var(--purple);">Adicionar Valor Avulso</h3> <label style="font-size:12px; color:#999;">Descrição:</label> <input type="text" id="avulso-desc" placeholder="Taxa / Item não cadastrado"> <label style="font-size:12px; color:#999;">Valor:</label> <input type="text" id="avulso-valor" placeholder="R$ 0,00" style="font-size:18px; font-weight:bold; color:var(--success);" onkeyup="mascaraMoeda(this)"> <div style="display: flex; gap: 10px; margin-top: 20px;"> <button onclick="document.getElementById('modal-avulso').style.display='none'" class="btn-cancel">Cancelar</button> <button onclick="confirmarAvulso()" class="btn-confirm" style="background: var(--purple);">Adicionar</button> </div> </div> </div>
     <div class="modal-overlay" id="modal-historico"> <div class="modal"> <h3 style="color: #eab308;"><i class="fas fa-history"></i> Histórico do Cliente</h3> <div id="conteudo-historico" class="historico-lista">Carregando...</div> <button onclick="document.getElementById('modal-historico').style.display='none'" class="btn-cancel" style="width:100%;">Fechar</button> </div> </div>
-    <div class="modal-overlay" id="modal-simulador"> <div class="modal"> <div style="display:flex; justify-content:space-between; align-items:center;"> <h3>Simulação</h3> <div style="display:flex; gap:10px;"> <button onclick="toggleTaxasVisuais()" title="Ocultar/Mostrar Taxas" style="background:none; border:none; color:#fff; cursor:pointer; font-size:18px;"><i class="fas fa-eye" id="icon-eye"></i></button> <button onclick="abrirConfigTaxas()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:18px;"><i class="fas fa-cog"></i></button> </div> </div> <table class="sim-table"> <thead><tr><th>Parc.</th><th>Valor Parc.</th><th>Total</th></tr></thead> <tbody id="lista-simulacao"></tbody> </table> <button onclick="copiarOfertaZap()" style="margin-top:15px; width:100%; background:#25D366; color:#fff; padding:10px; border:none; border-radius:5px; cursor:pointer; font-weight:bold;"><i class="fab fa-whatsapp"></i> Copiar (Sem Taxas)</button> <button onclick="document.getElementById('modal-simulador').style.display='none'" class="btn-cancel" style="margin-top:5px; width:100%;">Fechar</button> </div> </div>
+    
+    <div class="modal-overlay" id="modal-simulador"> 
+        <div class="modal"> 
+            <div style="display:flex; justify-content:space-between; align-items:center;"> 
+                <h3>Simulação</h3> 
+                <div style="display:flex; gap:10px;"> 
+                    <button onclick="toggleTaxasVisuais()" title="Ocultar/Mostrar Taxas" style="background:none; border:none; color:#fff; cursor:pointer; font-size:18px;"><i class="fas fa-eye" id="icon-eye"></i></button> 
+                    <button onclick="abrirConfigTaxas()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:18px;"><i class="fas fa-cog"></i></button> 
+                </div> 
+            </div> 
+            <table class="sim-table"> 
+                <thead><tr><th>Parc.</th><th>Valor Parc.</th><th>Total</th></tr></thead> 
+                <tbody id="lista-simulacao"></tbody> 
+            </table> 
+            <button onclick="copiarOfertaZap()" style="margin-top:15px; width:100%; background:#25D366; color:#fff; padding:10px; border:none; border-radius:5px; cursor:pointer; font-weight:bold;"><i class="fab fa-whatsapp"></i> Copiar (Sem Taxas)</button> 
+            <button onclick="document.getElementById('modal-simulador').style.display='none'" class="btn-cancel" style="margin-top:5px; width:100%;">Fechar</button> 
+        </div> 
+    </div>
+    
     <div class="modal-overlay" id="modal-config-taxas"> <div class="modal"> <h3>Configurar Taxas (%)</h3> <div id="grid-inputs-taxas" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; max-height:300px; overflow-y:auto;"></div> <div style="display: flex; gap: 10px; margin-top: 20px;"> <button onclick="document.getElementById('modal-config-taxas').style.display='none'" class="btn-cancel">Cancelar</button> <button onclick="salvarConfigTaxas()" class="btn-confirm">Salvar</button> </div> </div> </div>
     <div class="modal-overlay" id="modal-troca"> <div class="modal" style="border-color: var(--warning);"> <h3 style="color: var(--warning);">Entrada de Troca</h3> <label style="font-size: 11px; color: #999;">Modelo:</label><input list="dl-modelos-list" id="troca-modelo" placeholder="Selecione..."><datalist id="dl-modelos-list"></datalist> <div class="modal-grid"><div><label style="font-size: 11px; color: #999;">GB:</label><select id="troca-gb"><option value="">-</option><option value="64GB">64GB</option><option value="128GB">128GB</option><option value="256GB">256GB</option><option value="512GB">512GB</option></select></div><div><label style="font-size: 11px; color: #999;">Cor:</label><input list="dl-cores-list" id="troca-cor" placeholder="Cor"><datalist id="dl-cores-list"></datalist></div></div> <label style="font-size: 11px; color: #999;">IMEI:</label><input type="text" id="troca-imei" placeholder="15 dígitos" maxlength="15"> <div class="modal-grid"><div><label style="font-size: 11px; color: #999;">Valor (R$):</label><input type="number" id="troca-valor"></div><div><label style="font-size: 11px; color: #999;">Bateria (%):</label><input type="number" id="troca-bateria"></div></div> <div style="display: flex; gap: 10px; margin-top: 10px;"> <button onclick="fecharModalTroca()" class="btn-cancel">Cancelar</button> <button onclick="confirmarTroca()" class="btn-confirm" style="background: var(--warning);">Confirmar</button> </div> </div> </div>
     
@@ -237,7 +255,53 @@
         function carregarTaxasDoBanco(){db.collection("config_taxas").doc("geral").onSnapshot(doc=>{if(doc.exists)taxasAtuais=doc.data();else taxasAtuais={1:4.5,12:15.5};});}
         function abrirSimulador(){let s=0;carrinho.forEach(i=>s+=i.isBrinde?0:parseFloat(i.venda||0));let dT=0;trocas.forEach(i=>dT+=i.valor);let dM=parseFloat(document.getElementById('valor-desconto-manual').value)||0;const vB=s-dT-dM;if(vB<=0)return alert("Adicione itens.");renderizarTabelaSimulacao(vB);document.getElementById('modal-simulador').setAttribute('data-base',vB);document.getElementById('modal-simulador').style.display='flex';}
         function toggleTaxasVisuais(){mostrarTaxasNaTela=!mostrarTaxasNaTela;const i=document.getElementById('icon-eye');i.className=mostrarTaxasNaTela?"fas fa-eye":"fas fa-eye-slash";const vB=parseFloat(document.getElementById('modal-simulador').getAttribute('data-base'));renderizarTabelaSimulacao(vB);}
-        function renderizarTabelaSimulacao(vB){const tb=document.getElementById('lista-simulacao');tb.innerHTML="";let copy=`*SIMULAÇÃO*\nValor: ${vB.toLocaleString('pt-br',{style:'currency',currency:'BRL'})}\n\n`;for(let i=1;i<=24;i++){let tx=parseFloat(taxasAtuais[i])||(4+(i*1.2));const vC=vB*(1+(tx/100));const vP=vC/i;const diff=vC-vB;const tr=document.createElement('tr');tr.className="sim-row";tr.onclick=()=>aplicarParcelamento(i,diff);let ht=mostrarTaxasNaTela?`<small style="color:#666">(${tx.toFixed(2)}%)</small>`:'';tr.innerHTML=`<td><strong>${i}x</strong> ${ht}</td><td>R$ ${vP.toFixed(2)}</td><td class="sim-total">R$ ${vC.toFixed(2)}</td>`;tb.appendChild(tr);copy+=`${i}x de ${vP.toLocaleString('pt-br',{style:'currency',currency:'BRL'})} (Total: ${vC.toLocaleString('pt-br',{style:'currency',currency:'BRL'})})\n`;}document.getElementById('modal-simulador').setAttribute('data-copy',copy);}
+        
+        // --- FUNÇÕES DE SIMULAÇÃO AJUSTADAS ATÉ 21x ---
+        function renderizarTabelaSimulacao(vB){
+            const tb=document.getElementById('lista-simulacao');
+            tb.innerHTML="";
+            let copy=`*SIMULAÇÃO*\nValor: ${vB.toLocaleString('pt-br',{style:'currency',currency:'BRL'})}\n\n`;
+            
+            // LOOP ATÉ 21
+            for(let i=1;i<=21;i++){
+                let tx=parseFloat(taxasAtuais[i])||(4+(i*1.2));
+                const vC=vB*(1+(tx/100));
+                const vP=vC/i;
+                const diff=vC-vB;
+                const tr=document.createElement('tr');
+                tr.className="sim-row";
+                tr.onclick=()=>aplicarParcelamento(i,diff);
+                let ht=mostrarTaxasNaTela?`<small style="color:#666">(${tx.toFixed(2)}%)</small>`:'';
+                tr.innerHTML=`<td><strong>${i}x</strong> ${ht}</td><td>R$ ${vP.toFixed(2)}</td><td class="sim-total">R$ ${vC.toFixed(2)}</td>`;
+                tb.appendChild(tr);
+                copy+=`${i}x de ${vP.toLocaleString('pt-br',{style:'currency',currency:'BRL'})} (Total: ${vC.toLocaleString('pt-br',{style:'currency',currency:'BRL'})})\n`;
+            }
+            document.getElementById('modal-simulador').setAttribute('data-copy',copy);
+        }
+
+        function abrirConfigTaxas(){
+            const c=document.getElementById('grid-inputs-taxas');
+            c.innerHTML="";
+            // LOOP ATÉ 21
+            for(let i=1;i<=21;i++){
+                let v=taxasAtuais[i]!==undefined?taxasAtuais[i]:(4+(i*1.2));
+                c.innerHTML+=`<div class="taxa-item"><label>${i}x</label><input type="number" id="taxa-input-${i}" value="${parseFloat(v).toFixed(2)}" step="0.01"> %</div>`;
+            }
+            document.getElementById('modal-config-taxas').style.display='flex';
+        }
+
+        async function salvarConfigTaxas(){
+            let nt={};
+            // LOOP ATÉ 21
+            for(let i=1;i<=21;i++) nt[i]=parseFloat(document.getElementById(`taxa-input-${i}`).value)||0;
+            try{
+                await db.collection("config_taxas").doc("geral").set(nt);
+                alert("Salvo!");
+                document.getElementById('modal-config-taxas').style.display='none';
+            }catch(e){alert("Erro");}
+        }
+        // --------------------------------------------------
+
         function aplicarParcelamento(p,vJ){valorTaxaAplicada=vJ;parcelasSelecionadas=p;let s=document.getElementById('forma-pagamento');let n=`Crédito ${p}x`;let e=false;for(let i=0;i<s.options.length;i++){if(s.options[i].value===n)e=true;}if(!e)s.innerHTML+=`<option value="${n}">${n} (Simulado)</option>`;s.value=n;document.getElementById('modal-simulador').style.display='none';atualizarTotais();salvarRascunho();}
         function copiarOfertaZap(){const t=document.getElementById('modal-simulador').getAttribute('data-copy');navigator.clipboard.writeText(t);alert("Copiado!");}
         function preVisualizar(){const c=document.getElementById('cliente-input').value;if(carrinho.length===0)return alert("Vazio!");const cf=dbClientes.find(x=>x.nome===c)||{nome:c||"Consumidor"};gerarDocumento(false, "PREVIEW", cf.nome, "PREVIEW-MODE");}
@@ -265,8 +329,6 @@
         }
 
         function formatMoeda(v){return parseFloat(v).toLocaleString('pt-br',{style:'currency',currency:'BRL'});}
-        function abrirConfigTaxas(){const c=document.getElementById('grid-inputs-taxas');c.innerHTML="";for(let i=1;i<=24;i++){let v=taxasAtuais[i]!==undefined?taxasAtuais[i]:(4+(i*1.2));c.innerHTML+=`<div class="taxa-item"><label>${i}x</label><input type="number" id="taxa-input-${i}" value="${parseFloat(v).toFixed(2)}" step="0.01"> %</div>`;}document.getElementById('modal-config-taxas').style.display='flex';}
-        async function salvarConfigTaxas(){let nt={};for(let i=1;i<=24;i++)nt[i]=parseFloat(document.getElementById(`taxa-input-${i}`).value)||0;try{await db.collection("config_taxas").doc("geral").set(nt);alert("Salvo!");document.getElementById('modal-config-taxas').style.display='none';}catch(e){alert("Erro");}}
         function atualizarTotais(){const dc=document.getElementById('carrinho-lista');const dt=document.getElementById('lista-trocas');dc.innerHTML="";dt.innerHTML="";let sub=0;carrinho.forEach((i,idx)=>{const v=i.isBrinde?0:parseFloat(i.venda||0);sub+=v;let cls=i.isBrinde?'brinde':'';if(i.isAvulso)cls+=' avulso';const txt=i.isBrinde?'<span style="color:#00e0ff;">GRÁTIS</span>':`R$ ${parseFloat(i.venda).toFixed(2)}`;dc.innerHTML+=`<div class="cart-item ${cls}"><div class="item-info"><div>${i.modelo||i.nomeP}</div><small>${txt}</small></div><div class="item-actions"><i class="btn-icon btn-gift fas fa-gift ${i.isBrinde?'active':''}" onclick="toggleBrinde(${idx})"></i><i class="btn-icon btn-remove fas fa-trash" onclick="removerDoCarrinho(${idx})"></i></div></div>`;});let dT=0;trocas.forEach((t,idx)=>{dT+=t.valor;dt.innerHTML+=`<div class="trade-in-box"><div class="trade-in-text"><strong>ENTRADA:</strong> ${t.modelo}<br><small>${t.imei} | R$ ${t.valor}</small></div><i class="fas fa-times btn-remove" onclick="removerTroca(${idx})"></i></div>`;});let dM=parseFloat(document.getElementById('valor-desconto-manual').value)||0;const pg=document.getElementById('forma-pagamento').value;if(!pg.includes("Crédito")){valorTaxaAplicada=0;parcelasSelecionadas=0;}if(valorTaxaAplicada>0){document.getElementById('row-taxas').style.display='flex';document.getElementById('valor-taxas').innerText=`+ R$ ${valorTaxaAplicada.toFixed(2)}`;}else{document.getElementById('row-taxas').style.display='none';}totalVendaGlobal=sub-dT-dM+valorTaxaAplicada;document.getElementById('valor-subtotal').innerText=`R$ ${sub.toFixed(2)}`;document.getElementById('valor-abatimento').innerText=`- R$ ${dT.toFixed(2)}`;document.getElementById('valor-total').innerText=`R$ ${totalVendaGlobal.toFixed(2)}`;const dd=document.getElementById('detalhe-parcelas');if(parcelasSelecionadas>0&&totalVendaGlobal>0){const vp=totalVendaGlobal/parcelasSelecionadas;dd.style.display='block';dd.innerText=`VALOR SIMULADO DE ${totalVendaGlobal.toLocaleString('pt-br',{style:'currency',currency:'BRL'})} EM ${parcelasSelecionadas}X (${vp.toLocaleString('pt-br',{style:'currency',currency:'BRL'})})`;}else{dd.style.display='none';}salvarRascunho();}
         function salvarRascunho(){const e={carrinho,trocas,cliente:document.getElementById('cliente-input').value,desconto:document.getElementById('valor-desconto-manual').value,pagamento:document.getElementById('forma-pagamento').value,taxa:valorTaxaAplicada,parcelas:parcelasSelecionadas};localStorage.setItem('pdv_rascunho',JSON.stringify(e));}
         function restaurarRascunho(){const s=localStorage.getItem('pdv_rascunho');if(s){const e=JSON.parse(s);carrinho=e.carrinho||[];trocas=e.trocas||[];valorTaxaAplicada=e.taxa||0;parcelasSelecionadas=e.parcelas||0;document.getElementById('cliente-input').value=e.cliente||"";document.getElementById('valor-desconto-manual').value=e.desconto||"";setTimeout(()=>document.getElementById('forma-pagamento').value=e.pagamento||"",500);atualizarTotais();}}
@@ -281,32 +343,8 @@
         function abrirModalCliente(){document.getElementById('modal-cliente').style.display='flex';}
         function fecharModalCliente(){document.getElementById('modal-cliente').style.display='none';}
         function buscarCep(){let c=document.getElementById('novo-cep').value.replace(/\D/g,'');if(c.length===8)fetch(`https://viacep.com.br/ws/${c}/json/`).then(r=>r.json()).then(d=>{if(!d.erro){document.getElementById('novo-endereco').value=d.logradouro;document.getElementById('novo-bairro').value=d.bairro;document.getElementById('novo-cidade').value=`${d.localidade}-${d.uf}`;document.getElementById('novo-numero').focus();}});}
-        
-        // --- FUNÇÃO CORRIGIDA AQUI: ID do telefone alterado para 'novo-telefone' ---
-        async function salvarNovoCliente(){
-            let n=document.getElementById('novo-nome').value;
-            if(!n)return alert("Nome?");
-            try{
-                await db.collection("clientes").add({
-                    nome:n,
-                    cpf:document.getElementById('novo-cpf').value,
-                    whats:document.getElementById('novo-telefone').value, // <--- CORRIGIDO
-                    email:document.getElementById('novo-email').value,
-                    cep:document.getElementById('novo-cep').value,
-                    logradouro:document.getElementById('novo-endereco').value,
-                    numero:document.getElementById('novo-numero').value,
-                    bairro:document.getElementById('novo-bairro').value,
-                    cidade:document.getElementById('novo-cidade').value
-                });
-                alert("Ok!");
-                document.getElementById('cliente-input').value=n;
-                fecharModalCliente();
-                salvarRascunho();
-            }catch(e){alert("Erro");}
-        }
-
+        async function salvarNovoCliente(){let n=document.getElementById('novo-nome').value;if(!n)return alert("Nome?");try{await db.collection("clientes").add({nome:n,cpf:document.getElementById('novo-cpf').value,whats:document.getElementById('novo-telefone').value,email:document.getElementById('novo-email').value,cep:document.getElementById('novo-cep').value,logradouro:document.getElementById('novo-endereco').value,numero:document.getElementById('novo-numero').value,bairro:document.getElementById('novo-bairro').value,cidade:document.getElementById('novo-cidade').value});alert("Ok!");document.getElementById('cliente-input').value=n;fecharModalCliente();salvarRascunho();}catch(e){alert("Erro");}}
         function carregarOpcoesPagamento(){let s=document.getElementById('forma-pagamento');s.innerHTML=`<option value="">Selecione...</option><option value="Pix">Pix</option><option value="Dinheiro">Dinheiro</option><option value="Débito">Débito</option><option value="Crédito">Crédito</option>`;}
     </script>
 </body>
 </html>
-
