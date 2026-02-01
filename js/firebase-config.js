@@ -1,12 +1,12 @@
-// O CÓDIGO TEM QUE SER ASSIM (INGLÊS):
+// Configuração REAL do Vértice BI Core
 const firebaseConfig = {
-  apiKey: "SUA_CHAVE_AQUI_....",
+  apiKey: "AIzaSyBdH-XiLP1C-5Nc044GJv35O0ey6dBlaA8",
   authDomain: "vertice-gestao.firebaseapp.com",
   projectId: "vertice-gestao",
-  storageBucket: "vertice-gestao.appspot.com",
-  messagingSenderId: "SEU_NUMERO",
-  appId: "SEU_APP_ID"
+  storageBucket: "vertice-gestao.firebasestorage.app",
+  messagingSenderId: "901320631312",
+  appId: "1:901320631312:web:becd5310e01d026f5b5695"
 };
 
-// Inicializa o Firebase
+// Inicializa o Firebase (Modo Compatibilidade)
 firebase.initializeApp(firebaseConfig);
