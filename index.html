@@ -28,7 +28,6 @@
 
         body {
             background-color: var(--bg);
-            /* FUNDO CYBER GRID (AS LINHAS QUE VOCÊ CURTE) */
             background-image: 
                 linear-gradient(rgba(0, 224, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 224, 255, 0.03) 1px, transparent 1px);
@@ -58,7 +57,7 @@
             z-index: -1;
         }
 
-        /* CAIXA DE LOGIN (VIDRO) */
+        /* CAIXA DE LOGIN */
         .login-card {
             background: rgba(15, 23, 42, 0.6);
             backdrop-filter: blur(12px);
@@ -74,7 +73,6 @@
             overflow: hidden;
         }
 
-        /* Barra Neon no topo do card */
         .login-card::before {
             content: '';
             position: absolute;
@@ -101,7 +99,6 @@
             margin-bottom: 30px;
         }
 
-        /* INPUTS MODERNOS */
         .input-group {
             position: relative;
             margin-bottom: 20px;
@@ -139,7 +136,6 @@
 
         .login-input:focus + i { color: var(--accent); }
 
-        /* BOTÃO COM SPINNER */
         .btn-login {
             width: 100%;
             padding: 15px;
@@ -173,7 +169,6 @@
             box-shadow: none;
         }
 
-        /* ANIMAÇÃO DO SPINNER (A Bolinha) */
         .spinner {
             width: 20px;
             height: 20px;
@@ -181,14 +176,13 @@
             border-radius: 50%;
             border-top-color: #000;
             animation: spin 0.8s linear infinite;
-            display: none; /* Escondido por padrão */
+            display: none;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        /* ASSINATURA PADRÃO RODRIGO */
         .footer-version {
             position: absolute;
             bottom: 20px;
@@ -229,10 +223,9 @@
     </div>
 
     <script>
-        // --- 1. CONFIGURAÇÃO E VARIÁVEIS ---
-        // OBS: 'firebase' já foi carregado pelo firebase-config.js
+        // --- 1. CONFIGURAÇÃO ---
         const auth = firebase.auth();
-        // REMOVIDA A REDECLARAÇÃO DO DB PARA EVITAR CONFLITO
+        // Nota: A variável 'db' não é redeclarada aqui para evitar conflito com firebase-config.js
 
         // --- 🔒 KILL SWITCH ---
         const DATA_LIMITE = new Date('2030-01-01'); 
@@ -242,80 +235,65 @@
         }
 
         // --- 2. MONITORAMENTO DE SESSÃO ---
-        // Se o usuário logar com sucesso, ou já estiver logado, essa função dispara
         auth.onAuthStateChanged(user => {
             if (user) {
                 console.log("Login Confirmado:", user.email);
-                
-                // Salva no localStorage para uso visual nas outras páginas
                 localStorage.setItem('usuarioLogado', user.email);
-                
-                // Redireciona para o menu
+                // Redireciona
                 window.location.href = "menu.html";
             }
         });
 
-        // --- 3. FUNÇÃO DE LOGIN (COM MÁGICA DO @VERTICE.COM) ---
+        // --- 3. FUNÇÃO DE LOGIN ---
         async function fazerLogin(event) {
-            event.preventDefault(); // Não recarrega a página
+            event.preventDefault();
 
-            // PEGA O QUE O CARA DIGITOU
             let usuarioDigitado = document.getElementById('login').value.trim().toLowerCase();
             const senhaInput = document.getElementById('senha').value.trim();
-            
             const btn = document.getElementById('btnEntrar');
             const txt = document.getElementById('btnText');
             const loader = document.getElementById('btnLoader');
 
-            // --- O TRUQUE DE MESTRE ---
-            // Se o usuário digitou só "rodrigo", a gente completa com "@vertice.com"
+            // Completa com o domínio se não tiver @
             if (!usuarioDigitado.includes('@')) {
                 usuarioDigitado = usuarioDigitado + '@vertice.com';
-                console.log("Transformando em:", usuarioDigitado);
+                console.log("Tentando entrar com:", usuarioDigitado);
             }
 
-            // Ativa UI de Carregamento
+            // Ativa loading
             btn.disabled = true;
             txt.style.display = 'none';
             loader.style.display = 'block';
 
             try {
-                // Tenta fazer o login no Firebase Auth com o e-mail completo
-                // Se der certo, o 'onAuthStateChanged' (acima) vai cuidar do resto
+                // Tenta logar
                 await auth.signInWithEmailAndPassword(usuarioDigitado, senhaInput);
-                
-                // Aguarda o redirecionamento...
+                // Se der certo, o onAuthStateChanged redireciona.
 
             } catch (error) {
-                console.error("Erro no login:", error.code, error.message);
+                // --- DEBUG DE ERRO (O ALERTA QUE VAI TE SALVAR) ---
+                console.error("Erro técnico:", error);
                 
-                // Tratamento de erros amigável
+                // ESSE ALERT VAI MOSTRAR O MOTIVO REAL
+                alert("ERRO REAL: " + error.code + "\n" + error.message);
+
+                // Tratamento amigável
                 let msg = "Erro ao entrar.";
                 if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
                     msg = "Usuário ou senha incorretos.";
-                } else if (error.code === 'auth/invalid-email') {
-                    msg = "Formato de usuário inválido.";
-                } else if (error.code === 'auth/too-many-requests') {
-                    msg = "Muitas tentativas falhas. Aguarde um momento.";
                 } else if (error.code === 'auth/network-request-failed') {
-                    msg = "Verifique sua conexão com a internet.";
+                    msg = "Erro de conexão. Verifique sua internet.";
+                } else if (error.code === 'auth/too-many-requests') {
+                    msg = "Muitas tentativas. Aguarde um pouco.";
                 }
 
-                alert(msg);
-                resetButton();
+                // Reseta botão
+                btn.disabled = false;
+                txt.style.display = 'block';
+                loader.style.display = 'none';
+                document.getElementById('senha').value = '';
+                document.getElementById('senha').focus();
             }
-        }
-
-        function resetButton() {
-            const btn = document.getElementById('btnEntrar');
-            const txt = document.getElementById('btnText');
-            const loader = document.getElementById('btnLoader');
-            
-            btn.disabled = false;
-            txt.style.display = 'block';
-            loader.style.display = 'none';
-            document.getElementById('senha').value = '';
-            document.getElementById('senha').focus();
         }
     </script>
 </body>
