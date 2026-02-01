@@ -208,7 +208,7 @@
 
         <form onsubmit="fazerLogin(event)">
             <div class="input-group">
-                <input type="text" id="login" class="login-input" placeholder="E-mail" required autocomplete="email">
+                <input type="text" id="login" class="login-input" placeholder="Usuário (ex: rodrigo)" required>
                 <i class="fas fa-user"></i>
             </div>
 
@@ -255,15 +255,24 @@
             }
         });
 
-        // --- 3. FUNÇÃO DE LOGIN (NOVA) ---
+        // --- 3. FUNÇÃO DE LOGIN (COM MÁGICA DO @VERTICE.COM) ---
         async function fazerLogin(event) {
             event.preventDefault(); // Não recarrega a página
 
-            const loginInput = document.getElementById('login').value.trim();
+            // PEGA O QUE O CARA DIGITOU
+            let usuarioDigitado = document.getElementById('login').value.trim().toLowerCase();
             const senhaInput = document.getElementById('senha').value.trim();
+            
             const btn = document.getElementById('btnEntrar');
             const txt = document.getElementById('btnText');
             const loader = document.getElementById('btnLoader');
+
+            // --- O TRUQUE DE MESTRE ---
+            // Se o usuário digitou só "rodrigo", a gente completa com "@vertice.com"
+            if (!usuarioDigitado.includes('@')) {
+                usuarioDigitado = usuarioDigitado + '@vertice.com';
+                console.log("Transformando em:", usuarioDigitado);
+            }
 
             // Ativa UI de Carregamento
             btn.disabled = true;
@@ -271,9 +280,9 @@
             loader.style.display = 'block';
 
             try {
-                // Tenta fazer o login no Firebase Auth
+                // Tenta fazer o login no Firebase Auth com o e-mail completo
                 // Se der certo, o 'onAuthStateChanged' (acima) vai cuidar do resto
-                await auth.signInWithEmailAndPassword(loginInput, senhaInput);
+                await auth.signInWithEmailAndPassword(usuarioDigitado, senhaInput);
                 
                 // Aguarda o redirecionamento...
 
@@ -283,9 +292,9 @@
                 // Tratamento de erros amigável
                 let msg = "Erro ao entrar.";
                 if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                    msg = "E-mail ou senha incorretos.";
+                    msg = "Usuário ou senha incorretos.";
                 } else if (error.code === 'auth/invalid-email') {
-                    msg = "O formato do e-mail é inválido.";
+                    msg = "Formato de usuário inválido.";
                 } else if (error.code === 'auth/too-many-requests') {
                     msg = "Muitas tentativas falhas. Aguarde um momento.";
                 } else if (error.code === 'auth/network-request-failed') {
