@@ -14,7 +14,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script> <script src="js/firebase-config.js"></script>
 
     <style>
         /* --- PADRÃO VÉRTICE BI CORE (LOGIN) --- */
@@ -207,7 +207,7 @@
 
         <form onsubmit="fazerLogin(event)">
             <div class="input-group">
-                <input type="text" id="login" class="login-input" placeholder="Usuário" required autocomplete="off">
+                <input type="text" id="login" class="login-input" placeholder="E-mail" required autocomplete="email">
                 <i class="fas fa-user"></i>
             </div>
 
@@ -228,6 +228,11 @@
     </div>
 
     <script>
+        // --- 1. CONFIGURAÇÃO E VARIÁVEIS ---
+        // Inicializa os serviços do Firebase
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         // --- 🔒 KILL SWITCH ---
         const DATA_LIMITE = new Date('2030-01-01'); 
         if(new Date() > DATA_LIMITE) { 
@@ -235,53 +240,56 @@
             throw new Error("Bloqueado"); 
         }
 
-        // LIMPA SESSÃO ANTERIOR AO ENTRAR NA TELA
-        localStorage.removeItem('usuarioLogado');
-        localStorage.removeItem('cargoUsuario');
+        // --- 2. MONITORAMENTO DE SESSÃO ---
+        // Se o usuário já estiver logado, redireciona automaticamente
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                console.log("Usuário detectado:", user.email);
+                // Salva visualmente no localStorage (opcional, apenas para o menu exibir o nome depois)
+                localStorage.setItem('usuarioLogado', user.email);
+                window.location.href = "menu.html";
+            }
+        });
 
+        // --- 3. FUNÇÃO DE LOGIN (NOVA) ---
         async function fazerLogin(event) {
             event.preventDefault(); // Não recarrega a página
 
-            const loginInput = document.getElementById('login').value.toLowerCase().trim();
+            const loginInput = document.getElementById('login').value.trim();
             const senhaInput = document.getElementById('senha').value.trim();
             const btn = document.getElementById('btnEntrar');
             const txt = document.getElementById('btnText');
             const loader = document.getElementById('btnLoader');
 
-            // 1. ATIVAR MODO "CARREGANDO" (A Bolinha)
+            // Ativa UI de Carregamento
             btn.disabled = true;
             txt.style.display = 'none';
             loader.style.display = 'block';
 
             try {
-                // Simula um delay mínimo pra animação aparecer (charme visual)
-                await new Promise(r => setTimeout(r, 1500));
-
-                // 2. BUSCA NO BANCO
-                const snapshot = await db.collection("equipe")
-                    .where("login", "==", loginInput)
-                    .where("pass", "==", senhaInput)
-                    .get();
-
-                if (!snapshot.empty) {
-                    // SUCESSO
-                    const dados = snapshot.docs[0].data();
-                    
-                    // Salva na sessão
-                    localStorage.setItem('usuarioLogado', dados.login);
-                    localStorage.setItem('cargoUsuario', dados.role || 'vendedor');
-                    
-                    // Redireciona
-                    window.location.href = "menu.html";
-                } else {
-                    // ERRO
-                    alert("Usuário ou senha incorretos!");
-                    resetButton();
-                }
+                // Tenta fazer o login no Firebase Auth
+                // Se der certo, o 'onAuthStateChanged' lá em cima vai capturar e redirecionar
+                await auth.signInWithEmailAndPassword(loginInput, senhaInput);
+                
+                // Não precisamos redirecionar aqui manualmente porque o onAuthStateChanged fará isso.
+                // Apenas esperamos.
 
             } catch (error) {
-                console.error("Erro login:", error);
-                alert("Erro de conexão. Tente novamente.");
+                console.error("Erro no login:", error.code, error.message);
+                
+                // Tratamento de erros amigável
+                let msg = "Erro ao entrar.";
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    msg = "E-mail ou senha incorretos.";
+                } else if (error.code === 'auth/invalid-email') {
+                    msg = "O formato do e-mail é inválido.";
+                } else if (error.code === 'auth/too-many-requests') {
+                    msg = "Muitas tentativas falhas. Aguarde um momento.";
+                } else if (error.code === 'auth/network-request-failed') {
+                    msg = "Verifique sua conexão com a internet.";
+                }
+
+                alert(msg);
                 resetButton();
             }
         }
@@ -300,4 +308,3 @@
     </script>
 </body>
 </html>
-
