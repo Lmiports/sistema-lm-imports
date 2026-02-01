@@ -14,7 +14,8 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script> <script src="js/firebase-config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script> 
+    <script src="js/firebase-config.js"></script>
 
     <style>
         /* --- PADRÃO VÉRTICE BI CORE (LOGIN) --- */
@@ -229,9 +230,9 @@
 
     <script>
         // --- 1. CONFIGURAÇÃO E VARIÁVEIS ---
-        // Inicializa os serviços do Firebase
+        // OBS: 'firebase' já foi carregado pelo firebase-config.js
         const auth = firebase.auth();
-        const db = firebase.firestore();
+        // REMOVIDA A REDECLARAÇÃO DO DB PARA EVITAR CONFLITO
 
         // --- 🔒 KILL SWITCH ---
         const DATA_LIMITE = new Date('2030-01-01'); 
@@ -241,12 +242,15 @@
         }
 
         // --- 2. MONITORAMENTO DE SESSÃO ---
-        // Se o usuário já estiver logado, redireciona automaticamente
+        // Se o usuário logar com sucesso, ou já estiver logado, essa função dispara
         auth.onAuthStateChanged(user => {
             if (user) {
-                console.log("Usuário detectado:", user.email);
-                // Salva visualmente no localStorage (opcional, apenas para o menu exibir o nome depois)
+                console.log("Login Confirmado:", user.email);
+                
+                // Salva no localStorage para uso visual nas outras páginas
                 localStorage.setItem('usuarioLogado', user.email);
+                
+                // Redireciona para o menu
                 window.location.href = "menu.html";
             }
         });
@@ -268,11 +272,10 @@
 
             try {
                 // Tenta fazer o login no Firebase Auth
-                // Se der certo, o 'onAuthStateChanged' lá em cima vai capturar e redirecionar
+                // Se der certo, o 'onAuthStateChanged' (acima) vai cuidar do resto
                 await auth.signInWithEmailAndPassword(loginInput, senhaInput);
                 
-                // Não precisamos redirecionar aqui manualmente porque o onAuthStateChanged fará isso.
-                // Apenas esperamos.
+                // Aguarda o redirecionamento...
 
             } catch (error) {
                 console.error("Erro no login:", error.code, error.message);
