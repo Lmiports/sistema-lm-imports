@@ -3,298 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VÉRTICE BI | LOGIN</title>
-    
+    <title>Login | VÉRTICE BI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="shortcut icon" href="logo.png" type="image/png">
-    <link rel="icon" href="logo.png" type="image/png">
-    <link rel="apple-touch-icon" href="logo.png">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script> 
     <script src="js/firebase-config.js"></script>
 
     <style>
-        /* --- PADRÃO VÉRTICE BI CORE (LOGIN) --- */
-        :root { 
-            --bg: #020617; 
-            --accent: #00e0ff; /* AZUL NEON */
-            --text: #f8fafc;
-            --danger: #ef4444;
-        }
-
-        body {
-            background-color: var(--bg);
-            background-image: 
-                linear-gradient(rgba(0, 224, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 224, 255, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
-            color: var(--text);
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            user-select: none;
-            overflow: hidden;
-        }
-
-        /* Spotlight Central */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100%; height: 100%;
-            background: radial-gradient(circle, rgba(0, 224, 255, 0.05) 0%, transparent 60%);
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        /* CAIXA DE LOGIN */
-        .login-card {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 40px 30px;
-            width: 100%;
-            max-width: 350px;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .login-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-        }
-
-        .brand-title {
-            font-size: 28px;
-            font-weight: 900;
-            color: #fff;
-            letter-spacing: 2px;
-            margin: 0;
-            text-shadow: 0 0 15px rgba(0, 224, 255, 0.3);
-        }
-        .brand-title span { color: var(--accent); }
-        
-        .brand-sub {
-            font-size: 10px;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            margin-top: 5px;
-            margin-bottom: 30px;
-        }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .input-group i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-
-        .login-input {
-            width: 100%;
-            padding: 15px 15px 15px 45px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: #fff;
-            font-size: 14px;
-            outline: none;
-            box-sizing: border-box;
-            transition: 0.3s;
-        }
-
-        .login-input:focus {
-            border-color: var(--accent);
-            background: rgba(0, 224, 255, 0.05);
-            box-shadow: 0 0 10px rgba(0, 224, 255, 0.1);
-        }
-
-        .login-input:focus + i { color: var(--accent); }
-
-        .btn-login {
-            width: 100%;
-            padding: 15px;
-            background: var(--accent);
-            color: #000;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 900;
-            cursor: pointer;
-            transition: 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 50px;
-        }
-
-        .btn-login:hover {
-            box-shadow: 0 0 20px rgba(0, 224, 255, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .btn-login:disabled {
-            background: #334155;
-            color: #94a3b8;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .spinner {
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(0,0,0,0.3);
-            border-radius: 50%;
-            border-top-color: #000;
-            animation: spin 0.8s linear infinite;
-            display: none;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .footer-version {
-            position: absolute;
-            bottom: 20px;
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.3);
-            letter-spacing: 0.5px;
-            text-align: center;
-            width: 100%;
-        }
+        :root { --bg: #020617; --accent: #00e0ff; --glass: rgba(15, 23, 42, 0.6); --text: #f8fafc; }
+        body { margin: 0; background: var(--bg); font-family: 'Inter', sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .background-grid { position: absolute; width: 200%; height: 200%; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 50px 50px; transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px); animation: move 20s linear infinite; z-index: -1; }
+        @keyframes move { 0% {transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px);} 100% {transform: perspective(500px) rotateX(60deg) translateY(50px) translateZ(-200px);} }
+        .login-card { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); padding: 40px; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .logo { font-size: 2rem; font-weight: 900; color: #fff; margin-bottom: 5px; }
+        .logo span { color: var(--accent); }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { color: #94a3b8; font-size: 12px; margin-left: 5px; }
+        input { width: 100%; padding: 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--accent); }
+        .btn-login { width: 100%; padding: 15px; background: linear-gradient(135deg, #00e0ff 0%, #0066ff 100%); border: none; border-radius: 10px; color: #fff; font-weight: bold; cursor: pointer; margin-top: 10px; text-transform: uppercase; }
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(0,224,255,0.3); }
+        #welcome-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 20; opacity: 0; pointer-events: none; transition: 0.5s; background: var(--bg); }
+        #welcome-screen.active { opacity: 1; pointer-events: all; }
+        .welcome-text { font-size: 3rem; font-weight: 900; color: #fff; text-align: center; }
+        .welcome-text span { color: var(--accent); display: block; }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <h1 class="brand-title">VÉRTICE <span>BI CORE</span></h1>
-        <div class="brand-sub">SISTEMA DE GESTÃO</div>
+    <div class="background-grid"></div>
+
+    <div class="login-card" id="loginBox">
+        <div class="logo">VÉRTICE <span>BI</span></div>
+        <p style="color:#94a3b8; font-size:12px; letter-spacing:2px; margin-bottom:30px;">GESTÃO INTELIGENTE</p>
 
         <form onsubmit="fazerLogin(event)">
             <div class="input-group">
-                <input type="text" id="login" class="login-input" placeholder="Usuário (ex: rodrigo)" required>
-                <i class="fas fa-user"></i>
+                <label>USUÁRIO</label>
+                <input type="text" id="user" placeholder="admin" required autocomplete="off">
             </div>
-
             <div class="input-group">
-                <input type="password" id="senha" class="login-input" placeholder="Senha" required>
-                <i class="fas fa-lock"></i>
+                <label>SENHA</label>
+                <input type="password" id="pass" placeholder="••••" required>
             </div>
-
-            <button type="submit" id="btnEntrar" class="btn-login">
-                <span id="btnText">ENTRAR</span>
-                <div id="btnLoader" class="spinner"></div>
-            </button>
+            <button type="submit" class="btn-login" id="btnEntrar">ACESSAR</button>
         </form>
     </div>
 
-    <div class="footer-version">
-        VÉRTICE BI CORE v11.0 © Rodrigo N Carvalho 2026
+    <div id="welcome-screen">
+        <div class="welcome-text">BEM-VINDO <span>VÉRTICE BI</span></div>
     </div>
 
     <script>
-        // --- 1. CONFIGURAÇÃO ---
-        const auth = firebase.auth();
-        // Nota: A variável 'db' não é redeclarada aqui para evitar conflito com firebase-config.js
-
-        // --- 🔒 KILL SWITCH ---
-        const DATA_LIMITE = new Date('2030-01-01'); 
-        if(new Date() > DATA_LIMITE) { 
-            document.body.innerHTML = '<div style="height:100vh;display:flex;justify-content:center;align-items:center;background:#000;color:red;flex-direction:column;"><h1>ACESSO SUSPENSO</h1><p>Contate o suporte.</p></div>'; 
-            throw new Error("Bloqueado"); 
-        }
-
-        // --- 2. MONITORAMENTO DE SESSÃO ---
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                console.log("Login Confirmado:", user.email);
-                localStorage.setItem('usuarioLogado', user.email);
-                // Redireciona
-                window.location.href = "menu.html";
+        // Checkup inicial
+        window.onload = function() {
+            if (typeof db === 'undefined') {
+                alert("ERRO CRÍTICO: O sistema não conseguiu carregar o arquivo 'js/firebase-config.js'.");
             }
-        });
+        };
 
-        // --- 3. FUNÇÃO DE LOGIN ---
-        async function fazerLogin(event) {
-            event.preventDefault();
-
-            let usuarioDigitado = document.getElementById('login').value.trim().toLowerCase();
-            const senhaInput = document.getElementById('senha').value.trim();
+        async function fazerLogin(e) {
+            e.preventDefault();
             const btn = document.getElementById('btnEntrar');
-            const txt = document.getElementById('btnText');
-            const loader = document.getElementById('btnLoader');
+            const welcome = document.getElementById('welcome-screen');
+            
+            let user = document.getElementById('user').value;
+            let pass = document.getElementById('pass').value;
 
-            // Completa com o domínio se não tiver @
-            if (!usuarioDigitado.includes('@')) {
-                usuarioDigitado = usuarioDigitado + '@vertice.com';
-                console.log("Tentando entrar com:", usuarioDigitado);
-            }
+            if(user) user = user.toLowerCase().trim().replace(/\s/g, '');
+            if(pass) pass = pass.trim();
 
-            // Ativa loading
-            btn.disabled = true;
-            txt.style.display = 'none';
-            loader.style.display = 'block';
+            btn.innerText = "VERIFICANDO...";
+            btn.style.opacity = "0.7";
 
             try {
-                // Tenta logar
-                await auth.signInWithEmailAndPassword(usuarioDigitado, senhaInput);
-                // Se der certo, o onAuthStateChanged redireciona.
+                if (typeof db === 'undefined') throw new Error("Banco de dados desconectado.");
 
-            } catch (error) {
-                // --- DEBUG DE ERRO (O ALERTA QUE VAI TE SALVAR) ---
-                console.error("Erro técnico:", error);
-                
-                // ESSE ALERT VAI MOSTRAR O MOTIVO REAL
-                alert("ERRO REAL: " + error.code + "\n" + error.message);
+                const snapshot = await db.collection("equipe")
+                    .where("login", "==", user)
+                    .where("pass", "==", pass)
+                    .get();
 
-                // Tratamento amigável
-                let msg = "Erro ao entrar.";
-                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                    msg = "Usuário ou senha incorretos.";
-                } else if (error.code === 'auth/network-request-failed') {
-                    msg = "Erro de conexão. Verifique sua internet.";
-                } else if (error.code === 'auth/too-many-requests') {
-                    msg = "Muitas tentativas. Aguarde um pouco.";
+                if (!snapshot.empty) {
+                    const dados = snapshot.docs[0].data();
+                    
+                    // --- SALVA DADOS NO NAVEGADOR ---
+                    localStorage.setItem('usuarioLogado', dados.login);
+                    localStorage.setItem('cargoUsuario', dados.role);
+                    
+                    // --- AQUI ESTÁ A ATUALIZAÇÃO IMPORTANTE ---
+                    // Salva a lista de permissões (ex: ['pdv', 'estoque']) para o menu ler depois
+                    localStorage.setItem('permissoesUsuario', JSON.stringify(dados.permissoes || []));
+
+                    // Animação e Redirecionamento
+                    document.getElementById('loginBox').style.opacity = '0';
+                    setTimeout(() => { welcome.classList.add('active'); }, 300);
+
+                    setTimeout(() => {
+                        window.location.href = 'menu.html';
+                    }, 2000);
+
+                } else {
+                    btn.innerText = "ACESSAR";
+                    btn.style.opacity = "1";
+                    alert(`Login Incorreto! Verifique usuário e senha.`);
                 }
 
-                // Reseta botão
-                btn.disabled = false;
-                txt.style.display = 'block';
-                loader.style.display = 'none';
-                document.getElementById('senha').value = '';
-                document.getElementById('senha').focus();
+            } catch (error) {
+                console.error(error);
+                btn.innerText = "ERRO";
+                btn.style.opacity = "1";
+                alert("Erro Técnico: " + error.message);
             }
         }
     </script>
 </body>
 </html>
+
