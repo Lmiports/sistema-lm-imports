@@ -1,4 +1,5 @@
-// VERSÃO CORRETA PARA SEU HTML (NÃO USE 'IMPORT')
+// --- CONFIGURAÇÃO CLÁSSICA (COMPAT) ---
+// Não use 'import' e nem 'const app ='
 
 const firebaseConfig = {
   apiKey: "AIzaSyBdh-XiLP1C-5Nc044GJv3500ey6dBLaA8",
@@ -9,8 +10,7 @@ const firebaseConfig = {
   appId: "1:901320631312:web:becd5310e01d026f5b5695"
 };
 
-// Inicializa o Firebase Globalmente
+// INICIALIZA O FIREBASE NO MODO GLOBAL
+// (Isso é o que faz o seu index.html funcionar)
 firebase.initializeApp(firebaseConfig);
-
-// Opcional: Deixar o banco pronto para uso
-// const db = firebase.firestore();
+const db = firebase.firestore();
